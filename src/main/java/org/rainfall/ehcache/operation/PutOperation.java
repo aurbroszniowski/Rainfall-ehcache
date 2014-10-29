@@ -16,6 +16,7 @@ import org.rainfall.statistics.Task;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
 import static org.rainfall.ehcache.statistics.EhcacheResult.PUT;
@@ -24,6 +25,8 @@ import static org.rainfall.ehcache.statistics.EhcacheResult.PUT;
  * @author Aurelien Broszniowski
  */
 public class PutOperation<K, V> extends Operation {
+
+  AtomicLong putcnt = new AtomicLong();
 
   @Override
   public void exec(final StatisticsObserversFactory statisticsObserversFactory, final Map<Class<? extends Configuration>,

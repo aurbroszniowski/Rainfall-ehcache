@@ -15,6 +15,7 @@ import org.rainfall.configuration.ConcurrencyConfig;
 import org.rainfall.configuration.ReportingConfig;
 import org.rainfall.generator.ByteArrayGenerator;
 import org.rainfall.generator.StringGenerator;
+import org.rainfall.generator.sequence.Distribution;
 import org.rainfall.utils.SystemTest;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -89,6 +90,29 @@ public class EhcacheTest {
         .caches(cache)
         .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
         .sequentially()
+        .weights(operation(PUT, 0.10), operation(GET, 0.80), operation(REMOVE, 0.10));
+
+    ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
+        .threads(4).timeout(5, MINUTES);
+    ReportingConfig reporting = ReportingConfig.reportingConfig(ReportingConfig.text(), ReportingConfig.html());
+
+    Scenario scenario = Scenario.scenario("Cache load")
+        .exec(put())
+        .exec(get())
+        .exec(remove());
+
+    Runner.setUp(scenario)
+        .executed(during(25, seconds))
+        .config(cacheConfig, concurrency, reporting)
+        .start();
+  }
+
+  @Test
+  public void testRandomAccess() throws SyntaxException {
+    CacheConfig<String, Byte[]> cacheConfig = CacheConfig.<String, Byte[]>cacheConfig()
+        .caches(cache)
+        .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
+        .atRandom(Distribution.GAUSSIAN, 0, 10000, 1000)
         .weights(operation(PUT, 0.10), operation(GET, 0.80), operation(REMOVE, 0.10));
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()

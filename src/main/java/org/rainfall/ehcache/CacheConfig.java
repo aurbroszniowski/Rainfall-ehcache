@@ -19,8 +19,11 @@ package org.rainfall.ehcache;
 import net.sf.ehcache.Ehcache;
 import org.rainfall.Configuration;
 import org.rainfall.ObjectGenerator;
+import org.rainfall.SequenceGenerator;
 import org.rainfall.generator.IterationSequenceGenerator;
 import org.rainfall.ehcache.operation.OperationWeight;
+import org.rainfall.generator.RandomSequenceGenerator;
+import org.rainfall.generator.sequence.Distribution;
 import org.rainfall.utils.PseudoRandom;
 import org.rainfall.utils.RangeMap;
 
@@ -38,7 +41,7 @@ public class CacheConfig<K, V> extends Configuration {
   private List<Ehcache> caches = new ArrayList<Ehcache>();
   private ObjectGenerator<K> keyGenerator = null;
   private ObjectGenerator<V> valueGenerator = null;
-  private IterationSequenceGenerator sequenceGenerator = null;
+  private SequenceGenerator sequenceGenerator = null;
   private RangeMap<OperationWeight.OPERATION> weights = new RangeMap<OperationWeight.OPERATION>();
   private PseudoRandom randomizer = new PseudoRandom();
 
@@ -72,6 +75,15 @@ public class CacheConfig<K, V> extends Configuration {
     return this;
   }
 
+  public CacheConfig<K, V> atRandom(Distribution distribution, long min, long max, long width) {
+    if (sequenceGenerator == null) {
+      this.sequenceGenerator = new RandomSequenceGenerator(distribution, min, max, width);
+    } else {
+      throw new IllegalStateException("SequenceGenerator already chosen");
+    }
+    return this;
+  }
+
   public CacheConfig<K, V> weights(OperationWeight... operationWeights) {
     double totalWeight = 0;
     for (OperationWeight weight : operationWeights) {
@@ -99,7 +111,7 @@ public class CacheConfig<K, V> extends Configuration {
     return valueGenerator;
   }
 
-  public IterationSequenceGenerator getSequenceGenerator() {
+  public SequenceGenerator getSequenceGenerator() {
     return sequenceGenerator;
   }
 
