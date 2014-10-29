@@ -9,6 +9,7 @@ import org.rainfall.Operation;
 import org.rainfall.SequenceGenerator;
 import org.rainfall.TestException;
 import org.rainfall.ehcache.CacheConfig;
+import org.rainfall.ehcache.statistics.EhcacheResult;
 import org.rainfall.statistics.Result;
 import org.rainfall.statistics.StatisticsObserversFactory;
 import org.rainfall.statistics.Task;
@@ -19,7 +20,6 @@ import java.util.Map;
 import static org.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
 import static org.rainfall.ehcache.statistics.EhcacheResult.GET;
 import static org.rainfall.ehcache.statistics.EhcacheResult.MISS;
-import static org.rainfall.ehcache.statistics.EhcacheResult.values;
 
 /**
  * @author Aurelien Broszniowski
@@ -38,7 +38,7 @@ public class GetOperation<K, V> extends Operation {
       List<Ehcache> caches = cacheConfig.getCaches();
       final ObjectGenerator<K> keyGenerator = cacheConfig.getKeyGenerator();
       for (final Ehcache cache : caches) {
-        statisticsObserversFactory.getStatisticObserver(cache.getName(), values())
+        statisticsObserversFactory.getStatisticObserver(cache.getName(), EhcacheResult.values())
             .measure(new Task() {
 
               @Override
