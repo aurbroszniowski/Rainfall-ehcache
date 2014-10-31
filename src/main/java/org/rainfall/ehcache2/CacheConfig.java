@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.rainfall.ehcache;
+package org.rainfall.ehcache2;
 
 import net.sf.ehcache.Ehcache;
 import org.rainfall.Configuration;

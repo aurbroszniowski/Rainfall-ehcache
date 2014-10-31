@@ -41,6 +41,43 @@
       <version>2.9.0</version>
       <scope>provided</scope>
     </dependency>
+
+    <!--ehcache 3-->
+    <dependency>
+      <groupId>org.ehcache.modules</groupId>
+      <artifactId>ehcache-107</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ehcache.modules</groupId>
+      <artifactId>ehcache-api</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ehcache.modules</groupId>
+      <artifactId>ehcache-core</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ehcache.modules</groupId>
+      <artifactId>ehcache-impl</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ehcache.modules</groupId>
+      <artifactId>ehcache-jmx</artifactId>
+      <version>3.0.0-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 
   <build>

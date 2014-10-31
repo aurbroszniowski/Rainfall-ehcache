@@ -1,30 +1,32 @@
-package org.rainfall.ehcache.operation;
+package org.rainfall.ehcache3.operation;
 
-import net.sf.ehcache.Ehcache;
-import net.sf.ehcache.Element;
+import org.ehcache.Cache;
 import org.rainfall.AssertionEvaluator;
 import org.rainfall.Configuration;
 import org.rainfall.ObjectGenerator;
 import org.rainfall.Operation;
 import org.rainfall.SequenceGenerator;
 import org.rainfall.TestException;
-import org.rainfall.ehcache.CacheConfig;
+import org.rainfall.ehcache.operation.OperationWeight;
 import org.rainfall.ehcache.statistics.EhcacheResult;
+import org.rainfall.ehcache3.CacheConfig;
 import org.rainfall.statistics.Result;
 import org.rainfall.statistics.StatisticsObserversFactory;
 import org.rainfall.statistics.Task;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static org.rainfall.ehcache.statistics.EhcacheResult.GET;
-import static org.rainfall.ehcache.statistics.EhcacheResult.MISS;
+import static org.rainfall.ehcache.statistics.EhcacheResult.PUT;
 
 /**
  * @author Aurelien Broszniowski
  */
-public class GetOperation<K, V> extends Operation {
+public class PutOperation<K, V> extends Operation {
+
+  AtomicLong putcnt = new AtomicLong();
 
   @Override
   public void exec(final StatisticsObserversFactory statisticsObserversFactory, final Map<Class<? extends Configuration>,
@@ -34,29 +36,26 @@ public class GetOperation<K, V> extends Operation {
     SequenceGenerator sequenceGenerator = cacheConfig.getSequenceGenerator();
     final long next = sequenceGenerator.next();
     Double weight = cacheConfig.getRandomizer().nextDouble(next);
-    if (cacheConfig.getOperationWeights().get(weight) == OperationWeight.OPERATION.GET) {
-      List<Ehcache> caches = cacheConfig.getCaches();
+    if (cacheConfig.getOperationWeights().get(weight) == OperationWeight.OPERATION.PUT) {
+      List<Cache<K, V>> caches = cacheConfig.getCaches();
       final ObjectGenerator<K> keyGenerator = cacheConfig.getKeyGenerator();
-      for (final Ehcache cache : caches) {
-        statisticsObserversFactory.getStatisticObserver(cache.getName(), EhcacheResult.values())
-            .measure(new Task() {
+      final ObjectGenerator<V> valueGenerator = cacheConfig.getValueGenerator();
+      for (final Cache<K, V> cache : caches) {
+        statisticsObserversFactory
+            .measure(cache.toString(), EhcacheResult.values(), new Task() {
 
               @Override
               public Result definition() throws Exception {
-                Element value;
                 try {
-                  value = cache.get(keyGenerator.generate(next));
+                  cache.put(keyGenerator.generate(next), valueGenerator.generate(next));
                 } catch (Exception e) {
                   return EXCEPTION;
                 }
-                if (value == null) {
-                  return MISS;
-                } else {
-                  return GET;
-                }
+                return PUT;
               }
             });
       }
     }
+
   }
 }

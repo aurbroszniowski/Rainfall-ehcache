@@ -1,4 +1,4 @@
-package org.rainfall.ehcache.operation;
+package org.rainfall.ehcache2.operation;
 
 import net.sf.ehcache.Ehcache;
 import org.rainfall.AssertionEvaluator;
@@ -7,7 +7,8 @@ import org.rainfall.ObjectGenerator;
 import org.rainfall.Operation;
 import org.rainfall.SequenceGenerator;
 import org.rainfall.TestException;
-import org.rainfall.ehcache.CacheConfig;
+import org.rainfall.ehcache2.CacheConfig;
+import org.rainfall.ehcache.operation.OperationWeight;
 import org.rainfall.ehcache.statistics.EhcacheResult;
 import org.rainfall.statistics.Result;
 import org.rainfall.statistics.StatisticsObserversFactory;
@@ -37,8 +38,8 @@ public class RemoveOperation<K, V> extends Operation {
       List<Ehcache> caches = cacheConfig.getCaches();
       final ObjectGenerator<K> keyGenerator = cacheConfig.getKeyGenerator();
       for (final Ehcache cache : caches) {
-        statisticsObserversFactory.getStatisticObserver(cache.getName(), EhcacheResult.values())
-            .measure(new Task() {
+        statisticsObserversFactory
+            .measure(cache.getName(), EhcacheResult.values(), new Task() {
 
               @Override
               public Result definition() throws Exception {
