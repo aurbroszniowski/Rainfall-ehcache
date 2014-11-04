@@ -8,16 +8,15 @@ import org.rainfall.ObjectGenerator;
 import org.rainfall.Operation;
 import org.rainfall.SequenceGenerator;
 import org.rainfall.TestException;
-import org.rainfall.ehcache2.CacheConfig;
 import org.rainfall.ehcache.operation.OperationWeight;
 import org.rainfall.ehcache.statistics.EhcacheResult;
+import org.rainfall.ehcache2.CacheConfig;
 import org.rainfall.statistics.Result;
-import org.rainfall.statistics.StatisticsObserversFactory;
+import org.rainfall.statistics.StatisticsObserversHolder;
 import org.rainfall.statistics.Task;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
 import static org.rainfall.ehcache.statistics.EhcacheResult.PUT;
@@ -28,7 +27,7 @@ import static org.rainfall.ehcache.statistics.EhcacheResult.PUT;
 public class PutOperation<K, V> extends Operation {
 
   @Override
-  public void exec(final StatisticsObserversFactory statisticsObserversFactory, final Map<Class<? extends Configuration>,
+  public void exec(final StatisticsObserversHolder statisticsObserversHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
     CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
@@ -40,7 +39,7 @@ public class PutOperation<K, V> extends Operation {
       final ObjectGenerator<K> keyGenerator = cacheConfig.getKeyGenerator();
       final ObjectGenerator<V> valueGenerator = cacheConfig.getValueGenerator();
       for (final Ehcache cache : caches) {
-        statisticsObserversFactory
+        statisticsObserversHolder
             .measure(cache.getName(), EhcacheResult.values(), new Task() {
 
               @Override

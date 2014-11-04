@@ -31,6 +31,7 @@ import static org.rainfall.ehcache2.Ehcache2Operations.remove;
 import static org.rainfall.execution.Executions.during;
 import static org.rainfall.execution.Executions.nothingFor;
 import static org.rainfall.execution.Executions.times;
+import static org.rainfall.unit.TimeDivision.minutes;
 import static org.rainfall.unit.TimeDivision.seconds;
 
 /**
@@ -110,7 +111,7 @@ public class Ehcache2Test {
         .exec(remove());
 
     Runner.setUp(scenario)
-        .executed(during(25, seconds))
+        .executed(during(45, seconds))
         .config(cacheConfig, concurrency, reporting)
         .start();
   }
@@ -137,4 +138,6 @@ public class Ehcache2Test {
         .config(cacheConfig, concurrency, reporting)
         .start();
   }
+
+
 }

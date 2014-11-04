@@ -11,7 +11,7 @@ import org.rainfall.ehcache.operation.OperationWeight;
 import org.rainfall.ehcache.statistics.EhcacheResult;
 import org.rainfall.ehcache3.CacheConfig;
 import org.rainfall.statistics.Result;
-import org.rainfall.statistics.StatisticsObserversFactory;
+import org.rainfall.statistics.StatisticsObserversHolder;
 import org.rainfall.statistics.Task;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class PutOperation<K, V> extends Operation {
   AtomicLong putcnt = new AtomicLong();
 
   @Override
-  public void exec(final StatisticsObserversFactory statisticsObserversFactory, final Map<Class<? extends Configuration>,
+  public void exec(final StatisticsObserversHolder statisticsObserversHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
     CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
@@ -41,7 +41,7 @@ public class PutOperation<K, V> extends Operation {
       final ObjectGenerator<K> keyGenerator = cacheConfig.getKeyGenerator();
       final ObjectGenerator<V> valueGenerator = cacheConfig.getValueGenerator();
       for (final Cache<K, V> cache : caches) {
-        statisticsObserversFactory
+        statisticsObserversHolder
             .measure(cache.toString(), EhcacheResult.values(), new Task() {
 
               @Override
