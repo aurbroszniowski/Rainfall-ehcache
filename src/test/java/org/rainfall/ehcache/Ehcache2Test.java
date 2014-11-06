@@ -13,7 +13,6 @@ import org.rainfall.Scenario;
 import org.rainfall.SyntaxException;
 import org.rainfall.configuration.ConcurrencyConfig;
 import org.rainfall.configuration.ReportingConfig;
-import org.rainfall.ehcache.statistics.EhcacheResult;
 import org.rainfall.ehcache2.CacheConfig;
 import org.rainfall.generator.ByteArrayGenerator;
 import org.rainfall.generator.StringGenerator;
@@ -29,9 +28,7 @@ import static org.rainfall.ehcache2.Ehcache2Operations.get;
 import static org.rainfall.ehcache2.Ehcache2Operations.put;
 import static org.rainfall.ehcache2.Ehcache2Operations.remove;
 import static org.rainfall.execution.Executions.during;
-import static org.rainfall.execution.Executions.nothingFor;
 import static org.rainfall.execution.Executions.times;
-import static org.rainfall.unit.TimeDivision.minutes;
 import static org.rainfall.unit.TimeDivision.seconds;
 
 /**
