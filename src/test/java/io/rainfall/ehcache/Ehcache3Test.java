@@ -1,43 +1,28 @@
-package org.rainfall.ehcache;
+package io.rainfall.ehcache;
 
+import io.rainfall.Runner;
+import io.rainfall.configuration.ConcurrencyConfig;
+import io.rainfall.ehcache.operation.OperationWeight;
+import io.rainfall.ehcache3.CacheConfig;
+import io.rainfall.ehcache3.Ehcache3Operations;
+import io.rainfall.generator.ByteArrayGenerator;
+import io.rainfall.generator.StringGenerator;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.CacheConfigurationBuilder;
-import org.rainfall.ObjectGenerator;
-import org.rainfall.Runner;
-import org.rainfall.Scenario;
-import org.rainfall.SyntaxException;
+import io.rainfall.Scenario;
+import io.rainfall.SyntaxException;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.rainfall.Runner;
-import org.rainfall.Scenario;
-import org.rainfall.SyntaxException;
-import org.rainfall.configuration.ConcurrencyConfig;
-import org.rainfall.configuration.ReportingConfig;
-import org.rainfall.ehcache3.CacheConfig;
-import org.rainfall.generator.ByteArrayGenerator;
-import org.rainfall.generator.StringGenerator;
-import org.rainfall.generator.sequence.Distribution;
-import org.rainfall.utils.SystemTest;
+import io.rainfall.configuration.ReportingConfig;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.ehcache.CacheManagerBuilder.newCacheManagerBuilder;
-import static org.rainfall.ehcache3.Ehcache3Operations.get;
-import static org.rainfall.ehcache3.Ehcache3Operations.put;
-import static org.rainfall.ehcache3.Ehcache3Operations.remove;
-import static org.rainfall.ehcache.operation.OperationWeight.OPERATION.GET;
-import static org.rainfall.ehcache.operation.OperationWeight.OPERATION.PUT;
-import static org.rainfall.ehcache.operation.OperationWeight.OPERATION.REMOVE;
-import static org.rainfall.ehcache.operation.OperationWeight.operation;
-import static org.rainfall.execution.Executions.during;
-import static org.rainfall.execution.Executions.nothingFor;
-import static org.rainfall.execution.Executions.times;
-import static org.rainfall.unit.TimeDivision.seconds;
-
-import org.junit.Test;
+import static io.rainfall.execution.Executions.nothingFor;
+import static io.rainfall.execution.Executions.times;
+import static io.rainfall.unit.TimeDivision.seconds;
 
 /**
  * @author Aurelien Broszniowski
@@ -74,15 +59,16 @@ public class Ehcache3Test {
         .caches(cache)
         .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
         .sequentially()
-        .weights(operation(PUT, 0.10), operation(GET, 0.80), operation(REMOVE, 0.10));
+        .weights(OperationWeight.operation(OperationWeight.OPERATION.PUT, 0.10), OperationWeight.operation(OperationWeight.OPERATION.GET, 0.80), OperationWeight
+            .operation(OperationWeight.OPERATION.REMOVE, 0.10));
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig reporting = ReportingConfig.reportingConfig(ReportingConfig.text());
 
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(put())
-        .exec(get())
-        .exec(remove());
+        .exec(Ehcache3Operations.put())
+        .exec(Ehcache3Operations.get())
+        .exec(Ehcache3Operations.remove());
 
     Runner.setUp(scenario)
         .executed(times(10000000), nothingFor(10, seconds))

@@ -1,6 +1,6 @@
-package org.rainfall.ehcache.statistics;
+package io.rainfall.ehcache.statistics;
 
-import org.rainfall.statistics.Result;
+import io.rainfall.statistics.Result;
 
 /**
  * @author Aurelien Broszniowski

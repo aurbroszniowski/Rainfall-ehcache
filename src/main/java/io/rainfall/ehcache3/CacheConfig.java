@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package org.rainfall.ehcache3;
+package io.rainfall.ehcache3;
+import io.rainfall.generator.IterationSequenceGenerator;
+import io.rainfall.generator.sequence.Distribution;
 import org.ehcache.*;
 
-import org.rainfall.Configuration;
-import org.rainfall.ObjectGenerator;
-import org.rainfall.SequenceGenerator;
-import org.rainfall.ehcache.operation.OperationWeight;
-import org.rainfall.generator.IterationSequenceGenerator;
-import org.rainfall.generator.RandomSequenceGenerator;
-import org.rainfall.generator.sequence.Distribution;
-import org.rainfall.utils.PseudoRandom;
-import org.rainfall.utils.RangeMap;
+import io.rainfall.Configuration;
+import io.rainfall.ObjectGenerator;
+import io.rainfall.SequenceGenerator;
+import io.rainfall.ehcache.operation.OperationWeight;
+import io.rainfall.generator.RandomSequenceGenerator;
+import io.rainfall.utils.PseudoRandom;
+import io.rainfall.utils.RangeMap;
 
 import java.util.ArrayList;
 import java.util.Collections;

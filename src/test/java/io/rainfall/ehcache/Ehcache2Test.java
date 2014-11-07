@@ -1,5 +1,11 @@
-package org.rainfall.ehcache;
+package io.rainfall.ehcache;
 
+import io.rainfall.Runner;
+import io.rainfall.configuration.ConcurrencyConfig;
+import io.rainfall.generator.ByteArrayGenerator;
+import io.rainfall.generator.StringGenerator;
+import io.rainfall.generator.sequence.Distribution;
+import io.rainfall.utils.SystemTest;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.config.CacheConfiguration;
@@ -8,28 +14,22 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.rainfall.Runner;
-import org.rainfall.Scenario;
-import org.rainfall.SyntaxException;
-import org.rainfall.configuration.ConcurrencyConfig;
-import org.rainfall.configuration.ReportingConfig;
-import org.rainfall.ehcache2.CacheConfig;
-import org.rainfall.generator.ByteArrayGenerator;
-import org.rainfall.generator.StringGenerator;
-import org.rainfall.generator.sequence.Distribution;
-import org.rainfall.utils.SystemTest;
+import io.rainfall.Scenario;
+import io.rainfall.SyntaxException;
+import io.rainfall.configuration.ReportingConfig;
+import io.rainfall.ehcache2.CacheConfig;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.rainfall.ehcache.operation.OperationWeight.OPERATION.GET;
-import static org.rainfall.ehcache.operation.OperationWeight.OPERATION.PUT;
-import static org.rainfall.ehcache.operation.OperationWeight.OPERATION.REMOVE;
-import static org.rainfall.ehcache.operation.OperationWeight.operation;
-import static org.rainfall.ehcache2.Ehcache2Operations.get;
-import static org.rainfall.ehcache2.Ehcache2Operations.put;
-import static org.rainfall.ehcache2.Ehcache2Operations.remove;
-import static org.rainfall.execution.Executions.during;
-import static org.rainfall.execution.Executions.times;
-import static org.rainfall.unit.TimeDivision.seconds;
+import static io.rainfall.ehcache.operation.OperationWeight.OPERATION.GET;
+import static io.rainfall.ehcache.operation.OperationWeight.OPERATION.PUT;
+import static io.rainfall.ehcache.operation.OperationWeight.OPERATION.REMOVE;
+import static io.rainfall.ehcache.operation.OperationWeight.operation;
+import static io.rainfall.ehcache2.Ehcache2Operations.get;
+import static io.rainfall.ehcache2.Ehcache2Operations.put;
+import static io.rainfall.ehcache2.Ehcache2Operations.remove;
+import static io.rainfall.execution.Executions.during;
+import static io.rainfall.execution.Executions.times;
+import static io.rainfall.unit.TimeDivision.seconds;
 
 /**
  * @author Aurelien Broszniowski

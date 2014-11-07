@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package org.rainfall.ehcache2;
+package io.rainfall.ehcache3;
 
-import org.rainfall.ehcache.statistics.EhcacheResult;
-import org.rainfall.ehcache2.operation.GetOperation;
-import org.rainfall.ehcache2.operation.PutOperation;
-import org.rainfall.ehcache2.operation.RemoveOperation;
-import org.rainfall.statistics.Result;
+import io.rainfall.ehcache3.operation.PutOperation;
+import io.rainfall.ehcache3.operation.GetOperation;
+import io.rainfall.ehcache3.operation.RemoveOperation;
 
 /**
- * Contains the helper methods to instantiate the Ehcache {@link org.rainfall.Operation} objects.
+ * Contains the helper methods to instantiate the Ehcache {@link io.rainfall.Operation} objects.
  *
  * @author Aurelien Broszniowski
  */
-public class Ehcache2Operations {
+public class Ehcache3Operations {
 
   public static PutOperation put() {
     return new PutOperation();

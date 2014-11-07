@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.rainfall.ehcache.operation;
+package io.rainfall.ehcache.operation;
 
 /**
- * Holds the weight of a specific {@link org.rainfall.Operation}, in order to calculate the statistic occurrence
+ * Holds the weight of a specific {@link io.rainfall.Operation}, in order to calculate the statistic occurrence
  * when the operation should be executed
  *
  * @author Aurelien Broszniowski

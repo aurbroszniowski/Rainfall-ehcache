@@ -1,25 +1,25 @@
-package org.rainfall.ehcache2.operation;
+package io.rainfall.ehcache2.operation;
 
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
-import org.rainfall.AssertionEvaluator;
-import org.rainfall.Configuration;
-import org.rainfall.ObjectGenerator;
-import org.rainfall.Operation;
-import org.rainfall.SequenceGenerator;
-import org.rainfall.TestException;
-import org.rainfall.ehcache.operation.OperationWeight;
-import org.rainfall.ehcache.statistics.EhcacheResult;
-import org.rainfall.ehcache2.CacheConfig;
-import org.rainfall.statistics.Result;
-import org.rainfall.statistics.StatisticsObserversHolder;
-import org.rainfall.statistics.Task;
+import io.rainfall.AssertionEvaluator;
+import io.rainfall.Configuration;
+import io.rainfall.ObjectGenerator;
+import io.rainfall.Operation;
+import io.rainfall.SequenceGenerator;
+import io.rainfall.TestException;
+import io.rainfall.ehcache.operation.OperationWeight;
+import io.rainfall.ehcache.statistics.EhcacheResult;
+import io.rainfall.ehcache2.CacheConfig;
+import io.rainfall.statistics.Result;
+import io.rainfall.statistics.StatisticsObserversHolder;
+import io.rainfall.statistics.Task;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static org.rainfall.ehcache.statistics.EhcacheResult.PUT;
+import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
+import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
 
 /**
  * @author Aurelien Broszniowski
