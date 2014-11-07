@@ -38,13 +38,13 @@ Use it in your project
 ```
   <dependencies>
     <dependency>
-      <groupId>org.rainfall</groupId>
+      <groupId>io.rainfall</groupId>
       <artifactId>rainfall-ehcache</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
 
     <dependency>
-      <groupId>org.rainfall</groupId>
+      <groupId>io.rainfall</groupId>
       <artifactId>rainfall-core</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
