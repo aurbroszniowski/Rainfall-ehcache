@@ -81,7 +81,7 @@ public class Ehcache2Test {
         .exec(put());
 
     Runner.setUp(scenario)
-        .executed(times(1000000))
+        .executed(times(1000))
         .config(cacheConfig, concurrency, reporting)
         .start();
 
@@ -108,7 +108,7 @@ public class Ehcache2Test {
         .exec(remove());
 
     Runner.setUp(scenario)
-        .executed(during(45, seconds))
+        .executed(during(10, seconds))
         .config(cacheConfig, concurrency, reporting)
         .start();
   }
@@ -131,7 +131,7 @@ public class Ehcache2Test {
         .exec(remove());
 
     Runner.setUp(scenario)
-        .executed(during(25, seconds))
+        .executed(during(10, seconds))
         .config(cacheConfig, concurrency, reporting)
         .start();
   }

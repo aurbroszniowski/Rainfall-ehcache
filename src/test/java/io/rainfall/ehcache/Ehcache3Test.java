@@ -71,7 +71,7 @@ public class Ehcache3Test {
         .exec(Ehcache3Operations.remove());
 
     Runner.setUp(scenario)
-        .executed(times(10000000), nothingFor(10, seconds))
+        .executed(times(1000), nothingFor(10, seconds))
         .config(cacheConfig, concurrency, reporting)
 //          .assertion(latencyTime(), isLessThan(1, seconds))
         .start();
