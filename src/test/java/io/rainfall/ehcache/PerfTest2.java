@@ -6,6 +6,7 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.Configuration;
+import org.junit.Ignore;
 import org.junit.Test;
 import io.rainfall.ObjectGenerator;
 import io.rainfall.Runner;
@@ -34,16 +35,17 @@ import static io.rainfall.unit.TimeDivision.minutes;
 public class PerfTest2 {
 
   @Test
+  @Ignore
   public void testLoad() throws SyntaxException {
 
     CacheManager cacheManager = null;
     try {
       Configuration configuration = new Configuration().name("EhcacheTest")
           .defaultCache(new CacheConfiguration("default", 0))
-          .cache(new CacheConfiguration("one", 0))
-          .cache(new CacheConfiguration("two", 0))
-          .cache(new CacheConfiguration("three", 0))
-          .cache(new CacheConfiguration("four", 0));
+          .cache(new CacheConfiguration("one", 250000))
+          .cache(new CacheConfiguration("two", 250000))
+          .cache(new CacheConfiguration("three", 250000))
+          .cache(new CacheConfiguration("four", 250000));
       cacheManager = CacheManager.create(configuration);
 
       Ehcache one = cacheManager.getEhcache("one");

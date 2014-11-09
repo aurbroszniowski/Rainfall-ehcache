@@ -9,6 +9,8 @@ import io.rainfall.generator.sequence.Distribution;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.CacheConfigurationBuilder;
+import org.ehcache.function.Predicates;
+import org.junit.Ignore;
 import org.junit.Test;
 import io.rainfall.ObjectGenerator;
 import io.rainfall.Scenario;
@@ -33,18 +35,18 @@ import static io.rainfall.unit.TimeDivision.minutes;
  */
 public class PerfTest3 {
 
-
   @Test
+  @Ignore
   public void testLoad() throws SyntaxException {
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", CacheConfigurationBuilder.newCacheConfigurationBuilder()
-            .buildCacheConfig(String.class, byte[].class))
+            .buildConfig(String.class, byte[].class, 250000L, null, null))
         .withCache("two", CacheConfigurationBuilder.newCacheConfigurationBuilder()
-            .buildCacheConfig(String.class, byte[].class))
+            .buildConfig(String.class, byte[].class, 250000L, null, null))
         .withCache("three", CacheConfigurationBuilder.newCacheConfigurationBuilder()
-            .buildCacheConfig(String.class, byte[].class))
+            .buildConfig(String.class, byte[].class, 250000L, null, null))
         .withCache("four", CacheConfigurationBuilder.newCacheConfigurationBuilder()
-            .buildCacheConfig(String.class, byte[].class))
+            .buildConfig(String.class, byte[].class, 250000L, null, null))
         .build();
 
     final Cache<String, byte[]> one = cacheManager.getCache("one", String.class, byte[].class);
