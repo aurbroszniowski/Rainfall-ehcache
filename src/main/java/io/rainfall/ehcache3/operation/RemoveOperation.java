@@ -9,7 +9,7 @@ import io.rainfall.TestException;
 import io.rainfall.ehcache.operation.OperationWeight;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
-import io.rainfall.statistics.StatisticsObserversHolder;
+import io.rainfall.statistics.StatisticsHolder;
 import io.rainfall.statistics.Task;
 import org.ehcache.Cache;
 
@@ -22,10 +22,10 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVE;
 /**
  * @author Aurelien Broszniowski
  */
-public class RemoveOperation<K, V> extends Operation<EhcacheResult> {
+public class RemoveOperation<K, V> extends Operation {
 
   @Override
-  public void exec(final StatisticsObserversHolder<EhcacheResult> statisticsObserversHolder, final Map<Class<? extends Configuration>,
+  public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
     CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
@@ -36,8 +36,8 @@ public class RemoveOperation<K, V> extends Operation<EhcacheResult> {
       List<Cache<K, V>> caches = cacheConfig.getCaches();
       final ObjectGenerator<K> keyGenerator = cacheConfig.getKeyGenerator();
       for (final Cache<K, V> cache : caches) {
-        statisticsObserversHolder
-            .measure(cache.toString(), EhcacheResult.class, new Task() {
+        statisticsHolder
+            .measure(cache.toString(), new Task() {
 
               @Override
               public EhcacheResult definition() throws Exception {

@@ -1,7 +1,12 @@
 package io.rainfall.ehcache;
 
 import io.rainfall.Runner;
+import io.rainfall.Scenario;
+import io.rainfall.SyntaxException;
 import io.rainfall.configuration.ConcurrencyConfig;
+import io.rainfall.configuration.ReportingConfig;
+import io.rainfall.ehcache.statistics.EhcacheResult;
+import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.StringGenerator;
 import io.rainfall.generator.sequence.Distribution;
@@ -14,12 +19,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import io.rainfall.Scenario;
-import io.rainfall.SyntaxException;
-import io.rainfall.configuration.ReportingConfig;
-import io.rainfall.ehcache2.CacheConfig;
 
-import static java.util.concurrent.TimeUnit.MINUTES;
+import static io.rainfall.configuration.ReportingConfig.html;
+import static io.rainfall.configuration.ReportingConfig.reportingConfig;
+import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache.operation.OperationWeight.OPERATION.GET;
 import static io.rainfall.ehcache.operation.OperationWeight.OPERATION.PUT;
 import static io.rainfall.ehcache.operation.OperationWeight.OPERATION.REMOVE;
@@ -30,6 +33,7 @@ import static io.rainfall.ehcache2.Ehcache2Operations.remove;
 import static io.rainfall.execution.Executions.during;
 import static io.rainfall.execution.Executions.times;
 import static io.rainfall.unit.TimeDivision.seconds;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
  * @author Aurelien Broszniowski
@@ -75,7 +79,7 @@ public class Ehcache2Test {
         .weights(operation(PUT, 1.00));
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
-    ReportingConfig reporting = ReportingConfig.reportingConfig(ReportingConfig.text(), ReportingConfig.html());
+    ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
 
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(put());
@@ -100,7 +104,7 @@ public class Ehcache2Test {
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
-    ReportingConfig reporting = ReportingConfig.reportingConfig(ReportingConfig.text(), ReportingConfig.html());
+    ReportingConfig<EhcacheResult> reporting = reportingConfig(EhcacheResult.class, text(), html());
 
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(put())
@@ -108,7 +112,7 @@ public class Ehcache2Test {
         .exec(remove());
 
     Runner.setUp(scenario)
-        .executed(during(10, seconds))
+        .executed(during(20, seconds))
         .config(cacheConfig, concurrency, reporting)
         .start();
   }
@@ -123,7 +127,7 @@ public class Ehcache2Test {
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
-    ReportingConfig reporting = ReportingConfig.reportingConfig(ReportingConfig.text(), ReportingConfig.html());
+    ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
 
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(put())
@@ -136,5 +140,27 @@ public class Ehcache2Test {
         .start();
   }
 
+  @Test
+  public void testRemove() throws SyntaxException {
+    CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
+        .caches(cache1, cache2, cache3)
+        .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
+        .sequentially()
+        .weights(operation(PUT, 0.10), operation(GET, 0.80), operation(REMOVE, 0.10));
+
+    ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
+        .threads(4).timeout(5, MINUTES);
+    ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
+
+    Scenario scenario = Scenario.scenario("Cache load")
+        .exec(put())
+        .exec(get())
+        .exec(remove());
+
+    Runner.setUp(scenario)
+        .executed(during(10, seconds))
+        .config(cacheConfig, concurrency, reporting)
+        .start();
+  }
 
 }

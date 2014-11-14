@@ -1,7 +1,11 @@
 package io.rainfall.ehcache;
 
+import io.rainfall.ObjectGenerator;
 import io.rainfall.Runner;
+import io.rainfall.Scenario;
+import io.rainfall.SyntaxException;
 import io.rainfall.configuration.ConcurrencyConfig;
+import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.StringGenerator;
@@ -9,15 +13,9 @@ import io.rainfall.generator.sequence.Distribution;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.CacheConfigurationBuilder;
-import org.ehcache.function.Predicates;
 import org.junit.Ignore;
 import org.junit.Test;
-import io.rainfall.ObjectGenerator;
-import io.rainfall.Scenario;
-import io.rainfall.SyntaxException;
 
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.ehcache.CacheManagerBuilder.newCacheManagerBuilder;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.reportingConfig;
 import static io.rainfall.configuration.ReportingConfig.text;
@@ -29,6 +27,8 @@ import static io.rainfall.ehcache3.Ehcache3Operations.put;
 import static io.rainfall.execution.Executions.during;
 import static io.rainfall.execution.Executions.times;
 import static io.rainfall.unit.TimeDivision.minutes;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static org.ehcache.CacheManagerBuilder.newCacheManagerBuilder;
 
 /**
  * @author Aurelien Broszniowski
@@ -65,7 +65,7 @@ public class PerfTest3 {
     Runner.setUp(
         Scenario.scenario("Warm up phase").exec(put()))
         .executed(times(nbElements))
-        .config(concurrency, reportingConfig(text()))
+        .config(concurrency, reportingConfig(EhcacheResult.class, text()))
         .config(CacheConfig.<String, byte[]>cacheConfig()
                 .caches(one, two, three, four)
                 .using(keyGenerator, valueGenerator)
@@ -79,7 +79,7 @@ public class PerfTest3 {
     Runner.setUp(
         Scenario.scenario("Test phase").exec(put()).exec(get()))
         .executed(during(5, minutes))
-        .config(concurrency, reportingConfig(text(), html()))
+        .config(concurrency, reportingConfig(EhcacheResult.class, text(), html()))
         .config(CacheConfig.<String, byte[]>cacheConfig()
             .caches(one, two, three, four)
             .using(keyGenerator, valueGenerator)

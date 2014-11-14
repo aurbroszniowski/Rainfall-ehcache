@@ -1,8 +1,12 @@
 package io.rainfall.ehcache;
 
 import io.rainfall.Runner;
+import io.rainfall.Scenario;
+import io.rainfall.SyntaxException;
 import io.rainfall.configuration.ConcurrencyConfig;
+import io.rainfall.configuration.ReportingConfig;
 import io.rainfall.ehcache.operation.OperationWeight;
+import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.ehcache3.Ehcache3Operations;
 import io.rainfall.generator.ByteArrayGenerator;
@@ -10,19 +14,15 @@ import io.rainfall.generator.StringGenerator;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.CacheConfigurationBuilder;
-import io.rainfall.Scenario;
-import io.rainfall.SyntaxException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import io.rainfall.configuration.ReportingConfig;
 
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.ehcache.CacheManagerBuilder.newCacheManagerBuilder;
 import static io.rainfall.execution.Executions.nothingFor;
 import static io.rainfall.execution.Executions.times;
 import static io.rainfall.unit.TimeDivision.seconds;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static org.ehcache.CacheManagerBuilder.newCacheManagerBuilder;
 
 /**
  * @author Aurelien Broszniowski
@@ -63,7 +63,7 @@ public class Ehcache3Test {
             .operation(OperationWeight.OPERATION.REMOVE, 0.10));
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
-    ReportingConfig reporting = ReportingConfig.reportingConfig(ReportingConfig.text());
+    ReportingConfig reporting = ReportingConfig.reportingConfig(EhcacheResult.class, ReportingConfig.text());
 
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(Ehcache3Operations.put())

@@ -1,6 +1,14 @@
 package io.rainfall.ehcache;
 
+import io.rainfall.ObjectGenerator;
+import io.rainfall.Runner;
+import io.rainfall.Scenario;
+import io.rainfall.SyntaxException;
+import io.rainfall.configuration.ConcurrencyConfig;
+import io.rainfall.ehcache.statistics.EhcacheResult;
+import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.generator.ByteArrayGenerator;
+import io.rainfall.generator.StringGenerator;
 import io.rainfall.generator.sequence.Distribution;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
@@ -8,15 +16,7 @@ import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.Configuration;
 import org.junit.Ignore;
 import org.junit.Test;
-import io.rainfall.ObjectGenerator;
-import io.rainfall.Runner;
-import io.rainfall.Scenario;
-import io.rainfall.SyntaxException;
-import io.rainfall.configuration.ConcurrencyConfig;
-import io.rainfall.ehcache2.CacheConfig;
-import io.rainfall.generator.StringGenerator;
 
-import static java.util.concurrent.TimeUnit.MINUTES;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.reportingConfig;
 import static io.rainfall.configuration.ReportingConfig.text;
@@ -28,6 +28,7 @@ import static io.rainfall.ehcache2.Ehcache2Operations.put;
 import static io.rainfall.execution.Executions.during;
 import static io.rainfall.execution.Executions.times;
 import static io.rainfall.unit.TimeDivision.minutes;
+import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
  * @author Aurelien Broszniowski
@@ -64,7 +65,7 @@ public class PerfTest2 {
       Runner.setUp(
           Scenario.scenario("Warm up phase").exec(put()))
           .executed(times(nbElements))
-          .config(concurrency, reportingConfig(text()))
+          .config(concurrency, reportingConfig(EhcacheResult.class, text()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
                   .caches(one, two, three, four)
                   .using(keyGenerator, valueGenerator)
@@ -83,7 +84,7 @@ public class PerfTest2 {
       Runner.setUp(
           Scenario.scenario("Test phase").exec(put()).exec(get()))
           .executed(during(5, minutes))
-          .config(concurrency, reportingConfig(text(), html()))
+          .config(concurrency, reportingConfig(EhcacheResult.class, text(), html()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
               .caches(one, two, three, four)
               .using(keyGenerator, valueGenerator)
