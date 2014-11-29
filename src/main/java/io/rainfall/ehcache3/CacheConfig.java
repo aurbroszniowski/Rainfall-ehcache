@@ -15,17 +15,15 @@
  */
 
 package io.rainfall.ehcache3;
-import io.rainfall.generator.IterationSequenceGenerator;
-import io.rainfall.generator.sequence.Distribution;
-import org.ehcache.*;
 
 import io.rainfall.Configuration;
 import io.rainfall.ObjectGenerator;
 import io.rainfall.SequenceGenerator;
-import io.rainfall.ehcache.operation.OperationWeight;
+import io.rainfall.generator.IterationSequenceGenerator;
 import io.rainfall.generator.RandomSequenceGenerator;
+import io.rainfall.generator.sequence.Distribution;
 import io.rainfall.utils.ConcurrentPseudoRandom;
-import io.rainfall.utils.RangeMap;
+import org.ehcache.Cache;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,18 +36,17 @@ import java.util.List;
 
 public class CacheConfig<K, V> extends Configuration {
 
-  private List<Cache<K,V>> caches = new ArrayList<Cache<K,V>>();
+  private List<Cache<K, V>> caches = new ArrayList<Cache<K, V>>();
   private ObjectGenerator<K> keyGenerator = null;
   private ObjectGenerator<V> valueGenerator = null;
   private SequenceGenerator sequenceGenerator = null;
-  private RangeMap<OperationWeight.OPERATION> weights = new RangeMap<OperationWeight.OPERATION>();
   private ConcurrentPseudoRandom randomizer = new ConcurrentPseudoRandom();
 
   public static <K, V> CacheConfig<K, V> cacheConfig() {
     return new CacheConfig<K, V>();
   }
 
-  public CacheConfig<K, V> caches(final Cache<K,V>... caches) {
+  public CacheConfig<K, V> caches(final Cache<K, V>... caches) {
     Collections.addAll(this.caches, caches);
     return this;
   }
@@ -84,22 +81,7 @@ public class CacheConfig<K, V> extends Configuration {
     return this;
   }
 
-  public CacheConfig<K, V> weights(OperationWeight... operationWeights) {
-    double totalWeight = 0;
-    for (OperationWeight weight : operationWeights) {
-      totalWeight += weight.getWeight();
-    }
-    if (totalWeight > 1.0) {
-      throw new IllegalStateException("Sum of all operation weights is higher than 1.0 (100%)");
-    }
-    this.weights = new RangeMap<OperationWeight.OPERATION>();
-    for (OperationWeight weight : operationWeights) {
-      this.weights.put(weight.getWeight(), weight.getOperation());
-    }
-    return this;
-  }
-
-  public List<Cache<K,V>> getCaches() {
+  public List<Cache<K, V>> getCaches() {
     return caches;
   }
 
@@ -113,10 +95,6 @@ public class CacheConfig<K, V> extends Configuration {
 
   public SequenceGenerator getSequenceGenerator() {
     return sequenceGenerator;
-  }
-
-  public RangeMap<OperationWeight.OPERATION> getOperationWeights() {
-    return weights;
   }
 
   public ConcurrentPseudoRandom getRandomizer() {

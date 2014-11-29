@@ -20,9 +20,6 @@ import org.junit.Test;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.reportingConfig;
 import static io.rainfall.configuration.ReportingConfig.text;
-import static io.rainfall.ehcache.operation.OperationWeight.OPERATION.GET;
-import static io.rainfall.ehcache.operation.OperationWeight.OPERATION.PUT;
-import static io.rainfall.ehcache.operation.OperationWeight.operation;
 import static io.rainfall.ehcache2.Ehcache2Operations.get;
 import static io.rainfall.ehcache2.Ehcache2Operations.put;
 import static io.rainfall.execution.Executions.during;
@@ -69,7 +66,6 @@ public class PerfTest2 {
           .config(CacheConfig.<String, byte[]>cacheConfig()
                   .caches(one, two, three, four)
                   .using(keyGenerator, valueGenerator)
-                  .weights(operation(PUT, 1))
                   .sequentially()
           )
           .start();
@@ -82,14 +78,13 @@ public class PerfTest2 {
       System.out.println("----------> Test phase");
 
       Runner.setUp(
-          Scenario.scenario("Test phase").exec(put()).exec(get()))
+          Scenario.scenario("Test phase").exec(put().withWeight(0.90)).exec(get().withWeight(0.10)))
           .executed(during(5, minutes))
           .config(concurrency, reportingConfig(EhcacheResult.class, text(), html()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
               .caches(one, two, three, four)
               .using(keyGenerator, valueGenerator)
-              .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
-              .weights(operation(GET, 0.90), operation(PUT, 0.10)))
+              .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000))
           .start();
 
       System.out.println("----------> Done");

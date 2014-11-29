@@ -6,7 +6,6 @@ import io.rainfall.ObjectGenerator;
 import io.rainfall.Operation;
 import io.rainfall.SequenceGenerator;
 import io.rainfall.TestException;
-import io.rainfall.ehcache.operation.OperationWeight;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
@@ -26,15 +25,16 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
  */
 public class GetOperation<K, V> extends Operation {
 
+  private double weight = 1;
+
   @Override
-  public void exec(final StatisticsHolder  statisticsHolder, final Map<Class<? extends Configuration>,
+  public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
     CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
     SequenceGenerator sequenceGenerator = cacheConfig.getSequenceGenerator();
     final long next = sequenceGenerator.next();
-    Double weight = cacheConfig.getRandomizer().nextDouble(next);
-    if (cacheConfig.getOperationWeights().get(weight) == OperationWeight.OPERATION.GET) {
+    if (cacheConfig.getRandomizer().nextFloat(next) <= this.weight) {
       List<Ehcache> caches = cacheConfig.getCaches();
       final ObjectGenerator<K> keyGenerator = cacheConfig.getKeyGenerator();
       for (final Ehcache cache : caches) {
@@ -58,5 +58,13 @@ public class GetOperation<K, V> extends Operation {
             });
       }
     }
+  }
+
+  public Operation withWeight(double weight) {
+    if (weight < 0 || weight > 1) {
+      throw new IllegalStateException("Operation weight should be between 0.01 and 1.00 (1 and 100%) and is " + weight);
+    }
+    this.weight = weight;
+    return this;
   }
 }

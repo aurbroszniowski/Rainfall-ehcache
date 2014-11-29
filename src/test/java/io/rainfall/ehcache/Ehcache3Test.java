@@ -5,7 +5,6 @@ import io.rainfall.Scenario;
 import io.rainfall.SyntaxException;
 import io.rainfall.configuration.ConcurrencyConfig;
 import io.rainfall.configuration.ReportingConfig;
-import io.rainfall.ehcache.operation.OperationWeight;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.ehcache3.Ehcache3Operations;
@@ -18,6 +17,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.rainfall.ehcache3.Ehcache3Operations.get;
+import static io.rainfall.ehcache3.Ehcache3Operations.put;
+import static io.rainfall.ehcache3.Ehcache3Operations.remove;
 import static io.rainfall.execution.Executions.nothingFor;
 import static io.rainfall.execution.Executions.times;
 import static io.rainfall.unit.TimeDivision.seconds;
@@ -58,17 +60,15 @@ public class Ehcache3Test {
     CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
         .caches(cache)
         .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
-        .sequentially()
-        .weights(OperationWeight.operation(OperationWeight.OPERATION.PUT, 0.10), OperationWeight.operation(OperationWeight.OPERATION.GET, 0.80), OperationWeight
-            .operation(OperationWeight.OPERATION.REMOVE, 0.10));
+        .sequentially();
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig reporting = ReportingConfig.reportingConfig(EhcacheResult.class, ReportingConfig.text());
 
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(Ehcache3Operations.put())
-        .exec(Ehcache3Operations.get())
-        .exec(Ehcache3Operations.remove());
+        .exec(put().withWeight(0.10))
+        .exec(get().withWeight(0.80))
+        .exec(remove().withWeight(0.10));
 
     Runner.setUp(scenario)
         .executed(times(1000), nothingFor(10, seconds))

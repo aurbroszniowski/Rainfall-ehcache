@@ -23,15 +23,12 @@ import org.junit.experimental.categories.Category;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.reportingConfig;
 import static io.rainfall.configuration.ReportingConfig.text;
-import static io.rainfall.ehcache.operation.OperationWeight.OPERATION.GET;
-import static io.rainfall.ehcache.operation.OperationWeight.OPERATION.PUT;
-import static io.rainfall.ehcache.operation.OperationWeight.OPERATION.REMOVE;
-import static io.rainfall.ehcache.operation.OperationWeight.operation;
 import static io.rainfall.ehcache2.Ehcache2Operations.get;
 import static io.rainfall.ehcache2.Ehcache2Operations.put;
 import static io.rainfall.ehcache2.Ehcache2Operations.remove;
 import static io.rainfall.execution.Executions.during;
 import static io.rainfall.execution.Executions.times;
+import static io.rainfall.unit.TimeDivision.minutes;
 import static io.rainfall.unit.TimeDivision.seconds;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
@@ -75,8 +72,7 @@ public class Ehcache2Test {
     CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
         .caches(cache1, cache2, cache3)
         .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
-        .sequentially()
-        .weights(operation(PUT, 1.00));
+        .sequentially();
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
@@ -99,17 +95,16 @@ public class Ehcache2Test {
     CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
         .caches(cache1, cache2, cache3)
         .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
-        .sequentially()
-        .weights(operation(PUT, 0.10), operation(GET, 0.80), operation(REMOVE, 0.10));
+        .sequentially();
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig<EhcacheResult> reporting = reportingConfig(EhcacheResult.class, text(), html());
 
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(put())
-        .exec(get())
-        .exec(remove());
+        .exec(put().withWeight(0.10))
+        .exec(get().withWeight(0.80))
+        .exec(remove().withWeight(0.10));
 
     Runner.setUp(scenario)
         .executed(during(20, seconds))
@@ -122,17 +117,16 @@ public class Ehcache2Test {
     CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
         .caches(cache1, cache2, cache3)
         .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
-        .atRandom(Distribution.GAUSSIAN, 0, 10000, 1000)
-        .weights(operation(PUT, 0.10), operation(GET, 0.80), operation(REMOVE, 0.10));
+        .atRandom(Distribution.GAUSSIAN, 0, 10000, 1000);
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
 
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(put())
-        .exec(get())
-        .exec(remove());
+        .exec(put().withWeight(0.10))
+        .exec(get().withWeight(0.80))
+        .exec(remove().withWeight(0.10));
 
     Runner.setUp(scenario)
         .executed(during(10, seconds))
@@ -145,17 +139,16 @@ public class Ehcache2Test {
     CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
         .caches(cache1, cache2, cache3)
         .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
-        .sequentially()
-        .weights(operation(PUT, 0.10), operation(GET, 0.80), operation(REMOVE, 0.10));
+        .sequentially();
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
 
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(put())
-        .exec(get())
-        .exec(remove());
+        .exec(put().withWeight(0.10))
+        .exec(get().withWeight(0.80))
+        .exec(remove().withWeight(0.10));
 
     Runner.setUp(scenario)
         .executed(during(10, seconds))
