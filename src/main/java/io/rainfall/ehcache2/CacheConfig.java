@@ -25,7 +25,7 @@ import io.rainfall.generator.sequence.Distribution;
 import io.rainfall.utils.RangeMap;
 import net.sf.ehcache.Ehcache;
 import io.rainfall.generator.RandomSequenceGenerator;
-import io.rainfall.utils.PseudoRandom;
+import io.rainfall.utils.ConcurrentPseudoRandom;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +43,7 @@ public class CacheConfig<K, V> extends Configuration {
   private ObjectGenerator<V> valueGenerator = null;
   private SequenceGenerator sequenceGenerator = null;
   private RangeMap<OperationWeight.OPERATION> weights = new RangeMap<OperationWeight.OPERATION>();
-  private PseudoRandom randomizer = new PseudoRandom();
+  private ConcurrentPseudoRandom randomizer = new ConcurrentPseudoRandom();
 
   public static <K, V> CacheConfig<K, V> cacheConfig() {
     return new CacheConfig<K, V>();
@@ -119,7 +119,7 @@ public class CacheConfig<K, V> extends Configuration {
     return weights;
   }
 
-  public PseudoRandom getRandomizer() {
+  public ConcurrentPseudoRandom getRandomizer() {
     return randomizer;
   }
 }
