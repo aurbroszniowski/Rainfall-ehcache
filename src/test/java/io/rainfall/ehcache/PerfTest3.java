@@ -35,15 +35,14 @@ public class PerfTest3 {
   @Test
   @Ignore
   public void testLoad() throws SyntaxException {
+    CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    builder.maxEntriesInCache(250000L);
+
     final CacheManager cacheManager = newCacheManagerBuilder()
-        .withCache("one", CacheConfigurationBuilder.newCacheConfigurationBuilder()
-            .buildConfig(String.class, byte[].class, 250000L, null, null))
-        .withCache("two", CacheConfigurationBuilder.newCacheConfigurationBuilder()
-            .buildConfig(String.class, byte[].class, 250000L, null, null))
-        .withCache("three", CacheConfigurationBuilder.newCacheConfigurationBuilder()
-            .buildConfig(String.class, byte[].class, 250000L, null, null))
-        .withCache("four", CacheConfigurationBuilder.newCacheConfigurationBuilder()
-            .buildConfig(String.class, byte[].class, 250000L, null, null))
+        .withCache("one", builder.buildConfig(String.class, byte[].class))
+        .withCache("two", builder.buildConfig(String.class, byte[].class))
+        .withCache("three", builder.buildConfig(String.class, byte[].class))
+        .withCache("four", builder.buildConfig(String.class, byte[].class))
         .build();
 
     final Cache<String, byte[]> one = cacheManager.getCache("one", String.class, byte[].class);

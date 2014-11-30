@@ -19,6 +19,29 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+  <repositories>
+    <repository>
+      <id>terracotta-snapshots</id>
+      <url>http://snapshots.terracotta.org</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>terracotta-releases</id>
+      <url>http://repo.terracotta.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>io.rainfall</groupId>
@@ -67,12 +90,6 @@
       <artifactId>ehcache-core</artifactId>
       <version>3.0.0-SNAPSHOT</version>
       <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.terracotta.internal</groupId>
-          <artifactId>statistics</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
