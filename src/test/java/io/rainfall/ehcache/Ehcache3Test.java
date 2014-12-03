@@ -7,9 +7,9 @@ import io.rainfall.configuration.ConcurrencyConfig;
 import io.rainfall.configuration.ReportingConfig;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
-import io.rainfall.ehcache3.Ehcache3Operations;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.StringGenerator;
+import io.rainfall.statistics.StatisticsPeekHolder;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.CacheConfigurationBuilder;
@@ -70,7 +70,7 @@ public class Ehcache3Test {
         .exec(get().withWeight(0.80))
         .exec(remove().withWeight(0.10));
 
-    Runner.setUp(scenario)
+    StatisticsPeekHolder finalStats = Runner.setUp(scenario)
         .executed(times(1000), nothingFor(10, seconds))
         .config(cacheConfig, concurrency, reporting)
 //          .assertion(latencyTime(), isLessThan(1, seconds))

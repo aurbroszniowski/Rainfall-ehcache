@@ -10,6 +10,7 @@ import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.StringGenerator;
 import io.rainfall.generator.sequence.Distribution;
+import io.rainfall.statistics.StatisticsPeekHolder;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.config.CacheConfiguration;
@@ -77,7 +78,7 @@ public class PerfTest2 {
 
       System.out.println("----------> Test phase");
 
-      Runner.setUp(
+      StatisticsPeekHolder finalStats = Runner.setUp(
           Scenario.scenario("Test phase").exec(put().withWeight(0.90)).exec(get().withWeight(0.10)))
           .executed(during(5, minutes))
           .config(concurrency, reportingConfig(EhcacheResult.class, text(), html()))

@@ -10,6 +10,7 @@ import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.StringGenerator;
 import io.rainfall.generator.sequence.Distribution;
+import io.rainfall.statistics.StatisticsPeekHolder;
 import io.rainfall.utils.SystemTest;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
@@ -80,7 +81,7 @@ public class Ehcache2Test {
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(put());
 
-    Runner.setUp(scenario)
+    StatisticsPeekHolder finalStats = Runner.setUp(scenario)
         .executed(times(1000))
         .config(cacheConfig, concurrency, reporting)
         .start();
@@ -106,7 +107,7 @@ public class Ehcache2Test {
         .exec(get().withWeight(0.80))
         .exec(remove().withWeight(0.10));
 
-    Runner.setUp(scenario)
+    StatisticsPeekHolder finalStats = Runner.setUp(scenario)
         .executed(during(20, seconds))
         .config(cacheConfig, concurrency, reporting)
         .start();
