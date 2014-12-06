@@ -34,6 +34,7 @@ import static org.ehcache.CacheManagerBuilder.newCacheManagerBuilder;
 public class PerfTest3 {
 
   @Test
+  @Ignore
   public void testLoad() throws SyntaxException {
     CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
     builder.maxEntriesInCache(250000L);
@@ -73,7 +74,7 @@ public class PerfTest3 {
 
     StatisticsPeekHolder finalStats = Runner.setUp(
         Scenario.scenario("Test phase").exec(put().withWeight(0.10), get().withWeight(0.90)))
-        .executed(during(2, minutes))
+        .executed(during(10, minutes))
         .config(concurrency, reportingConfig(EhcacheResult.class, text(), html()))
         .config(CacheConfig.<String, byte[]>cacheConfig()
             .caches(one, two, three, four)
