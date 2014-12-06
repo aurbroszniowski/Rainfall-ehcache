@@ -29,7 +29,6 @@ import static io.rainfall.ehcache2.Ehcache2Operations.put;
 import static io.rainfall.ehcache2.Ehcache2Operations.remove;
 import static io.rainfall.execution.Executions.during;
 import static io.rainfall.execution.Executions.times;
-import static io.rainfall.unit.TimeDivision.minutes;
 import static io.rainfall.unit.TimeDivision.seconds;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
@@ -69,6 +68,21 @@ public class Ehcache2Test {
   }
 
   @Test
+  public void testMultipleExec() {
+    CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
+        .caches(cache1, cache2, cache3)
+        .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
+        .sequentially();
+    ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
+        .threads(4).timeout(5, MINUTES);
+    ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
+
+    Scenario scenario = Scenario.scenario("Cache load")
+        .exec(put(), get(), remove());
+
+  }
+
+  @Test
   public void testLoad() throws SyntaxException {
     CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
         .caches(cache1, cache2, cache3)
@@ -103,9 +117,7 @@ public class Ehcache2Test {
     ReportingConfig<EhcacheResult> reporting = reportingConfig(EhcacheResult.class, text(), html());
 
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(put().withWeight(0.10))
-        .exec(get().withWeight(0.80))
-        .exec(remove().withWeight(0.10));
+        .exec(put().withWeight(0.10), get().withWeight(0.80), remove().withWeight(0.10));
 
     StatisticsPeekHolder finalStats = Runner.setUp(scenario)
         .executed(during(20, seconds))
@@ -125,9 +137,7 @@ public class Ehcache2Test {
     ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
 
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(put().withWeight(0.10))
-        .exec(get().withWeight(0.80))
-        .exec(remove().withWeight(0.10));
+        .exec(put().withWeight(0.10), get().withWeight(0.80), remove().withWeight(0.10));
 
     Runner.setUp(scenario)
         .executed(during(10, seconds))
@@ -147,9 +157,7 @@ public class Ehcache2Test {
     ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
 
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(put().withWeight(0.10))
-        .exec(get().withWeight(0.80))
-        .exec(remove().withWeight(0.10));
+        .exec(put().withWeight(0.10), get().withWeight(0.80), remove().withWeight(0.10));
 
     Runner.setUp(scenario)
         .executed(during(10, seconds))

@@ -66,9 +66,7 @@ public class Ehcache3Test {
     ReportingConfig reporting = ReportingConfig.reportingConfig(EhcacheResult.class, ReportingConfig.text());
 
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(put().withWeight(0.10))
-        .exec(get().withWeight(0.80))
-        .exec(remove().withWeight(0.10));
+        .exec(put().withWeight(0.10), get().withWeight(0.80), remove().withWeight(0.10));
 
     StatisticsPeekHolder finalStats = Runner.setUp(scenario)
         .executed(times(1000), nothingFor(10, seconds))

@@ -79,7 +79,7 @@ public class PerfTest2 {
       System.out.println("----------> Test phase");
 
       StatisticsPeekHolder finalStats = Runner.setUp(
-          Scenario.scenario("Test phase").exec(put().withWeight(0.90)).exec(get().withWeight(0.10)))
+          Scenario.scenario("Test phase").exec(put().withWeight(0.90), get().withWeight(0.10)))
           .executed(during(5, minutes))
           .config(concurrency, reportingConfig(EhcacheResult.class, text(), html()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
