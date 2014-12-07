@@ -22,18 +22,15 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
 /**
  * @author Aurelien Broszniowski
  */
-public class PutOperation<K, V> extends Operation {
+public class PutOperation<K, V> extends EhcacheOperation {
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
     CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
-    SequenceGenerator sequenceGenerator = cacheConfig.getSequenceGenerator();
-    final long next = sequenceGenerator.next();
+    final long next = this.sequenceGenerator.next();
     List<Ehcache> caches = cacheConfig.getCaches();
-    final ObjectGenerator<K> keyGenerator = cacheConfig.getKeyGenerator();
-    final ObjectGenerator<V> valueGenerator = cacheConfig.getValueGenerator();
     for (final Ehcache cache : caches) {
       statisticsHolder
           .measure(cache.getName(), new Task() {

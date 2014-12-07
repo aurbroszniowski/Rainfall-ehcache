@@ -16,9 +16,9 @@
 
 package io.rainfall.ehcache2;
 
+import io.rainfall.ehcache2.operation.GetOperation;
 import io.rainfall.ehcache2.operation.PutOperation;
 import io.rainfall.ehcache2.operation.RemoveOperation;
-import io.rainfall.ehcache2.operation.GetOperation;
 
 /**
  * Contains the helper methods to instantiate the Ehcache {@link io.rainfall.Operation} objects.
@@ -27,16 +27,16 @@ import io.rainfall.ehcache2.operation.GetOperation;
  */
 public class Ehcache2Operations {
 
-  public static PutOperation put() {
-    return new PutOperation();
+  public static <K, V> PutOperation<K, V> put() {
+    return new PutOperation<K, V>();
   }
 
-  public static GetOperation get() {
-    return new GetOperation();
+  public static <K, V> GetOperation<K, V> get() {
+    return new GetOperation<K, V>();
   }
 
-  public static RemoveOperation remove() {
-    return new RemoveOperation();
+  public static <K, V> RemoveOperation<K, V> remove() {
+    return new RemoveOperation<K, V>();
   }
 
 }

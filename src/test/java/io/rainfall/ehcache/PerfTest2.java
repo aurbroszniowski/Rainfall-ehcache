@@ -61,13 +61,14 @@ public class PerfTest2 {
 
       System.out.println("----------> Warm up phase");
       Runner.setUp(
-          Scenario.scenario("Warm up phase").exec(put()))
+          Scenario.scenario("Warm up phase")
+              .exec(
+                  put().using(keyGenerator, valueGenerator).sequentially()
+              ))
           .executed(times(nbElements))
           .config(concurrency, reportingConfig(EhcacheResult.class, text()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
                   .caches(one, two, three, four)
-                  .using(keyGenerator, valueGenerator)
-                  .sequentially()
           )
           .start();
 
@@ -79,13 +80,19 @@ public class PerfTest2 {
       System.out.println("----------> Test phase");
 
       StatisticsPeekHolder finalStats = Runner.setUp(
-          Scenario.scenario("Test phase").exec(put().withWeight(0.90), get().withWeight(0.10)))
+          Scenario.scenario("Test phase").exec(
+              put().withWeight(0.90)
+                  .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
+                  .using(keyGenerator, valueGenerator),
+              get().withWeight(0.10)
+                  .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
+                  .using(keyGenerator, valueGenerator)
+              ))
           .executed(during(5, minutes))
           .config(concurrency, reportingConfig(EhcacheResult.class, text(), html()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
-              .caches(one, two, three, four)
-              .using(keyGenerator, valueGenerator)
-              .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000))
+                  .caches(one, two, three, four)
+          )
           .start();
 
       System.out.println("----------> Done");

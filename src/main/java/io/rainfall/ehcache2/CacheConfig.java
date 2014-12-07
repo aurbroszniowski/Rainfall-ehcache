@@ -17,11 +17,6 @@
 package io.rainfall.ehcache2;
 
 import io.rainfall.Configuration;
-import io.rainfall.ObjectGenerator;
-import io.rainfall.SequenceGenerator;
-import io.rainfall.generator.IterationSequenceGenerator;
-import io.rainfall.generator.RandomSequenceGenerator;
-import io.rainfall.generator.sequence.Distribution;
 import io.rainfall.utils.ConcurrentPseudoRandom;
 import net.sf.ehcache.Ehcache;
 
@@ -37,9 +32,6 @@ import java.util.List;
 public class CacheConfig<K, V> extends Configuration {
 
   private List<Ehcache> caches = new ArrayList<Ehcache>();
-  private ObjectGenerator<K> keyGenerator = null;
-  private ObjectGenerator<V> valueGenerator = null;
-  private SequenceGenerator sequenceGenerator = null;
   private ConcurrentPseudoRandom randomizer = new ConcurrentPseudoRandom();
 
   public static <K, V> CacheConfig<K, V> cacheConfig() {
@@ -51,50 +43,8 @@ public class CacheConfig<K, V> extends Configuration {
     return this;
   }
 
-  public CacheConfig<K, V> using(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator) {
-    if (this.keyGenerator != null) {
-      throw new IllegalStateException("KeyGenerator already chosen.");
-    }
-    this.keyGenerator = keyGenerator;
-
-    if (this.valueGenerator != null) {
-      throw new IllegalStateException("ValueGenerator already chosen.");
-    }
-    this.valueGenerator = valueGenerator;
-    return this;
-  }
-
-  public CacheConfig<K, V> sequentially() {
-    if (this.sequenceGenerator != null) {
-      throw new IllegalStateException("SequenceGenerator already chosen.");
-    }
-    this.sequenceGenerator = new IterationSequenceGenerator();
-    return this;
-  }
-
-  public CacheConfig<K, V> atRandom(Distribution distribution, long min, long max, long width) {
-    if (sequenceGenerator == null) {
-      this.sequenceGenerator = new RandomSequenceGenerator(distribution, min, max, width);
-    } else {
-      throw new IllegalStateException("SequenceGenerator already chosen");
-    }
-    return this;
-  }
-
   public List<Ehcache> getCaches() {
     return caches;
-  }
-
-  public ObjectGenerator<K> getKeyGenerator() {
-    return keyGenerator;
-  }
-
-  public ObjectGenerator<V> getValueGenerator() {
-    return valueGenerator;
-  }
-
-  public SequenceGenerator getSequenceGenerator() {
-    return sequenceGenerator;
   }
 
   public ConcurrentPseudoRandom getRandomizer() {

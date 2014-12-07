@@ -1,5 +1,6 @@
 package io.rainfall.ehcache;
 
+import io.rainfall.ObjectGenerator;
 import io.rainfall.Runner;
 import io.rainfall.Scenario;
 import io.rainfall.SyntaxException;
@@ -9,7 +10,6 @@ import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.StringGenerator;
-import io.rainfall.generator.sequence.Distribution;
 import io.rainfall.statistics.StatisticsPeekHolder;
 import io.rainfall.utils.SystemTest;
 import net.sf.ehcache.CacheManager;
@@ -29,6 +29,7 @@ import static io.rainfall.ehcache2.Ehcache2Operations.put;
 import static io.rainfall.ehcache2.Ehcache2Operations.remove;
 import static io.rainfall.execution.Executions.during;
 import static io.rainfall.execution.Executions.times;
+import static io.rainfall.generator.sequence.Distribution.GAUSSIAN;
 import static io.rainfall.unit.TimeDivision.seconds;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
@@ -70,30 +71,31 @@ public class Ehcache2Test {
   @Test
   public void testMultipleExec() {
     CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
-        .caches(cache1, cache2, cache3)
-        .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
-        .sequentially();
+        .caches(cache1, cache2, cache3);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
 
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(put(), get(), remove());
+        .exec(
+            put().using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128)).sequentially(),
+            get().using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128)).sequentially(),
+            remove().using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128)).sequentially());
 
   }
 
   @Test
   public void testLoad() throws SyntaxException {
     CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
-        .caches(cache1, cache2, cache3)
-        .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
-        .sequentially();
+        .caches(cache1, cache2, cache3);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
 
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(put());
+        .exec(
+            put().using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128)).sequentially()
+        );
 
     StatisticsPeekHolder finalStats = Runner.setUp(scenario)
         .executed(times(1000))
@@ -108,16 +110,20 @@ public class Ehcache2Test {
   @Test
   public void testLength() throws SyntaxException {
     CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
-        .caches(cache1, cache2, cache3)
-        .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
-        .sequentially();
+        .caches(cache1, cache2, cache3);
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig<EhcacheResult> reporting = reportingConfig(EhcacheResult.class, text(), html());
 
+    ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
+    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(put().withWeight(0.10), get().withWeight(0.80), remove().withWeight(0.10));
+        .exec(
+            put().withWeight(0.10).using(keyGenerator, valueGenerator).sequentially(),
+            get().withWeight(0.80).using(keyGenerator, valueGenerator).sequentially(),
+            remove().withWeight(0.10).using(keyGenerator, valueGenerator).sequentially()
+        );
 
     StatisticsPeekHolder finalStats = Runner.setUp(scenario)
         .executed(during(20, seconds))
@@ -128,16 +134,20 @@ public class Ehcache2Test {
   @Test
   public void testRandomAccess() throws SyntaxException {
     CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
-        .caches(cache1, cache2, cache3)
-        .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
-        .atRandom(Distribution.GAUSSIAN, 0, 10000, 1000);
+        .caches(cache1, cache2, cache3);
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
 
+    ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
+    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(put().withWeight(0.10), get().withWeight(0.80), remove().withWeight(0.10));
+        .exec(
+            put().withWeight(0.10).using(keyGenerator, valueGenerator).atRandom(GAUSSIAN, 0, 10000, 1000),
+            get().withWeight(0.80).using(keyGenerator, valueGenerator).atRandom(GAUSSIAN, 0, 10000, 1000),
+            remove().withWeight(0.10).using(keyGenerator, valueGenerator).atRandom(GAUSSIAN, 0, 10000, 1000)
+        );
 
     Runner.setUp(scenario)
         .executed(during(10, seconds))
@@ -148,21 +158,24 @@ public class Ehcache2Test {
   @Test
   public void testRemove() throws SyntaxException {
     CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
-        .caches(cache1, cache2, cache3)
-        .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
-        .sequentially();
+        .caches(cache1, cache2, cache3);
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
 
+    ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
+    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(put().withWeight(0.10), get().withWeight(0.80), remove().withWeight(0.10));
+        .exec(
+            put().withWeight(0.10).using(keyGenerator, valueGenerator).sequentially(),
+            get().withWeight(0.80).using(keyGenerator, valueGenerator).sequentially(),
+            remove().withWeight(0.10).using(keyGenerator, valueGenerator).sequentially()
+        );
 
     Runner.setUp(scenario)
         .executed(during(10, seconds))
         .config(cacheConfig, concurrency, reporting)
         .start();
   }
-
 }
