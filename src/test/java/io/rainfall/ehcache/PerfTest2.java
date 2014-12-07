@@ -18,6 +18,7 @@ import net.sf.ehcache.config.Configuration;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static io.rainfall.configuration.ReportType.BOTH;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.reportingConfig;
 import static io.rainfall.configuration.ReportingConfig.text;
@@ -66,7 +67,7 @@ public class PerfTest2 {
                   put().using(keyGenerator, valueGenerator).sequentially()
               ))
           .executed(times(nbElements))
-          .config(concurrency, reportingConfig(EhcacheResult.class, text()))
+          .config(concurrency, reportingConfig(EhcacheResult.class, BOTH, text()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
                   .caches(one, two, three, four)
           )
@@ -87,9 +88,9 @@ public class PerfTest2 {
               get().withWeight(0.10)
                   .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
                   .using(keyGenerator, valueGenerator)
-              ))
+          ))
           .executed(during(5, minutes))
-          .config(concurrency, reportingConfig(EhcacheResult.class, text(), html()))
+          .config(concurrency, reportingConfig(EhcacheResult.class, BOTH, text(), html()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
                   .caches(one, two, three, four)
           )

@@ -5,6 +5,7 @@ import io.rainfall.Runner;
 import io.rainfall.Scenario;
 import io.rainfall.SyntaxException;
 import io.rainfall.configuration.ConcurrencyConfig;
+import io.rainfall.configuration.ReportType;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.generator.ByteArrayGenerator;
@@ -17,6 +18,7 @@ import org.ehcache.config.CacheConfigurationBuilder;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static io.rainfall.configuration.ReportType.BOTH;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.reportingConfig;
 import static io.rainfall.configuration.ReportingConfig.text;
