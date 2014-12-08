@@ -43,14 +43,24 @@ Use it in your project
     <dependency>
       <groupId>io.rainfall</groupId>
       <artifactId>rainfall-ehcache</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>io.rainfall</groupId>
       <artifactId>rainfall-core</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
 ```
+
+
+Thanks to the following companies for their support to FOSS:
+------------------------------------------------------------
+
+[ej-technologies for JProfiler](http://www.ej-technologies.com/products/jprofiler/overview.html)
+[Sonatype for Nexus](http://www.sonatype.org/)
+[Cloudbees for cloud-based continuous delivery](https://www.cloudbees.com/)
+and of course [Github](https://github.com/) for hosting this project.
+
 
