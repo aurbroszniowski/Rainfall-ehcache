@@ -16,8 +16,8 @@
 
 package io.rainfall.ehcache3;
 
-import io.rainfall.ehcache3.operation.PutOperation;
 import io.rainfall.ehcache3.operation.GetOperation;
+import io.rainfall.ehcache3.operation.PutOperation;
 import io.rainfall.ehcache3.operation.RemoveOperation;
 
 /**
@@ -27,16 +27,16 @@ import io.rainfall.ehcache3.operation.RemoveOperation;
  */
 public class Ehcache3Operations {
 
-  public static PutOperation put() {
-    return new PutOperation();
+  public static <K, V> PutOperation<K, V> put() {
+    return new PutOperation<K, V>();
   }
 
-  public static GetOperation get() {
-    return new GetOperation();
+  public static <K, V> GetOperation<K, V> get() {
+    return new GetOperation<K, V>();
   }
 
-  public static RemoveOperation remove() {
-    return new RemoveOperation();
+  public static <K, V> RemoveOperation<K, V> remove() {
+    return new RemoveOperation<K, V>();
   }
 
 }

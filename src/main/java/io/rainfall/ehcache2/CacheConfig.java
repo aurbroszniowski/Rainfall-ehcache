@@ -17,7 +17,6 @@
 package io.rainfall.ehcache2;
 
 import io.rainfall.Configuration;
-import io.rainfall.utils.ConcurrentPseudoRandom;
 import net.sf.ehcache.Ehcache;
 
 import java.util.ArrayList;
@@ -32,7 +31,6 @@ import java.util.List;
 public class CacheConfig<K, V> extends Configuration {
 
   private List<Ehcache> caches = new ArrayList<Ehcache>();
-  private ConcurrentPseudoRandom randomizer = new ConcurrentPseudoRandom();
 
   public static <K, V> CacheConfig<K, V> cacheConfig() {
     return new CacheConfig<K, V>();
@@ -47,7 +45,4 @@ public class CacheConfig<K, V> extends Configuration {
     return caches;
   }
 
-  public ConcurrentPseudoRandom getRandomizer() {
-    return randomizer;
-  }
 }

@@ -1,5 +1,22 @@
+/*
+ * Copyright 2014 Aurélien Broszniowski
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.rainfall.ehcache;
 
+import io.rainfall.ObjectGenerator;
 import io.rainfall.Runner;
 import io.rainfall.Scenario;
 import io.rainfall.SyntaxException;
@@ -7,6 +24,7 @@ import io.rainfall.configuration.ConcurrencyConfig;
 import io.rainfall.configuration.ReportingConfig;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
+import io.rainfall.ehcache3.Ehcache3Operations;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.StringGenerator;
 import io.rainfall.statistics.StatisticsPeekHolder;
@@ -57,16 +75,22 @@ public class Ehcache3Test {
 
   @Test
   public void test3() throws SyntaxException {
-    CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
-        .caches(cache)
-        .using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128))
-        .sequentially();
+    CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig().caches(cache);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig reporting = ReportingConfig.reportingConfig(EhcacheResult.class, ReportingConfig.text());
 
+    ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
+    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
     Scenario scenario = Scenario.scenario("Cache load")
-        .exec(put().withWeight(0.10), get().withWeight(0.80), remove().withWeight(0.10));
+        .exec(
+            Ehcache3Operations.<String, byte[]>put()
+                .withWeight(0.10)
+                .using(keyGenerator, valueGenerator)
+                .sequentially(),
+            Ehcache3Operations.<String, byte[]>get().withWeight(0.80).using(keyGenerator, valueGenerator).sequentially(),
+            Ehcache3Operations.<String, byte[]>remove().withWeight(0.10).using(keyGenerator, valueGenerator).sequentially()
+        );
 
     StatisticsPeekHolder finalStats = Runner.setUp(scenario)
         .executed(times(1000), nothingFor(10, seconds))
