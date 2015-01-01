@@ -32,7 +32,7 @@ public class CacheConfig<K, V> extends Configuration {
 
   private List<Cache<K, V>> caches = new ArrayList<Cache<K, V>>();
 
-  public static <K, V> CacheConfig<K, V> cacheConfig() {
+  public static <K, V> CacheConfig<K, V> cacheConfig(Class<K> keyClass, final Class<V> valueClass) {
     return new CacheConfig<K, V>();
   }
 

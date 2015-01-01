@@ -24,7 +24,6 @@ import io.rainfall.configuration.ConcurrencyConfig;
 import io.rainfall.configuration.ReportingConfig;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
-import io.rainfall.ehcache3.Ehcache3Operations;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.StringGenerator;
 import io.rainfall.statistics.StatisticsPeekHolder;
@@ -35,7 +34,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.rainfall.ehcache3.CacheConfig.cacheConfig;
 import static io.rainfall.ehcache3.Ehcache3Operations.get;
+
 import static io.rainfall.ehcache3.Ehcache3Operations.put;
 import static io.rainfall.ehcache3.Ehcache3Operations.remove;
 import static io.rainfall.execution.Executions.nothingFor;
@@ -75,7 +76,7 @@ public class Ehcache3Test {
 
   @Test
   public void test3() throws SyntaxException {
-    CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig().caches(cache);
+    CacheConfig<String, byte[]> cacheConfig = cacheConfig(String.class, byte[].class).caches(cache);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig reporting = ReportingConfig.reportingConfig(EhcacheResult.class, ReportingConfig.text());
@@ -84,12 +85,18 @@ public class Ehcache3Test {
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(
-            Ehcache3Operations.<String, byte[]>put()
+            put(String.class, byte[].class)
                 .withWeight(0.10)
                 .using(keyGenerator, valueGenerator)
                 .sequentially(),
-            Ehcache3Operations.<String, byte[]>get().withWeight(0.80).using(keyGenerator, valueGenerator).sequentially(),
-            Ehcache3Operations.<String, byte[]>remove().withWeight(0.10).using(keyGenerator, valueGenerator).sequentially()
+            get(String.class, byte[].class)
+                .withWeight(0.80)
+                .using(keyGenerator, valueGenerator)
+                .sequentially(),
+            remove(String.class, byte[].class)
+                .withWeight(0.10)
+                .using(keyGenerator, valueGenerator)
+                .sequentially()
         );
 
     StatisticsPeekHolder finalStats = Runner.setUp(scenario)
