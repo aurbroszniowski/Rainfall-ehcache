@@ -20,23 +20,21 @@ import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
 import io.rainfall.EhcacheOperation;
 import io.rainfall.TestException;
-import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
-import io.rainfall.statistics.Task;
 import net.sf.ehcache.Ehcache;
 
 import java.util.List;
 import java.util.Map;
 
-import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
-import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVE;
-
 /**
+ * Execute and measure a Ehcache remove operation
+ *
  * @author Aurelien Broszniowski
  */
 public class RemoveOperation<K, V> extends EhcacheOperation {
+
+  private RemoveOperationFunction<K> function = new RemoveOperationFunction<K>();
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
@@ -46,24 +44,7 @@ public class RemoveOperation<K, V> extends EhcacheOperation {
     final long next = this.sequenceGenerator.next();
     List<Ehcache> caches = cacheConfig.getCaches();
     for (final Ehcache cache : caches) {
-      statisticsHolder
-          .measure(cache.getName(), new Task() {
-
-            @Override
-            public EhcacheResult definition() throws Exception {
-              boolean removed;
-              try {
-                removed = cache.remove(keyGenerator.generate(next));
-              } catch (Exception e) {
-                return EXCEPTION;
-              }
-              if (removed) {
-                return REMOVE;
-              } else {
-                return MISS;
-              }
-            }
-          });
+      statisticsHolder.measure(cache.getName(), function.execute(cache, next, keyGenerator));
     }
   }
 }

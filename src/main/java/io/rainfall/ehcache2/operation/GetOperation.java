@@ -20,24 +20,21 @@ import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
 import io.rainfall.EhcacheOperation;
 import io.rainfall.TestException;
-import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
-import io.rainfall.statistics.Task;
 import net.sf.ehcache.Ehcache;
-import net.sf.ehcache.Element;
 
 import java.util.List;
 import java.util.Map;
 
-import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.GET;
-import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
-
 /**
+ * Execute and measure a Ehcache get operation
+ *
  * @author Aurelien Broszniowski
  */
 public class GetOperation<K, V> extends EhcacheOperation {
+
+  private GetOperationFunction<K> function = new GetOperationFunction<K>();
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
@@ -47,24 +44,9 @@ public class GetOperation<K, V> extends EhcacheOperation {
     final long next = this.sequenceGenerator.next();
     List<Ehcache> caches = cacheConfig.getCaches();
     for (final Ehcache cache : caches) {
-      statisticsHolder
-          .measure(cache.getName(), new Task() {
-
-            @Override
-            public EhcacheResult definition() throws Exception {
-              Element value;
-              try {
-                value = cache.get(keyGenerator.generate(next));
-              } catch (Exception e) {
-                return EXCEPTION;
-              }
-              if (value == null) {
-                return MISS;
-              } else {
-                return GET;
-              }
-            }
-          });
+      statisticsHolder.measure(cache.getName(), function.execute(cache, next, keyGenerator));
     }
   }
+
+
 }
