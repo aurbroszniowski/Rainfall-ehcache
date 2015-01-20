@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 /**
  * @author Aurelien Broszniowski
  */
@@ -44,5 +43,4 @@ public class CacheConfig<K, V> extends Configuration {
   public List<Cache<K, V>> getCaches() {
     return caches;
   }
-
 }

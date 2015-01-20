@@ -86,6 +86,17 @@ public class PerfTest3 {
         )
         .start();
 
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
+    System.out.println(one.getStatistics().getCachePuts());
+    System.out.println(two.getStatistics().getCachePuts());
+    System.out.println(three.getStatistics().getCachePuts());
+    System.out.println(four.getStatistics().getCachePuts());
+
     System.out.println("----------> Test phase");
 
     StatisticsPeekHolder finalStats = Runner.setUp(

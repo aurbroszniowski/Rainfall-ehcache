@@ -7,6 +7,7 @@ import io.rainfall.SyntaxException;
 import io.rainfall.configuration.ConcurrencyConfig;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache2.CacheConfig;
+import io.rainfall.ehcache2.execution.UntilCacheFull;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.StringGenerator;
 import io.rainfall.generator.sequence.Distribution;
@@ -25,7 +26,6 @@ import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache2.Ehcache2Operations.get;
 import static io.rainfall.ehcache2.Ehcache2Operations.put;
 import static io.rainfall.execution.Executions.during;
-import static io.rainfall.execution.Executions.times;
 import static io.rainfall.unit.TimeDivision.minutes;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
@@ -41,7 +41,7 @@ public class PerfTest2 {
     CacheManager cacheManager = null;
     try {
       Configuration configuration = new Configuration().name("EhcacheTest")
-          .defaultCache(new CacheConfiguration("default", 0))
+          .defaultCache(new CacheConfiguration("default", 0).eternal(true))
           .cache(new CacheConfiguration("one", 250000))
           .cache(new CacheConfiguration("two", 250000))
           .cache(new CacheConfiguration("three", 250000))
@@ -61,17 +61,24 @@ public class PerfTest2 {
       ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000);
 
       System.out.println("----------> Warm up phase");
+
       Runner.setUp(
           Scenario.scenario("Warm up phase")
               .exec(
                   put().using(keyGenerator, valueGenerator).sequentially()
               ))
-          .executed(times(nbElements))
+          .executed(new UntilCacheFull())
           .config(concurrency, reportingConfig(EhcacheResult.class, BOTH, text()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
                   .caches(one, two, three, four)
           )
           .start();
+
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
 
       System.out.println(one.getStatistics().getLocalHeapSize());
       System.out.println(two.getStatistics().getLocalHeapSize());
