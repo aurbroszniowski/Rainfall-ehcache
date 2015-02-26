@@ -82,7 +82,7 @@ public class PerfTest3 {
         .executed(times(nbElements))
         .config(concurrency, reportingConfig(EhcacheResult.class, text()))
         .config(cacheConfig(String.class, byte[].class)
-                .caches(one, two, three, four)
+                .cache(one).and(two).and(three).and(four)
         )
         .start();
 
@@ -111,7 +111,7 @@ public class PerfTest3 {
         .executed(during(10, minutes))
         .config(concurrency, reportingConfig(EhcacheResult.class, text(), html()))
         .config(cacheConfig(String.class, byte[].class)
-            .caches(one, two, three, four))
+            .cache(one).and(two).and(three).and(four))
         .start();
 
     System.out.println("----------> Done");

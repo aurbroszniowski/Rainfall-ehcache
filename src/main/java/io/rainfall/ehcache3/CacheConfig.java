@@ -20,7 +20,6 @@ import io.rainfall.Configuration;
 import org.ehcache.Cache;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,12 +34,24 @@ public class CacheConfig<K, V> extends Configuration {
     return new CacheConfig<K, V>();
   }
 
-  public CacheConfig<K, V> caches(final Cache<K, V>... caches) {
-    Collections.addAll(this.caches, caches);
+  public List<Cache<K, V>> getCaches() {
+    return caches;
+  }
+
+  /**
+   * This builder pattern has been implemented in order to avoid the warning of using generics with varargs
+   *
+   * @param cache
+   * @return this config
+   */
+
+  public CacheConfig<K, V> cache(final Cache<K, V> cache) {
+    caches.add(cache);
     return this;
   }
 
-  public List<Cache<K, V>> getCaches() {
-    return caches;
+  public CacheConfig<K, V> and(final Cache<K, V> cache) {
+    caches.add(cache);
+    return this;
   }
 }

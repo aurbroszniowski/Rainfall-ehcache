@@ -76,7 +76,7 @@ public class Ehcache3Test {
 
   @Test
   public void test3() throws SyntaxException {
-    CacheConfig<String, byte[]> cacheConfig = cacheConfig(String.class, byte[].class).caches(cache);
+    CacheConfig<String, byte[]> cacheConfig = cacheConfig(String.class, byte[].class).cache(cache);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig reporting = ReportingConfig.reportingConfig(EhcacheResult.class, ReportingConfig.text());
