@@ -31,6 +31,8 @@ import org.ehcache.config.CacheConfigurationBuilder;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.reportingConfig;
 import static io.rainfall.configuration.ReportingConfig.text;
@@ -82,7 +84,7 @@ public class PerfTest3 {
         .executed(times(nbElements))
         .config(concurrency, reportingConfig(EhcacheResult.class, text()))
         .config(cacheConfig(String.class, byte[].class)
-                .cache(one).and(two).and(three).and(four)
+                .caches(one, two, three, four)
         )
         .start();
 
@@ -111,7 +113,7 @@ public class PerfTest3 {
         .executed(during(10, minutes))
         .config(concurrency, reportingConfig(EhcacheResult.class, text(), html()))
         .config(cacheConfig(String.class, byte[].class)
-            .cache(one).and(two).and(three).and(four))
+            .caches(one, two, three, four))
         .start();
 
     System.out.println("----------> Done");
