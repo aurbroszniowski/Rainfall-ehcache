@@ -22,7 +22,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import static io.rainfall.configuration.ReportingConfig.html;
-import static io.rainfall.configuration.ReportingConfig.reportingConfig;
 import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache2.Ehcache2Operations.get;
 import static io.rainfall.ehcache2.Ehcache2Operations.put;
@@ -74,7 +73,7 @@ public class Ehcache2Test {
         .caches(cache1, cache2, cache3);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
-    ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
+    ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text(), html()).summary(text());
 
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(
@@ -90,7 +89,7 @@ public class Ehcache2Test {
         .caches(cache1, cache2, cache3);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
-    ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
+    ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text(), html());
 
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(
@@ -114,7 +113,7 @@ public class Ehcache2Test {
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
-    ReportingConfig<EhcacheResult> reporting = reportingConfig(EhcacheResult.class, text(), html());
+    ReportingConfig<EhcacheResult> reporting = ReportingConfig.report(EhcacheResult.class).log(text(), html());
 
     ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
@@ -138,7 +137,7 @@ public class Ehcache2Test {
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
-    ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
+    ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text(), html()).summary(text());
 
     ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
@@ -162,7 +161,7 @@ public class Ehcache2Test {
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
-    ReportingConfig reporting = reportingConfig(EhcacheResult.class, text(), html());
+    ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text(), html());
 
     ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);

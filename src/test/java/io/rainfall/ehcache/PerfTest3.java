@@ -21,6 +21,7 @@ import io.rainfall.Runner;
 import io.rainfall.Scenario;
 import io.rainfall.SyntaxException;
 import io.rainfall.configuration.ConcurrencyConfig;
+import io.rainfall.configuration.ReportingConfig;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.StringGenerator;
@@ -31,10 +32,7 @@ import org.ehcache.config.CacheConfigurationBuilder;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static io.rainfall.configuration.ReportingConfig.html;
-import static io.rainfall.configuration.ReportingConfig.reportingConfig;
 import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache3.CacheConfig.cacheConfig;
 import static io.rainfall.ehcache3.Ehcache3Operations.get;
@@ -82,7 +80,7 @@ public class PerfTest3 {
             put(String.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
         ))
         .executed(times(nbElements))
-        .config(concurrency, reportingConfig(EhcacheResult.class, text()))
+        .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text()))
         .config(cacheConfig(String.class, byte[].class)
                 .caches(one, two, three, four)
         )
@@ -111,7 +109,7 @@ public class PerfTest3 {
                 .atRandom(GAUSSIAN, 0, nbElements, 10000)
         ))
         .executed(during(10, minutes))
-        .config(concurrency, reportingConfig(EhcacheResult.class, text(), html()))
+        .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()).summary(text()))
         .config(cacheConfig(String.class, byte[].class)
             .caches(one, two, three, four))
         .start();

@@ -34,6 +34,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache3.CacheConfig.cacheConfig;
 import static io.rainfall.ehcache3.Ehcache3Operations.get;
 
@@ -79,7 +80,7 @@ public class Ehcache3Test {
     CacheConfig<String, byte[]> cacheConfig = cacheConfig(String.class, byte[].class).caches(cache);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
-    ReportingConfig reporting = ReportingConfig.reportingConfig(EhcacheResult.class, ReportingConfig.text());
+    ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text()).summary(text());
 
     ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
