@@ -108,7 +108,7 @@ public class PerfTest3 {
                 .using(keyGenerator, valueGenerator)
                 .atRandom(GAUSSIAN, 0, nbElements, 10000)
         ))
-        .executed(during(10, minutes))
+        .executed(during(1, minutes))
         .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()).summary(text()))
         .config(cacheConfig(String.class, byte[].class)
             .caches(one, two, three, four))
