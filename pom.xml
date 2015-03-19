@@ -4,16 +4,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>io.rainfall</groupId>
-    <artifactId>rainfall</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
-  </parent>
-
+  <groupId>io.rainfall</groupId>
+  <artifactId>rainfall-ehcache</artifactId>
   <name>Rainfall-ehcache</name>
   <version>1.0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <artifactId>rainfall-ehcache</artifactId>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -141,7 +136,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>3.2</version>
         <configuration>
           <showDeprecation>true</showDeprecation>
           <source>1.6</source>
