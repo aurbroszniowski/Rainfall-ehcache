@@ -16,6 +16,7 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.config.CacheConfiguration;
 import net.sf.ehcache.config.Configuration;
+import net.sf.ehcache.config.MemoryUnit;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -42,7 +43,9 @@ public class PerfTest2 {
     try {
       Configuration configuration = new Configuration().name("EhcacheTest")
           .defaultCache(new CacheConfiguration("default", 0).eternal(true))
-          .cache(new CacheConfiguration("one", 250000))
+          .cache(new CacheConfiguration().name("one")
+              .maxBytesLocalHeap(100, MemoryUnit.MEGABYTES)
+              .maxBytesLocalOffHeap(200, MemoryUnit.MEGABYTES))
           .cache(new CacheConfiguration("two", 250000))
           .cache(new CacheConfiguration("three", 250000))
           .cache(new CacheConfiguration("four", 250000));
