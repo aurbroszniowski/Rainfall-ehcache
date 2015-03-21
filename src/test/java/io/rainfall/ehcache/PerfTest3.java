@@ -34,9 +34,13 @@ import org.junit.Test;
 
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.text;
+import static io.rainfall.ehcache.statistics.EhcacheResult.*;
+import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
+import static io.rainfall.ehcache.statistics.EhcacheResult.PUTALL;
 import static io.rainfall.ehcache3.CacheConfig.cacheConfig;
 import static io.rainfall.ehcache3.Ehcache3Operations.get;
 import static io.rainfall.ehcache3.Ehcache3Operations.put;
+import static io.rainfall.ehcache3.Ehcache3Operations.putAll;
 import static io.rainfall.execution.Executions.during;
 import static io.rainfall.execution.Executions.times;
 import static io.rainfall.generator.sequence.Distribution.GAUSSIAN;
@@ -74,17 +78,20 @@ public class PerfTest3 {
     ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000);
 
+    EhcacheResult[] resultsReported = new EhcacheResult[] {    PUT, PUTALL, MISS };
+
     System.out.println("----------> Warm up phase");
     Runner.setUp(
         Scenario.scenario("Warm up phase").exec(
             put(String.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
         ))
         .executed(times(nbElements))
-        .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text()))
+        .config(concurrency, ReportingConfig.report(EhcacheResult.class, resultsReported).log(text()))
         .config(cacheConfig(String.class, byte[].class)
-                .caches(one, two, three, four)
+                .caches(one, two, three, four).bulkBatchSize(5)
         )
-        .start();
+//        .start()
+        ;
 
     try {
       Thread.sleep(1000);
@@ -104,14 +111,17 @@ public class PerfTest3 {
             put(String.class, byte[].class).withWeight(0.10)
                 .using(keyGenerator, valueGenerator)
                 .atRandom(GAUSSIAN, 0, nbElements, 10000),
-            get(String.class, byte[].class).withWeight(0.90)
+            get(String.class, byte[].class).withWeight(0.80)
+                .using(keyGenerator, valueGenerator)
+                .atRandom(GAUSSIAN, 0, nbElements, 10000),
+            putAll(String.class, byte[].class).withWeight(0.10)
                 .using(keyGenerator, valueGenerator)
                 .atRandom(GAUSSIAN, 0, nbElements, 10000)
         ))
         .executed(during(1, minutes))
-        .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()).summary(text()))
+        .config(concurrency, ReportingConfig.report(EhcacheResult.class, resultsReported).log(text(), html()).summary(text()))
         .config(cacheConfig(String.class, byte[].class)
-            .caches(one, two, three, four))
+            .caches(one, two, three, four).bulkBatchSize(10))
         .start();
 
     System.out.println("----------> Done");

@@ -32,6 +32,7 @@ import java.util.List;
 public class CacheConfig<K, V> extends Configuration {
 
   private List<Cache<K, V>> caches = new ArrayList<Cache<K, V>>();
+  private int bulkBatchSize = 10;     // Default nb of objects used for bulk operations
 
   public static <K, V> CacheConfig<K, V> cacheConfig(Class<K> keyClass, final Class<V> valueClass) {
     return new CacheConfig<K, V>();
@@ -55,5 +56,14 @@ public class CacheConfig<K, V> extends Configuration {
       this.caches.add(cache);
     }
     return this;
+  }
+
+  public Configuration bulkBatchSize(final int bulkBatchSize) {
+    this.bulkBatchSize = bulkBatchSize;
+    return this;
+  }
+
+  public int getBulkBatchSize() {
+    return bulkBatchSize;
   }
 }

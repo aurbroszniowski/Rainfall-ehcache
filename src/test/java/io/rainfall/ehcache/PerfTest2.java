@@ -5,6 +5,7 @@ import io.rainfall.Runner;
 import io.rainfall.Scenario;
 import io.rainfall.SyntaxException;
 import io.rainfall.configuration.ConcurrencyConfig;
+import io.rainfall.configuration.ReportingConfig;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.ehcache2.execution.UntilCacheFull;
@@ -22,7 +23,6 @@ import org.junit.Test;
 
 import static io.rainfall.configuration.ReportType.CUMULATIVE_AND_PERIODIC;
 import static io.rainfall.configuration.ReportingConfig.html;
-import static io.rainfall.configuration.ReportingConfig.reportingConfig;
 import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache2.Ehcache2Operations.get;
 import static io.rainfall.ehcache2.Ehcache2Operations.put;
@@ -71,7 +71,7 @@ public class PerfTest2 {
                   put().using(keyGenerator, valueGenerator).sequentially()
               ))
           .executed(new UntilCacheFull())
-          .config(concurrency, reportingConfig(EhcacheResult.class, CUMULATIVE_AND_PERIODIC).log(text()))
+          .config(concurrency, ReportingConfig.report(EhcacheResult.class, CUMULATIVE_AND_PERIODIC).log(text()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
                   .caches(one, two, three, four)
           )
@@ -100,7 +100,7 @@ public class PerfTest2 {
                   .using(keyGenerator, valueGenerator)
           ))
           .executed(during(5, minutes))
-          .config(concurrency, reportingConfig(EhcacheResult.class, CUMULATIVE_AND_PERIODIC).log(text(), html()))
+          .config(concurrency, ReportingConfig.report(EhcacheResult.class, CUMULATIVE_AND_PERIODIC).log(text(), html()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
                   .caches(one, two, three, four)
           )
