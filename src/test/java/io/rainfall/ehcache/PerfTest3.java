@@ -151,7 +151,7 @@ public class PerfTest3 {
   @Test
   public void testReplace() throws SyntaxException {
     CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
-    builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());xed
+    builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
 
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", builder.buildConfig(Long.class, Long.class))
