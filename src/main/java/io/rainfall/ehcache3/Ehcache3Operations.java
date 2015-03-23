@@ -19,9 +19,13 @@ package io.rainfall.ehcache3;
 import io.rainfall.ehcache3.operation.GetAllOperation;
 import io.rainfall.ehcache3.operation.GetOperation;
 import io.rainfall.ehcache3.operation.PutAllOperation;
+import io.rainfall.ehcache3.operation.PutIfAbsentOperation;
 import io.rainfall.ehcache3.operation.PutOperation;
 import io.rainfall.ehcache3.operation.RemoveAllOperation;
+import io.rainfall.ehcache3.operation.RemoveForKeyAndValueOperation;
 import io.rainfall.ehcache3.operation.RemoveOperation;
+import io.rainfall.ehcache3.operation.ReplaceOperation;
+import io.rainfall.ehcache3.operation.ReplaceForKeyAndValueOperation;
 
 /**
  * Contains the helper methods to instantiate the Ehcache {@link io.rainfall.Operation} objects.
@@ -52,6 +56,22 @@ public class Ehcache3Operations {
 
   public static <K, V> RemoveAllOperation<K, V> removeAll(Class<K> keyClass, Class<V> valueClass) {
     return new RemoveAllOperation<K, V>();
+  }
+
+  public static <K, V> PutIfAbsentOperation<K, V> putIfAbsent(Class<K> keyClass, Class<V> valueClass) {
+    return new PutIfAbsentOperation<K, V>();
+  }
+
+  public static <K, V> ReplaceOperation<K, V> replace(Class<K> keyClass, Class<V> valueClass) {
+    return new ReplaceOperation<K, V>();
+  }
+
+  public static <K, V> ReplaceForKeyAndValueOperation<K, V> replaceForKeyAndValue(Class<K> keyClass, Class<V> valueClass) {
+    return new ReplaceForKeyAndValueOperation<K, V>();
+  }
+
+  public static <K, V> RemoveForKeyAndValueOperation<K, V> removeForKeyAndValue(Class<K> keyClass, Class<V> valueClass) {
+    return new RemoveForKeyAndValueOperation<K, V>();
   }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Aurélien Broszniowski
+ * Copyright 2014 Aurélien Broszniowski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,21 +30,19 @@ import java.util.Map;
 /**
  * @author Aurelien Broszniowski
  */
-public class GetAllOperation<K, V> extends EhcacheOperation<K, V>  {
+public class ReplaceForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V> {
 
-  private GetAllOperationFunction<K, V> function = new GetAllOperationFunction<K, V>();
+  private ReplaceForKeyAndValueOperationFunction<K, V> function = new ReplaceForKeyAndValueOperationFunction<K, V>();
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
     CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
-    int bulkBatchSize = cacheConfig.getBulkBatchSize();
     final long next = this.sequenceGenerator.next();
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      statisticsHolder.measure(cache.toString(), function.execute(cache, next, keyGenerator, bulkBatchSize));
+      statisticsHolder.measure(cache.toString(), function.execute(cache, next, keyGenerator, valueGenerator));
     }
   }
-
 }

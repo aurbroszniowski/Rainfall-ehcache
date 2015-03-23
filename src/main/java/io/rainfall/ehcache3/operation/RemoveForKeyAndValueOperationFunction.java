@@ -22,56 +22,42 @@ import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import org.ehcache.Cache;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
-
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.GETALL;
-import static io.rainfall.ehcache.statistics.EhcacheResult.*;
+import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
+import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVEVALUE;
 
 /**
- * Pure function to execute a Ehcache getAll
+ * Pure function to execute a Ehcache remove
  *
  * @author Aurelien Broszniowski
  */
-public class GetAllOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
+public class RemoveForKeyAndValueOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
 
   private Cache<K, V> cache;
   private long next;
   private ObjectGenerator<K> keyGenerator;
-  private int bulkBatchSize;
+  private ObjectGenerator<V> valueGenerator;
 
-  public FunctionExecutor execute(final Cache<K, V> cache, final long next,
-                                  final ObjectGenerator<K> keyGenerator, int bulkBatchSize) {
+  public FunctionExecutor execute(final Cache<K, V> cache, final long next, final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator) {
     this.cache = cache;
     this.next = next;
     this.keyGenerator = keyGenerator;
-    this.bulkBatchSize = bulkBatchSize;
+    this.valueGenerator = valueGenerator;
     return this.functionExecutor;
   }
 
   @Override
   public EhcacheResult apply() throws Exception {
-    Set<K> set = Collections.newSetFromMap(new WeakHashMap<K, Boolean>());
-    for (int i = 0; i < bulkBatchSize; i++) {
-      set.add(keyGenerator.generate(next));
-    }
-    Map<K, V> all;
-
+    boolean removed;
     try {
-      all = cache.getAll(set);
+      removed = cache.remove(keyGenerator.generate(next), valueGenerator.generate(next));
     } catch (Exception e) {
       return EXCEPTION;
     }
-
-    EhcacheResult result = GETALL;
-    for (V v : all.values()) {
-      if (v == null) {
-        result = MISS;
-      }
+    if (!removed) {
+      return MISS;
+    } else {
+      return REMOVEVALUE;
     }
-    return result;
   }
 }

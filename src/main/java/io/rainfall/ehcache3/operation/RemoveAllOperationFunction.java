@@ -39,16 +39,13 @@ public class RemoveAllOperationFunction<K, V> extends OperationFunction<EhcacheR
   private Cache<K, V> cache;
   private long next;
   private ObjectGenerator<K> keyGenerator;
-  private ObjectGenerator<V> valueGenerator;
   private int bulkBatchSize;
 
   public FunctionExecutor execute(final Cache<K, V> cache, final long next,
-                                  final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
-                                  int bulkBatchSize) {
+                                  final ObjectGenerator<K> keyGenerator, int bulkBatchSize) {
     this.cache = cache;
     this.next = next;
     this.keyGenerator = keyGenerator;
-    this.valueGenerator = valueGenerator;
     this.bulkBatchSize = bulkBatchSize;
     return this.functionExecutor;
   }
