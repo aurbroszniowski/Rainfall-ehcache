@@ -22,20 +22,21 @@ import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import org.ehcache.Cache;
 
-import java.util.EnumMap;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.PUTALL;
+import static io.rainfall.ehcache.statistics.EhcacheResult.GETALL;
+import static io.rainfall.ehcache.statistics.EhcacheResult.*;
 
 /**
- * Pure function to execute a Ehcache putAll
+ * Pure function to execute a Ehcache getAll
  *
  * @author Aurelien Broszniowski
  */
-public class PutAllOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
+public class GetAllOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
 
   private Cache<K, V> cache;
   private long next;
@@ -56,15 +57,24 @@ public class PutAllOperationFunction<K, V> extends OperationFunction<EhcacheResu
 
   @Override
   public EhcacheResult apply() throws Exception {
+    Set<K> set = Collections.newSetFromMap(new WeakHashMap<K, Boolean>());
+    for (int i = 0; i < bulkBatchSize; i++) {
+      set.add(keyGenerator.generate(next));
+    }
+    Map<K, V> all;
+
     try {
-      Map<K, V> maps = new WeakHashMap<K, V>();
-      for (int i = 0; i < bulkBatchSize; i++) {
-        maps.put(keyGenerator.generate(next), valueGenerator.generate(next));
-      }
-      cache.putAll(maps);
+      all = cache.getAll(set);
     } catch (Exception e) {
       return EXCEPTION;
     }
-    return PUTALL;
+
+    EhcacheResult result = GETALL;
+    for (V v : all.values()) {
+      if (v == null) {
+        result = MISS;
+      }
+    }
+    return result;
   }
 }

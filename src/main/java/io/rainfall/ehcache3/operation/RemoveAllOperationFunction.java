@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Aurélien Broszniowski
+ * Copyright 2015 Aurélien Broszniowski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,19 @@ import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import org.ehcache.Cache;
 
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.PUTALL;
+import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVEALL;
 
 /**
- * Pure function to execute a Ehcache putAll
+ * Pure function to execute a Ehcache removeAll
  *
  * @author Aurelien Broszniowski
  */
-public class PutAllOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
+public class RemoveAllOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
 
   private Cache<K, V> cache;
   private long next;
@@ -57,14 +56,14 @@ public class PutAllOperationFunction<K, V> extends OperationFunction<EhcacheResu
   @Override
   public EhcacheResult apply() throws Exception {
     try {
-      Map<K, V> maps = new WeakHashMap<K, V>();
+      Set<K> set = Collections.newSetFromMap(new WeakHashMap<K, Boolean>());
       for (int i = 0; i < bulkBatchSize; i++) {
-        maps.put(keyGenerator.generate(next), valueGenerator.generate(next));
+        set.add(keyGenerator.generate(next));
       }
-      cache.putAll(maps);
+      cache.removeAll(set);
     } catch (Exception e) {
       return EXCEPTION;
     }
-    return PUTALL;
+    return REMOVEALL;
   }
 }
