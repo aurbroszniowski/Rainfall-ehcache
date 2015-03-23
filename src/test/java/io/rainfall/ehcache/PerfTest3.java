@@ -30,6 +30,7 @@ import io.rainfall.statistics.StatisticsPeekHolder;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.CacheConfigurationBuilder;
+import org.ehcache.config.units.EntryUnit;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -49,6 +50,7 @@ import static io.rainfall.generator.sequence.Distribution.GAUSSIAN;
 import static io.rainfall.unit.TimeDivision.minutes;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.ehcache.CacheManagerBuilder.newCacheManagerBuilder;
+import static org.ehcache.config.ResourcePoolsBuilder.newResourcePoolsBuilder;
 
 /**
  * @author Aurelien Broszniowski
@@ -59,7 +61,7 @@ public class PerfTest3 {
   @Ignore
   public void testLoad() throws SyntaxException {
     CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
-    builder.maxEntriesInCache(250000L);
+    builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
 
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", builder.buildConfig(Long.class, byte[].class))
@@ -149,7 +151,7 @@ public class PerfTest3 {
   @Test
   public void testReplace() throws SyntaxException {
     CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
-    builder.maxEntriesInCache(250000L);
+    builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());xed
 
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", builder.buildConfig(Long.class, Long.class))
