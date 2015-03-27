@@ -30,7 +30,7 @@ Quick start
 
 Performance tests are written in java
 
-```
+```java
 ObjectGenerator<Long> keyGenerator = new LongGenerator();   // A class to generate Long values  
 ObjectGenerator<byte[]> valueGenerator = 
         ByteArrayGenerator.fixedLength(1000); // A class to generate byte arrays of 1000 bytes
@@ -64,13 +64,13 @@ See the [Wiki](https://github.com/aurbroszniowski/Rainfall-ehcache/wiki) to list
 
 Build the project
 -----------------
-```
+```maven
   mvn clean install
 ```
 
 Use it in your project
 ----------------------
-```
+```maven
   <dependencies>
     <dependency>
       <groupId>io.rainfall</groupId>
