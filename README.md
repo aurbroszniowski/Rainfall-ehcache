@@ -49,7 +49,9 @@ StatisticsPeekHolder finalStats = Runner.setUp( // (3)
     .config(cacheConfig(Long.class, byte[].class)
         .caches(one, two, three, four).bulkBatchSize(10))
     .start();
-        
+```
+ 
+```text
   (1) A class to generate Long values
   (2) A class to generate byte arrays of 1000 bytes
   (3) Test runner, returns a StatisticsPeekHolder that holds the final stats summary
