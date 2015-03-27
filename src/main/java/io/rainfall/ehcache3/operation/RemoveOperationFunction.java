@@ -21,6 +21,8 @@ import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import org.ehcache.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
 import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVE;
@@ -31,6 +33,8 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVE;
  * @author Aurelien Broszniowski
  */
 public class RemoveOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
+
+  private static final Logger log = LoggerFactory.getLogger(RemoveForKeyAndValueOperationFunction.class);
 
   private Cache<K, V> cache;
   private long next;
@@ -49,6 +53,7 @@ public class RemoveOperationFunction<K, V> extends OperationFunction<EhcacheResu
     try {
       cache.remove(keyGenerator.generate(next));
     } catch (Exception e) {
+      log.debug("remove(k) operation failed.", e);
       return EXCEPTION;
     }
     return REMOVE;

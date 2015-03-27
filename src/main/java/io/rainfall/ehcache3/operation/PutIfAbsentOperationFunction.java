@@ -21,6 +21,8 @@ import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import org.ehcache.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
 import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
@@ -33,6 +35,8 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.PUTIFABSENT;
  * @author Aurelien Broszniowski
  */
 public class PutIfAbsentOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
+
+  private static final Logger log = LoggerFactory.getLogger(PutIfAbsentOperationFunction.class);
 
   private Cache<K, V> cache;
   private long next;
@@ -54,6 +58,7 @@ public class PutIfAbsentOperationFunction<K, V> extends OperationFunction<Ehcach
     try {
       v = cache.putIfAbsent(keyGenerator.generate(next), valueGenerator.generate(next));
     } catch (Exception e) {
+      log.debug("putIfAbsent operation failed.", e);
       return EXCEPTION;
     }
     if (v != null) {

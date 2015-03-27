@@ -21,6 +21,8 @@ import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import org.ehcache.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
 import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
@@ -31,6 +33,8 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
  * @author Aurelien Broszniowski
  */
 public class PutOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
+
+  private static final Logger log = LoggerFactory.getLogger(PutOperationFunction.class);
 
   private Cache<K, V> cache;
   private long next;
@@ -51,6 +55,7 @@ public class PutOperationFunction<K, V> extends OperationFunction<EhcacheResult>
     try {
       cache.put(keyGenerator.generate(next), valueGenerator.generate(next));
     } catch (Exception e) {
+      log.debug("put operation failed.", e);
       return EXCEPTION;
     }
     return PUT;

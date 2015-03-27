@@ -21,6 +21,8 @@ import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import org.ehcache.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -36,6 +38,8 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.PUTALL;
  * @author Aurelien Broszniowski
  */
 public class PutAllOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
+
+  private static final Logger log = LoggerFactory.getLogger(PutAllOperationFunction.class);
 
   private Cache<K, V> cache;
   private long next;
@@ -63,6 +67,7 @@ public class PutAllOperationFunction<K, V> extends OperationFunction<EhcacheResu
       }
       cache.putAll(maps);
     } catch (Exception e) {
+      log.debug("putAll operation failed.", e);
       return EXCEPTION;
     }
     return PUTALL;

@@ -21,6 +21,8 @@ import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import org.ehcache.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
 import static io.rainfall.ehcache.statistics.EhcacheResult.GET;
@@ -32,6 +34,8 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
  * @author Aurelien Broszniowski
  */
 public class GetOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
+
+  private static final Logger log = LoggerFactory.getLogger(GetOperationFunction.class);
 
   private Cache<K, V> cache;
   private long next;
@@ -50,6 +54,7 @@ public class GetOperationFunction<K, V> extends OperationFunction<EhcacheResult>
     try {
       value = cache.get(keyGenerator.generate(next));
     } catch (Exception e) {
+      log.debug("get operation failed.", e);
       return EXCEPTION;
     }
     if (value == null) {
