@@ -31,32 +31,34 @@ Quick start
 Performance tests are written in java
 
 ```java
-ObjectGenerator<Long> keyGenerator = new LongGenerator();   // A class to generate Long values  
-ObjectGenerator<byte[]> valueGenerator = 
-        ByteArrayGenerator.fixedLength(1000); // A class to generate byte arrays of 1000 bytes
+ObjectGenerator<Long> keyGenerator = new LongGenerator();   // (1)  
+ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000); // (2)
 
-StatisticsPeekHolder finalStats = Runner.setUp( // Test runner, returns a StatisticsPeekHolder 
-                                                //    that holds the final stats summary 
-        Scenario.scenario("Test phase").exec(   // a Scenario is a list of operations that 
-                                                //    will be executed
-            put(Long.class, byte[].class)     // an operation (put) that will put Long objects 
-                                              //      as keys and byte[] objects as values.   
-               .using(keyGenerator, valueGenerator) // use a Long generator as a key generator
-                                                      // and a byte array generator for values
-               .atRandom(GAUSSIAN, 0, 100000, 5000), // The distribution of keys will be 
-                                                     //  gaussian, to simulate a real-life 
-                                                     //  scenario where only a limited set 
-                                                     //  of keys are more often accessed
-            get(Long.class, byte[].class).withWeight(0.80) // another operation (get)
-                .using(keyGenerator, valueGenerator)
-                .atRandom(GAUSSIAN, 0, 100000, 5000)
-        ))
-        .executed(during(1, minutes))
-        .config(concurrency, 
-              ReportingConfig.report(EhcacheResult.class).log(text(), html()).summary(text()))
-        .config(cacheConfig(Long.class, byte[].class)
-            .caches(one, two, three, four).bulkBatchSize(10))
-        .start();
+StatisticsPeekHolder finalStats = Runner.setUp( // (3) 
+    Scenario.scenario("Test phase").exec(   // (4)
+        put(Long.class, byte[].class)     // (5)   
+           .using(keyGenerator, valueGenerator) // (6)
+           .atRandom(GAUSSIAN, 0, 100000, 5000), // (7)
+        get(Long.class, byte[].class).withWeight(0.80) //(8)
+            .using(keyGenerator, valueGenerator)
+            .atRandom(GAUSSIAN, 0, 100000, 5000)
+    ))
+    .executed(during(1, minutes))
+    .config(concurrency, 
+          ReportingConfig.report(EhcacheResult.class).log(text(), html()).summary(text()))
+    .config(cacheConfig(Long.class, byte[].class)
+        .caches(one, two, three, four).bulkBatchSize(10))
+    .start();
+        
+  (1) A class to generate Long values
+  (2) A class to generate byte arrays of 1000 bytes
+  (3) Test runner, returns a StatisticsPeekHolder that holds the final stats summary
+  (4) a Scenario is a list of operations that will be executed
+  (5) an operation (put) that will put Long objects as keys and byte[] objects as values.
+  (6) use a Long generator as a key generator and a byte array generator for values
+  (7) The distribution of keys will be gaussian, to simulate a real-life scenario where 
+          only a limited set of keys are more often accessed
+  (8) Another operation : get()        
 ```
 
 See the [Wiki](https://github.com/aurbroszniowski/Rainfall-ehcache/wiki) to list all operations and parameters.
