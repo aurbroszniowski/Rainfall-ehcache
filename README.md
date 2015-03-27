@@ -52,13 +52,14 @@ StatisticsPeekHolder finalStats = Runner.setUp( // Test runner, returns a Statis
                 .atRandom(GAUSSIAN, 0, 100000, 5000)
         ))
         .executed(during(1, minutes))
-        .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()).summary(text()))
+        .config(concurrency, 
+              ReportingConfig.report(EhcacheResult.class).log(text(), html()).summary(text()))
         .config(cacheConfig(Long.class, byte[].class)
             .caches(one, two, three, four).bulkBatchSize(10))
         .start();
 ```
 
-See the [https://github.com/aurbroszniowski/Rainfall-ehcache/wiki](Wiki) to list all operations and parameters.
+See the [Wiki](https://github.com/aurbroszniowski/Rainfall-ehcache/wiki) to list all operations and parameters.
 
 
 Build the project
