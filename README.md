@@ -31,14 +31,22 @@ Quick start
 Performance tests are written in java
 
 ```
- ObjectGenerator<Long> keyGenerator = new LongGenerator(); // A class to generate Long values  
- ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000); // A class to generate byte arrays of 1000 bytes
+ObjectGenerator<Long> keyGenerator = new LongGenerator();   // A class to generate Long values  
+ObjectGenerator<byte[]> valueGenerator = 
+        ByteArrayGenerator.fixedLength(1000); // A class to generate byte arrays of 1000 bytes
 
- StatisticsPeekHolder finalStats = Runner.setUp(  // Test runner, returns a StatisticsPeekHolder that holds the final stats summary 
-        Scenario.scenario("Test phase").exec(     // a Scenario is a list of operations that will be executed
-            put(Long.class, byte[].class)         // an operation (put) that will put Long objects as keys and byte[] objects as values.   
-                .using(keyGenerator, valueGenerator)  // We use a Long generator as a key generator, and a byte array generator for values
-                .atRandom(GAUSSIAN, 0, 100000, 5000), // The distribution of keys will be gaussian, to simulate a real-life scenario where only a limited set of keys are more often accessed
+StatisticsPeekHolder finalStats = Runner.setUp( // Test runner, returns a StatisticsPeekHolder 
+                                                //    that holds the final stats summary 
+        Scenario.scenario("Test phase").exec(   // a Scenario is a list of operations that 
+                                                //    will be executed
+            put(Long.class, byte[].class)     // an operation (put) that will put Long objects 
+                                              //      as keys and byte[] objects as values.   
+               .using(keyGenerator, valueGenerator) // use a Long generator as a key generator
+                                                      // and a byte array generator for values
+               .atRandom(GAUSSIAN, 0, 100000, 5000), // The distribution of keys will be 
+                                                     //  gaussian, to simulate a real-life 
+                                                     //  scenario where only a limited set 
+                                                     //  of keys are more often accessed
             get(Long.class, byte[].class).withWeight(0.80) // another operation (get)
                 .using(keyGenerator, valueGenerator)
                 .atRandom(GAUSSIAN, 0, 100000, 5000)
@@ -50,7 +58,7 @@ Performance tests are written in java
         .start();
 ```
 
-See the Wiki to list all operations and parameters.
+See the [https://github.com/aurbroszniowski/Rainfall-ehcache/wiki](Wiki) to list all operations and parameters.
 
 
 Build the project
