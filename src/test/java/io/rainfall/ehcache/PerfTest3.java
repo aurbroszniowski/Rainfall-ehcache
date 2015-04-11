@@ -40,7 +40,9 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
 import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
 import static io.rainfall.ehcache.statistics.EhcacheResult.PUTALL;
 import static io.rainfall.ehcache3.CacheConfig.cacheConfig;
+import static io.rainfall.ehcache3.Ehcache3Operations.getAll;
 import static io.rainfall.ehcache3.Ehcache3Operations.put;
+import static io.rainfall.ehcache3.Ehcache3Operations.putAll;
 import static io.rainfall.ehcache3.Ehcache3Operations.removeForKeyAndValue;
 import static io.rainfall.ehcache3.Ehcache3Operations.replace;
 import static io.rainfall.ehcache3.Ehcache3Operations.replaceForKeyAndValue;
@@ -118,12 +120,12 @@ public class PerfTest3 {
 //            get(Long.class, byte[].class).withWeight(0.80)
 //                .using(keyGenerator, valueGenerator)
 //                .atRandom(GAUSSIAN, 0, nbElements, 10000),
-//            putAll(Long.class, byte[].class).withWeight(0.10)
-//                .using(keyGenerator, valueGenerator)
-//                .atRandom(GAUSSIAN, 0, nbElements, 10000),
-//            getAll(Long.class, byte[].class).withWeight(0.40)
-//                .using(keyGenerator, valueGenerator)
-//                .atRandom(GAUSSIAN, 0, nbElements, 10000),
+            putAll(Long.class, byte[].class).withWeight(0.10)
+                .using(keyGenerator, valueGenerator)
+                .atRandom(GAUSSIAN, 0, nbElements, 10000),
+            getAll(Long.class, byte[].class).withWeight(0.40)
+                .using(keyGenerator, valueGenerator)
+                .atRandom(GAUSSIAN, 0, nbElements, 10000)
 //            removeAll(Long.class, byte[].class).withWeight(0.10)
 //                .using(keyGenerator, valueGenerator)
 //                .atRandom(GAUSSIAN, 0, nbElements, 10000),
@@ -133,9 +135,9 @@ public class PerfTest3 {
 //            replace(Long.class, byte[].class).withWeight(0.10)
 //                .using(keyGenerator, valueGenerator)
 //                .atRandom(GAUSSIAN, 0, nbElements, 10000)
-            replaceForKeyAndValue(Long.class, byte[].class).withWeight(0.10)
-                .using(keyGenerator, valueGenerator)
-                .atRandom(GAUSSIAN, 0, nbElements, 10000)
+//            replaceForKeyAndValue(Long.class, byte[].class).withWeight(0.10)
+//                .using(keyGenerator, valueGenerator)
+//                .atRandom(GAUSSIAN, 0, nbElements, 10000)
         ))
         .executed(during(1, minutes))
         .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()).summary(text()))
