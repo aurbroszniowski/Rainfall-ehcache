@@ -59,7 +59,7 @@ public class Ehcache3Test {
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", CacheConfigurationBuilder.newCacheConfigurationBuilder()
             .buildConfig(String.class, byte[].class))
-        .build();
+        .build(true);
 
     cache = cacheManager.getCache("one", String.class, byte[].class);
 

@@ -209,7 +209,6 @@
       <scope>provided</scope>
     </dependency>
 
-
     <dependency>
       <groupId>nf.fr.eraasoft</groupId>
       <artifactId>objectpool</artifactId>

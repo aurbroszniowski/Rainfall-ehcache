@@ -18,11 +18,8 @@ package io.rainfall.ehcache3;
 
 import io.rainfall.Configuration;
 import org.ehcache.Cache;
-import org.ehcache.StandaloneCache;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**

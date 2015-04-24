@@ -70,7 +70,7 @@ public class PerfTest3 {
         .withCache("two", builder.buildConfig(Long.class, byte[].class))
         .withCache("three", builder.buildConfig(Long.class, byte[].class))
         .withCache("four", builder.buildConfig(Long.class, byte[].class))
-        .build();
+        .build(true);
 
     final Cache<Long, byte[]> one = cacheManager.getCache("one", Long.class, byte[].class);
     final Cache<Long, byte[]> two = cacheManager.getCache("two", Long.class, byte[].class);
@@ -157,7 +157,7 @@ public class PerfTest3 {
 
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", builder.buildConfig(Long.class, Long.class))
-        .build();
+        .build(true);
 
     final Cache<Long, Long> one = cacheManager.getCache("one", Long.class, Long.class);
 
