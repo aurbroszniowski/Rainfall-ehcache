@@ -50,6 +50,7 @@ import static io.rainfall.execution.Executions.during;
 import static io.rainfall.execution.Executions.times;
 import static io.rainfall.generator.sequence.Distribution.GAUSSIAN;
 import static io.rainfall.unit.TimeDivision.minutes;
+import static io.rainfall.unit.TimeDivision.seconds;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.ehcache.CacheManagerBuilder.newCacheManagerBuilder;
 import static org.ehcache.config.ResourcePoolsBuilder.newResourcePoolsBuilder;
@@ -74,23 +75,34 @@ public class PerfTest3 {
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(50, MINUTES);
 
-    int nbElements = 250000;
     ObjectGenerator<Long> keyGenerator = new LongGenerator();
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000);
 
-    EhcacheResult[] resultsReported = new EhcacheResult[] { PUT, PUTALL, MISS };
+    EhcacheResult[] resultsReported = new EhcacheResult[] { PUT, MISS };
+
+    Scenario scenario = Scenario.scenario("Test phase").exec(
+        put(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
+    );
 
     System.out.println("----------> Warm up phase");
     Runner.setUp(
-        Scenario.scenario("Warm up phase").exec(
-            put(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
-        ))
-        .executed(times(nbElements))
-        .config(concurrency, ReportingConfig.report(EhcacheResult.class, resultsReported).log(text()).summary(text()))
+        scenario)
+        .executed(during(15, seconds))
+        .config(concurrency,
+            ReportingConfig.report(EhcacheResult.class, resultsReported).log(text()).summary(text()))
         .config(cacheConfig(Long.class, byte[].class).caches(one)
         )
-        .start()
-    ;
+        .start();
+
+    System.out.println("----------> Test phase");
+    Runner.setUp(
+        scenario)
+        .executed(during(30, seconds))
+        .config(concurrency,
+            ReportingConfig.report(EhcacheResult.class, resultsReported).log(text(), html()).summary(text(), html()))
+        .config(cacheConfig(Long.class, byte[].class).caches(one)
+        )
+        .start();
     System.out.println("----------> Done");
 
     cacheManager.close();
