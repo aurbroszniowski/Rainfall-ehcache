@@ -36,10 +36,12 @@ import org.junit.Test;
 
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.text;
+import static io.rainfall.ehcache.statistics.EhcacheResult.GET;
 import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
 import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
 import static io.rainfall.ehcache.statistics.EhcacheResult.PUTALL;
 import static io.rainfall.ehcache3.CacheConfig.cacheConfig;
+import static io.rainfall.ehcache3.Ehcache3Operations.get;
 import static io.rainfall.ehcache3.Ehcache3Operations.getAll;
 import static io.rainfall.ehcache3.Ehcache3Operations.put;
 import static io.rainfall.ehcache3.Ehcache3Operations.putAll;
@@ -68,9 +70,11 @@ public class PerfTest3 {
 
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", builder.buildConfig(Long.class, byte[].class))
+        .withCache("two", builder.buildConfig(Long.class, byte[].class))
         .build(true);
 
     final Cache<Long, byte[]> one = cacheManager.getCache("one", Long.class, byte[].class);
+    final Cache<Long, byte[]> two = cacheManager.getCache("two", Long.class, byte[].class);
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(50, MINUTES);
@@ -78,10 +82,11 @@ public class PerfTest3 {
     ObjectGenerator<Long> keyGenerator = new LongGenerator();
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000);
 
-    EhcacheResult[] resultsReported = new EhcacheResult[] { PUT, MISS };
+    EhcacheResult[] resultsReported = new EhcacheResult[] { GET, PUT, MISS };
 
     Scenario scenario = Scenario.scenario("Test phase").exec(
-        put(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
+        put(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially(),
+        get(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
     );
 
     System.out.println("----------> Warm up phase");
@@ -90,7 +95,7 @@ public class PerfTest3 {
         .executed(during(15, seconds))
         .config(concurrency,
             ReportingConfig.report(EhcacheResult.class, resultsReported).log(text()).summary(text()))
-        .config(cacheConfig(Long.class, byte[].class).caches(one)
+        .config(cacheConfig(Long.class, byte[].class).caches(one, two)
         )
         .start();
 
@@ -100,7 +105,7 @@ public class PerfTest3 {
         .executed(during(30, seconds))
         .config(concurrency,
             ReportingConfig.report(EhcacheResult.class, resultsReported).log(text(), html()).summary(text(), html()))
-        .config(cacheConfig(Long.class, byte[].class).caches(one)
+        .config(cacheConfig(Long.class, byte[].class).caches(one, two)
         )
         .start();
     System.out.println("----------> Done");
