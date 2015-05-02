@@ -80,7 +80,7 @@ public class PerfTest3 {
     ObjectGenerator<Long> keyGenerator = new LongGenerator();
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000);
 
-    EhcacheResult[] resultsReported = new EhcacheResult[] { PUT};
+    EhcacheResult[] resultsReported = new EhcacheResult[] { GET, PUT, MISS };
 
     Scenario scenario = Scenario.scenario("Test phase").exec(
         put(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially(),
@@ -90,7 +90,7 @@ public class PerfTest3 {
     System.out.println("----------> Test phase");
     Runner.setUp(
         scenario)
-        .warmup(during(5, seconds))
+        .warmup(during(25, seconds))
         .executed(during(30, seconds))
         .config(concurrency,
             ReportingConfig.report(EhcacheResult.class, resultsReported).log(text(), html()).summary(text(), html()))
