@@ -21,7 +21,6 @@ import net.sf.ehcache.config.MemoryUnit;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static io.rainfall.configuration.ReportType.CUMULATIVE_AND_PERIODIC;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache2.Ehcache2Operations.get;
@@ -71,7 +70,7 @@ public class PerfTest2 {
                   put().using(keyGenerator, valueGenerator).sequentially()
               ))
           .executed(new UntilCacheFull())
-          .config(concurrency, ReportingConfig.report(EhcacheResult.class, CUMULATIVE_AND_PERIODIC).log(text()))
+          .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
                   .caches(one, two, three, four)
           )
@@ -100,7 +99,7 @@ public class PerfTest2 {
                   .using(keyGenerator, valueGenerator)
           ))
           .executed(during(5, minutes))
-          .config(concurrency, ReportingConfig.report(EhcacheResult.class, CUMULATIVE_AND_PERIODIC).log(text(), html()))
+          .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
                   .caches(one, two, three, four)
           )

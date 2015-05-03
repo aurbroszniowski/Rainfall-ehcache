@@ -161,6 +161,13 @@
 
   <dependencies>
     <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.0.7</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>io.rainfall</groupId>
       <artifactId>rainfall-core</artifactId>
       <version>1.0.3-SNAPSHOT</version>
