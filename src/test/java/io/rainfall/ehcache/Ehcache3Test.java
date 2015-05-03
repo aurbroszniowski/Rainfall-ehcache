@@ -32,6 +32,7 @@ import org.ehcache.CacheManager;
 import org.ehcache.config.CacheConfigurationBuilder;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static io.rainfall.configuration.ReportingConfig.text;
@@ -76,6 +77,7 @@ public class Ehcache3Test {
   }
 
   @Test
+  @Ignore
   public void test3() throws SyntaxException {
     CacheConfig<String, byte[]> cacheConfig = cacheConfig(String.class, byte[].class).caches(cache);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
