@@ -64,6 +64,43 @@ public class PerfTest3 {
 
   @Test
   @Ignore
+  public void testTpsLimit() throws SyntaxException {
+    CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
+
+    final CacheManager cacheManager = newCacheManagerBuilder()
+        .withCache("one", builder.buildConfig(Long.class, byte[].class))
+        .build(true);
+
+    final Cache<Long, byte[]> one = cacheManager.getCache("one", Long.class, byte[].class);
+
+    ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig().threads(4).timeout(50, MINUTES);
+
+    ObjectGenerator<Long> keyGenerator = new LongGenerator();
+    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000);
+
+    EhcacheResult[] resultsReported = new EhcacheResult[] { GET, PUT, MISS };
+
+    Scenario scenario = Scenario.scenario("Test phase").exec(
+        put(Long.class, byte[].class, 50000).using(keyGenerator, valueGenerator).sequentially()
+    );
+
+    System.out.println("----------> Test phase");
+    Runner.setUp(
+        scenario)
+        .executed(during(30, seconds))
+        .config(concurrency,
+            ReportingConfig.report(EhcacheResult.class, resultsReported).log(text(), html()).summary(text(), html()))
+        .config(cacheConfig(Long.class, byte[].class).caches(one)
+        )
+        .start();
+    System.out.println("----------> Done");
+
+    cacheManager.close();
+  }
+
+  @Test
+  @Ignore
   public void testWarmup() throws SyntaxException {
     CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
     builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
@@ -101,6 +138,8 @@ public class PerfTest3 {
 
     cacheManager.close();
   }
+
+
 
   @Test
   @Ignore
