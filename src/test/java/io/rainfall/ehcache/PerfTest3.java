@@ -23,17 +23,22 @@ import io.rainfall.SyntaxException;
 import io.rainfall.configuration.ConcurrencyConfig;
 import io.rainfall.configuration.ReportingConfig;
 import io.rainfall.ehcache.statistics.EhcacheResult;
+import io.rainfall.ehcache2.operation.PutOperation;
 import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.LongGenerator;
 import io.rainfall.statistics.StatisticsPeekHolder;
+import io.rainfall.unit.From;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.CacheConfigurationBuilder;
 import org.ehcache.config.units.EntryUnit;
+import org.ehcache.expiry.Duration;
+import org.ehcache.expiry.Expirations;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static io.rainfall.Unit.users;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache.statistics.EhcacheResult.GET;
@@ -48,12 +53,17 @@ import static io.rainfall.ehcache3.Ehcache3Operations.putAll;
 import static io.rainfall.ehcache3.Ehcache3Operations.removeForKeyAndValue;
 import static io.rainfall.ehcache3.Ehcache3Operations.replace;
 import static io.rainfall.ehcache3.Ehcache3Operations.replaceForKeyAndValue;
+import static io.rainfall.execution.Executions.atOnce;
 import static io.rainfall.execution.Executions.during;
+import static io.rainfall.execution.Executions.nothingFor;
+import static io.rainfall.execution.Executions.ramp;
 import static io.rainfall.execution.Executions.times;
+import static io.rainfall.generator.sequence.Distribution.FLAT;
 import static io.rainfall.generator.sequence.Distribution.GAUSSIAN;
 import static io.rainfall.unit.TimeDivision.minutes;
 import static io.rainfall.unit.TimeDivision.seconds;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.ehcache.CacheManagerBuilder.newCacheManagerBuilder;
 import static org.ehcache.config.ResourcePoolsBuilder.newResourcePoolsBuilder;
 
@@ -90,7 +100,8 @@ public class PerfTest3 {
         scenario)
         .executed(during(30, seconds))
         .config(concurrency,
-            ReportingConfig.report(EhcacheResult.class, resultsReported).log(text(), html()).summary(text(), html()))
+            ReportingConfig.report(EhcacheResult.class, resultsReported)
+                .log(text(), html()))
         .config(cacheConfig(Long.class, byte[].class).caches(one)
         )
         .start();
@@ -130,7 +141,7 @@ public class PerfTest3 {
         .warmup(during(25, seconds))
         .executed(during(30, seconds))
         .config(concurrency,
-            ReportingConfig.report(EhcacheResult.class, resultsReported).log(text(), html()).summary(text(), html()))
+            ReportingConfig.report(EhcacheResult.class, resultsReported).log(text(), html()))
         .config(cacheConfig(Long.class, byte[].class).caches(one)
         )
         .start();
@@ -169,11 +180,10 @@ public class PerfTest3 {
     );
 
     System.out.println("----------> Warm up phase");
-    Runner.setUp(
-        scenario)
+    Runner.setUp(scenario)
         .executed(during(15, seconds))
         .config(concurrency,
-            ReportingConfig.report(EhcacheResult.class, resultsReported).log(text()).summary(text()))
+            ReportingConfig.report(EhcacheResult.class, resultsReported).log(text()))
         .config(cacheConfig(Long.class, byte[].class).caches(one, two)
         )
         .start();
@@ -183,7 +193,7 @@ public class PerfTest3 {
         scenario)
         .executed(during(30, seconds))
         .config(concurrency,
-            ReportingConfig.report(EhcacheResult.class, resultsReported).log(text(), html()).summary(text(), html()))
+            ReportingConfig.report(EhcacheResult.class, resultsReported).log(text(), html()))
         .config(cacheConfig(Long.class, byte[].class).caches(one, two)
         )
         .start();
@@ -225,7 +235,7 @@ public class PerfTest3 {
             put(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
         ))
         .executed(times(nbElements))
-        .config(concurrency, ReportingConfig.report(EhcacheResult.class, resultsReported).log(text()).summary(text()))
+        .config(concurrency, ReportingConfig.report(EhcacheResult.class, resultsReported).log(text()))
         .config(cacheConfig(Long.class, byte[].class)
                 .caches(one, two, three, four).bulkBatchSize(5)
         )
@@ -273,7 +283,7 @@ public class PerfTest3 {
 //                .atRandom(GAUSSIAN, 0, nbElements, 10000)
         ))
         .executed(during(1, minutes))
-        .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()).summary(text()))
+        .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()))
         .config(cacheConfig(Long.class, byte[].class)
             .caches(one, two, three, four).bulkBatchSize(10))
         .start();

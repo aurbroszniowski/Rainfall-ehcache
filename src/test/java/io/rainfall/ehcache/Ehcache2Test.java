@@ -73,7 +73,7 @@ public class Ehcache2Test {
         .caches(cache1, cache2, cache3);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
-    ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text(), html()).summary(text());
+    ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text(), html());
 
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(
@@ -137,7 +137,7 @@ public class Ehcache2Test {
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
-    ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text(), html()).summary(text());
+    ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text(), html());
 
     ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);

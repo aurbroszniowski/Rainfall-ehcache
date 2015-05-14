@@ -82,7 +82,7 @@ public class Ehcache3Test {
     CacheConfig<String, byte[]> cacheConfig = cacheConfig(String.class, byte[].class).caches(cache);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
-    ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text()).summary(text());
+    ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text());
 
     ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
