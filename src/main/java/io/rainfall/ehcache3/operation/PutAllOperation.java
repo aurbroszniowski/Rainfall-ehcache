@@ -15,9 +15,7 @@ import java.util.Map;
 /**
  * @author Aurelien Broszniowski
  */
-public class PutAllOperation<K, V> extends EhcacheOperation<K, V>  {
-
-  private PutAllOperationFunction<K, V> function = new PutAllOperationFunction<K, V>();
+public class PutAllOperation<K, V> extends EhcacheOperation<K, V> {
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
@@ -28,7 +26,7 @@ public class PutAllOperation<K, V> extends EhcacheOperation<K, V>  {
     final long next = this.sequenceGenerator.next();
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      statisticsHolder.measure(cache.toString(), function.execute(cache, next, keyGenerator, valueGenerator, bulkBatchSize));
+      statisticsHolder.measure(cache.toString(), new PutAllOperationFunction<K, V>(cache, next, keyGenerator, valueGenerator, bulkBatchSize));
     }
   }
 

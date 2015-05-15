@@ -18,7 +18,6 @@ package io.rainfall.ehcache3.operation;
 
 import io.rainfall.ObjectGenerator;
 import io.rainfall.ehcache.statistics.EhcacheResult;
-import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import org.ehcache.Cache;
 import org.slf4j.Logger;
@@ -33,7 +32,7 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVEVALUE;
  *
  * @author Aurelien Broszniowski
  */
-public class RemoveForKeyAndValueOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
+public class RemoveForKeyAndValueOperationFunction<K, V> implements OperationFunction<EhcacheResult> {
 
   private static final Logger log = LoggerFactory.getLogger(RemoveForKeyAndValueOperationFunction.class);
 
@@ -42,12 +41,12 @@ public class RemoveForKeyAndValueOperationFunction<K, V> extends OperationFuncti
   private ObjectGenerator<K> keyGenerator;
   private ObjectGenerator<V> valueGenerator;
 
-  public FunctionExecutor execute(final Cache<K, V> cache, final long next, final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator) {
+  public RemoveForKeyAndValueOperationFunction(final Cache<K, V> cache, final long next,
+                                               final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator) {
     this.cache = cache;
     this.next = next;
     this.keyGenerator = keyGenerator;
     this.valueGenerator = valueGenerator;
-    return this.functionExecutor;
   }
 
   @Override

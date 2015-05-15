@@ -26,6 +26,7 @@ import io.rainfall.ehcache3.operation.RemoveForKeyAndValueOperation;
 import io.rainfall.ehcache3.operation.RemoveOperation;
 import io.rainfall.ehcache3.operation.ReplaceOperation;
 import io.rainfall.ehcache3.operation.ReplaceForKeyAndValueOperation;
+import io.rainfall.ehcache3.operation.TpsLimitGetOperation;
 import io.rainfall.ehcache3.operation.TpsLimitPutOperation;
 
 /**
@@ -45,6 +46,10 @@ public class Ehcache3Operations {
 
   public static <K, V> GetOperation<K, V> get(Class<K> keyClass, Class<V> valueClass) {
     return new GetOperation<K, V>();
+  }
+
+  public static <K, V> GetOperation<K, V> get(Class<K> keyClass, Class<V> valueClass, long tpsLimit) {
+    return new TpsLimitGetOperation<K, V>(tpsLimit);
   }
 
   public static <K, V> RemoveOperation<K, V> remove(Class<K> keyClass, Class<V> valueClass) {

@@ -32,7 +32,6 @@ import java.util.Map;
  */
 public class TpsLimitPutOperation<K, V> extends PutOperation<K, V> {
 
-  private PutOperationFunction<K, V> function = new PutOperationFunction<K, V>();
   private final long tpsLimit;
 
   public TpsLimitPutOperation(final long tpsLimit) {
@@ -49,7 +48,7 @@ public class TpsLimitPutOperation<K, V> extends PutOperation<K, V> {
     long currentTps = statisticsHolder.getCurrentTps(EhcacheResult.PUT);
     if (currentTps < this.tpsLimit) {
       for (final Cache<K, V> cache : caches) {
-        statisticsHolder.measure(cache.toString(), function.execute(cache, next, keyGenerator, valueGenerator));
+        statisticsHolder.measure(cache.toString(), new PutOperationFunction<K, V>(cache, next, keyGenerator, valueGenerator));
       }
     }
   }

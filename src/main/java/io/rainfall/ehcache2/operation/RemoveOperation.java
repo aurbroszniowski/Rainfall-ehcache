@@ -34,8 +34,6 @@ import java.util.Map;
  */
 public class RemoveOperation<K, V> extends EhcacheOperation {
 
-  private RemoveOperationFunction<K> function = new RemoveOperationFunction<K>();
-
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
@@ -44,7 +42,7 @@ public class RemoveOperation<K, V> extends EhcacheOperation {
     final long next = this.sequenceGenerator.next();
     List<Ehcache> caches = cacheConfig.getCaches();
     for (final Ehcache cache : caches) {
-      statisticsHolder.measure(cache.getName(), function.execute(cache, next, keyGenerator));
+      statisticsHolder.measure(cache.getName(), new RemoveOperationFunction<K>(cache, next, keyGenerator));
     }
   }
 }

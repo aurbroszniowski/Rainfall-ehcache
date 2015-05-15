@@ -18,7 +18,6 @@ package io.rainfall.ehcache3.operation;
 
 import io.rainfall.ObjectGenerator;
 import io.rainfall.ehcache.statistics.EhcacheResult;
-import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import org.ehcache.Cache;
 import org.slf4j.Logger;
@@ -32,7 +31,7 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
  *
  * @author Aurelien Broszniowski
  */
-public class PutOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
+public class PutOperationFunction<K, V> implements OperationFunction<EhcacheResult> {
 
   private static final Logger log = LoggerFactory.getLogger(PutOperationFunction.class);
 
@@ -41,13 +40,11 @@ public class PutOperationFunction<K, V> extends OperationFunction<EhcacheResult>
   private ObjectGenerator<K> keyGenerator;
   private ObjectGenerator<V> valueGenerator;
 
-  public FunctionExecutor execute(final Cache<K, V> cache, final long next,
-                                  final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator) {
+  public PutOperationFunction(final Cache<K, V> cache, final long next, final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator) {
     this.cache = cache;
     this.next = next;
     this.keyGenerator = keyGenerator;
     this.valueGenerator = valueGenerator;
-    return functionExecutor;
   }
 
   @Override

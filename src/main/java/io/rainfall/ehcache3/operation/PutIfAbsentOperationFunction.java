@@ -18,7 +18,6 @@ package io.rainfall.ehcache3.operation;
 
 import io.rainfall.ObjectGenerator;
 import io.rainfall.ehcache.statistics.EhcacheResult;
-import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import org.ehcache.Cache;
 import org.slf4j.Logger;
@@ -26,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
 import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
-import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
 import static io.rainfall.ehcache.statistics.EhcacheResult.PUTIFABSENT;
 
 /**
@@ -34,7 +32,7 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.PUTIFABSENT;
  *
  * @author Aurelien Broszniowski
  */
-public class PutIfAbsentOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
+public class PutIfAbsentOperationFunction<K, V> implements OperationFunction<EhcacheResult> {
 
   private static final Logger log = LoggerFactory.getLogger(PutIfAbsentOperationFunction.class);
 
@@ -43,13 +41,12 @@ public class PutIfAbsentOperationFunction<K, V> extends OperationFunction<Ehcach
   private ObjectGenerator<K> keyGenerator;
   private ObjectGenerator<V> valueGenerator;
 
-  public FunctionExecutor execute(final Cache<K, V> cache, final long next,
-                                  final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator) {
+  public PutIfAbsentOperationFunction(final Cache<K, V> cache, final long next, final ObjectGenerator<K> keyGenerator,
+                                      final ObjectGenerator<V> valueGenerator) {
     this.cache = cache;
     this.next = next;
     this.keyGenerator = keyGenerator;
     this.valueGenerator = valueGenerator;
-    return functionExecutor;
   }
 
   @Override

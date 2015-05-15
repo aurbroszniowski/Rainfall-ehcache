@@ -18,7 +18,6 @@ package io.rainfall.ehcache3.operation;
 
 import io.rainfall.ObjectGenerator;
 import io.rainfall.ehcache.statistics.EhcacheResult;
-import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import org.ehcache.Cache;
 import org.slf4j.Logger;
@@ -31,14 +30,14 @@ import java.util.WeakHashMap;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
 import static io.rainfall.ehcache.statistics.EhcacheResult.GETALL;
-import static io.rainfall.ehcache.statistics.EhcacheResult.*;
+import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
 
 /**
  * Pure function to execute a Ehcache getAll
  *
  * @author Aurelien Broszniowski
  */
-public class GetAllOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
+public class GetAllOperationFunction<K, V> implements OperationFunction<EhcacheResult> {
 
   private static final Logger log = LoggerFactory.getLogger(GetAllOperationFunction.class);
 
@@ -47,13 +46,11 @@ public class GetAllOperationFunction<K, V> extends OperationFunction<EhcacheResu
   private ObjectGenerator<K> keyGenerator;
   private int bulkBatchSize;
 
-  public FunctionExecutor execute(final Cache<K, V> cache, final long next,
-                                  final ObjectGenerator<K> keyGenerator, int bulkBatchSize) {
+  public GetAllOperationFunction(final Cache<K, V> cache, final long next, final ObjectGenerator<K> keyGenerator, final int bulkBatchSize) {
     this.cache = cache;
     this.next = next;
     this.keyGenerator = keyGenerator;
     this.bulkBatchSize = bulkBatchSize;
-    return this.functionExecutor;
   }
 
   @Override

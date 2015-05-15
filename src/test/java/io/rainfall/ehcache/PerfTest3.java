@@ -27,6 +27,7 @@ import io.rainfall.ehcache2.operation.PutOperation;
 import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.LongGenerator;
+import io.rainfall.generator.sequence.Distribution;
 import io.rainfall.statistics.StatisticsPeekHolder;
 import io.rainfall.unit.From;
 import org.ehcache.Cache;
@@ -38,8 +39,11 @@ import org.ehcache.expiry.Expirations;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.concurrent.TimeUnit;
+
 import static io.rainfall.Unit.users;
 import static io.rainfall.configuration.ReportingConfig.html;
+import static io.rainfall.configuration.ReportingConfig.report;
 import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache.statistics.EhcacheResult.GET;
 import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
@@ -74,6 +78,85 @@ public class PerfTest3 {
 
   @Test
   @Ignore
+  public void testKeys() {
+    ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig().threads(16).timeout(30, MINUTES);
+
+    ObjectGenerator<Long> keyGenerator = new ObjectGenerator<Long>() {
+      @Override
+      public Long generate(final long seed) {
+        System.out.println("seed = " + seed);
+        return seed;
+      }
+    };
+    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1024);
+
+    long nbElements = 100;
+    CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    builder.withResourcePools(newResourcePoolsBuilder().heap(nbElements, EntryUnit.ENTRIES).build());
+
+    CacheManager cacheManager = newCacheManagerBuilder()
+        .withCache("one", builder.buildConfig(Long.class, byte[].class))
+        .build(true);
+
+    Cache one = cacheManager.getCache("one", Long.class, byte[].class);
+
+    try {
+      long start = System.nanoTime();
+
+      System.out.println("Warmup");
+      Runner.setUp(
+          Scenario.scenario("Cache warm up phase")
+              .exec(put(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()))
+          .executed(times(nbElements))
+          .config(concurrency)
+          .config(report(EhcacheResult.class, new EhcacheResult[] { PUT }).log(text()))
+          .config(cacheConfig(Long.class, byte[].class)
+                  .caches(one)
+          )
+          .start();
+
+      long end = System.nanoTime();
+
+      System.out.println("verifying values");
+      for (long seed=2;seed<nbElements;seed++) {
+        Object o = one.get(keyGenerator.generate(seed));
+        if (o == null) System.out.println("null for key "+ seed);
+      }
+      System.out.println("done");
+
+
+/*
+
+      System.out.println("Test");
+      StatisticsPeekHolder finalStats = Runner.setUp(
+          Scenario.scenario("Test phase")
+              .exec(
+                  get(Long.class, byte[].class).using(keyGenerator, valueGenerator)
+                      .atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10)
+                      .withWeight(0.90)
+              ))
+          .warmup(during(1, minutes))
+          .executed(during(1, minutes))
+          .config(concurrency)
+          .config(report(EhcacheResult.class, new EhcacheResult[] { PUT, GET, MISS })
+              .log(text(), html("target/perf-cache-hr-test")))
+          .config(cacheConfig(Long.class, byte[].class)
+                  .caches(one)
+          )
+          .start();
+*/
+
+      System.out.println("----------> Done");
+    } catch (SyntaxException e) {
+      e.printStackTrace();
+    } finally {
+      cacheManager.close();
+    }
+
+  }
+
+  @Test
+  @Ignore
   public void testTpsLimit() throws SyntaxException {
     CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
     builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
@@ -98,7 +181,7 @@ public class PerfTest3 {
     System.out.println("----------> Test phase");
     Runner.setUp(
         scenario)
-        .executed(during(30, seconds))
+        .executed(during(10, seconds))
         .config(concurrency,
             ReportingConfig.report(EhcacheResult.class, resultsReported)
                 .log(text(), html()))
@@ -149,7 +232,6 @@ public class PerfTest3 {
 
     cacheManager.close();
   }
-
 
 
   @Test
@@ -257,18 +339,18 @@ public class PerfTest3 {
 
     StatisticsPeekHolder finalStats = Runner.setUp(
         Scenario.scenario("Test phase").exec(
-//            put(Long.class, byte[].class).withWeight(0.10)
-//                .using(keyGenerator, valueGenerator)
-//                .atRandom(GAUSSIAN, 0, nbElements, 10000),
-//            get(Long.class, byte[].class).withWeight(0.80)
-//                .using(keyGenerator, valueGenerator)
-//                .atRandom(GAUSSIAN, 0, nbElements, 10000),
-            putAll(Long.class, byte[].class).withWeight(0.10)
+            put(Long.class, byte[].class).withWeight(0.10)
                 .using(keyGenerator, valueGenerator)
                 .atRandom(GAUSSIAN, 0, nbElements, 10000),
-            getAll(Long.class, byte[].class).withWeight(0.40)
+            get(Long.class, byte[].class).withWeight(0.80)
                 .using(keyGenerator, valueGenerator)
                 .atRandom(GAUSSIAN, 0, nbElements, 10000)
+//            putAll(Long.class, byte[].class).withWeight(0.10)
+//                .using(keyGenerator, valueGenerator)
+//                .atRandom(GAUSSIAN, 0, nbElements, 10000),
+//            getAll(Long.class, byte[].class).withWeight(0.40)
+//                .using(keyGenerator, valueGenerator)
+//                .atRandom(GAUSSIAN, 0, nbElements, 10000)
 //            removeAll(Long.class, byte[].class).withWeight(0.10)
 //                .using(keyGenerator, valueGenerator)
 //                .atRandom(GAUSSIAN, 0, nbElements, 10000),

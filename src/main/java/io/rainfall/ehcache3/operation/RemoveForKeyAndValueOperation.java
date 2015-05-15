@@ -32,8 +32,6 @@ import java.util.Map;
  */
 public class RemoveForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V> {
 
-  private RemoveForKeyAndValueOperationFunction<K, V> function = new RemoveForKeyAndValueOperationFunction<K, V>();
-
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
@@ -42,7 +40,7 @@ public class RemoveForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V> 
     final long next = this.sequenceGenerator.next();
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      statisticsHolder.measure(cache.toString(), function.execute(cache, next, keyGenerator, valueGenerator));
+      statisticsHolder.measure(cache.toString(), new RemoveForKeyAndValueOperationFunction<K, V>(cache, next, keyGenerator, valueGenerator));
     }
   }
 }

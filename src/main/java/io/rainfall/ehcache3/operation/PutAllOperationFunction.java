@@ -18,14 +18,11 @@ package io.rainfall.ehcache3.operation;
 
 import io.rainfall.ObjectGenerator;
 import io.rainfall.ehcache.statistics.EhcacheResult;
-import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import org.ehcache.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -37,7 +34,7 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.PUTALL;
  *
  * @author Aurelien Broszniowski
  */
-public class PutAllOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
+public class PutAllOperationFunction<K, V> implements OperationFunction<EhcacheResult> {
 
   private static final Logger log = LoggerFactory.getLogger(PutAllOperationFunction.class);
 
@@ -47,15 +44,13 @@ public class PutAllOperationFunction<K, V> extends OperationFunction<EhcacheResu
   private ObjectGenerator<V> valueGenerator;
   private int bulkBatchSize;
 
-  public FunctionExecutor execute(final Cache<K, V> cache, final long next,
-                                  final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
-                                  int bulkBatchSize) {
+  public PutAllOperationFunction(final Cache<K, V> cache, final long next, final ObjectGenerator<K> keyGenerator,
+                                 final ObjectGenerator<V> valueGenerator, final int bulkBatchSize) {
     this.cache = cache;
     this.next = next;
     this.keyGenerator = keyGenerator;
     this.valueGenerator = valueGenerator;
     this.bulkBatchSize = bulkBatchSize;
-    return this.functionExecutor;
   }
 
   @Override
