@@ -18,7 +18,6 @@ package io.rainfall.ehcache2.operation;
 
 import io.rainfall.ObjectGenerator;
 import io.rainfall.ehcache.statistics.EhcacheResult;
-import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import net.sf.ehcache.Ehcache;
 
@@ -31,17 +30,16 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVE;
  *
  * @author Aurelien Broszniowski
  */
-public class RemoveOperationFunction<K> extends OperationFunction<EhcacheResult> {
+public class RemoveOperationFunction<K> implements OperationFunction<EhcacheResult> {
 
   private Ehcache cache;
   private long next;
   private ObjectGenerator<K> keyGenerator;
 
-  public FunctionExecutor execute(final Ehcache cache, final long next, final ObjectGenerator<K> keyGenerator) {
+  public RemoveOperationFunction(final Ehcache cache, final long next, final ObjectGenerator<K> keyGenerator) {
     this.cache = cache;
     this.next = next;
     this.keyGenerator = keyGenerator;
-    return this.functionExecutor;
   }
 
   @Override

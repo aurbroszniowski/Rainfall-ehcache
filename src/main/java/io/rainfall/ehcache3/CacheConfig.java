@@ -18,10 +18,8 @@ package io.rainfall.ehcache3;
 
 import io.rainfall.Configuration;
 import org.ehcache.Cache;
-import org.ehcache.StandaloneCache;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,9 +48,13 @@ public class CacheConfig<K, V> extends Configuration {
    * @throws java.lang.ClassCastException when the caches passed as parameter are not of the type K, V
    */
 
-  @SuppressWarnings("unchecked")
-  public CacheConfig<K, V> caches(final Cache... caches) throws ClassCastException {
-    for (Cache cache : caches) {
+  public CacheConfig<K, V> caches(final Cache<K, V>... caches) throws ClassCastException {
+    Collections.addAll(this.caches, caches);
+    return this;
+  }
+
+  public CacheConfig<K, V> caches(final List<Cache<K, V>> caches) throws ClassCastException {
+    for (Cache<K, V> cache : caches) {
       this.caches.add(cache);
     }
     return this;

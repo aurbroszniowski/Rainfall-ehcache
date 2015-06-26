@@ -20,18 +20,12 @@ import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
 import io.rainfall.EhcacheOperation;
 import io.rainfall.TestException;
-import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
-import io.rainfall.statistics.OperationFunction;
 import net.sf.ehcache.Ehcache;
-import net.sf.ehcache.Element;
 
 import java.util.List;
 import java.util.Map;
-
-import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
 
 /**
  * Execute and measure a Ehcache put operation
@@ -39,8 +33,6 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
  * @author Aurelien Broszniowski
  */
 public class PutOperation<K, V> extends EhcacheOperation {
-
-  private PutOperationFunction<K, V> function = new PutOperationFunction<K, V>();
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
@@ -50,7 +42,7 @@ public class PutOperation<K, V> extends EhcacheOperation {
     final long next = this.sequenceGenerator.next();
     List<Ehcache> caches = cacheConfig.getCaches();
     for (final Ehcache cache : caches) {
-      statisticsHolder.measure(cache.getName(), function.execute(cache, next, keyGenerator, valueGenerator));
+      statisticsHolder.measure(cache.getName(), new PutOperationFunction<K, V>(cache, next, keyGenerator, valueGenerator));
     }
   }
 }

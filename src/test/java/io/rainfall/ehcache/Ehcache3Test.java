@@ -32,6 +32,7 @@ import org.ehcache.CacheManager;
 import org.ehcache.config.CacheConfigurationBuilder;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static io.rainfall.configuration.ReportingConfig.text;
@@ -59,7 +60,7 @@ public class Ehcache3Test {
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", CacheConfigurationBuilder.newCacheConfigurationBuilder()
             .buildConfig(String.class, byte[].class))
-        .build();
+        .build(true);
 
     cache = cacheManager.getCache("one", String.class, byte[].class);
 
@@ -76,11 +77,12 @@ public class Ehcache3Test {
   }
 
   @Test
+  @Ignore
   public void test3() throws SyntaxException {
     CacheConfig<String, byte[]> cacheConfig = cacheConfig(String.class, byte[].class).caches(cache);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
-    ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text()).summary(text());
+    ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text());
 
     ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);

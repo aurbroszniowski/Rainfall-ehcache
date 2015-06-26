@@ -7,10 +7,11 @@
   <groupId>io.rainfall</groupId>
   <artifactId>rainfall-ehcache</artifactId>
   <name>Rainfall-ehcache</name>
-  <version>1.0.3-SNAPSHOT</version>
+  <version>1.0.5-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <properties>
+    <rainfall.core.version>1.0.5-SNAPSHOT</rainfall.core.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -161,9 +162,16 @@
 
   <dependencies>
     <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.0.7</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>io.rainfall</groupId>
       <artifactId>rainfall-core</artifactId>
-      <version>1.0.3-SNAPSHOT</version>
+      <version>${rainfall.core.version}</version>
     </dependency>
 
     <dependency>
@@ -208,7 +216,6 @@
       <version>1.0.3</version>
       <scope>provided</scope>
     </dependency>
-
 
     <dependency>
       <groupId>nf.fr.eraasoft</groupId>

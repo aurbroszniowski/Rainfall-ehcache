@@ -18,7 +18,6 @@ package io.rainfall.ehcache2.operation;
 
 import io.rainfall.ObjectGenerator;
 import io.rainfall.ehcache.statistics.EhcacheResult;
-import io.rainfall.statistics.FunctionExecutor;
 import io.rainfall.statistics.OperationFunction;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
@@ -31,20 +30,18 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
  *
  * @author Aurelien Broszniowski
  */
-public class PutOperationFunction<K, V> extends OperationFunction<EhcacheResult> {
+public class PutOperationFunction<K, V> implements OperationFunction<EhcacheResult> {
 
   private Ehcache cache;
   private long next;
   private ObjectGenerator<K> keyGenerator;
   private ObjectGenerator<V> valueGenerator;
 
-  public FunctionExecutor execute(final Ehcache cache, final long next,
-                                  final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator) {
+  public PutOperationFunction(final Ehcache cache, final long next, final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator) {
     this.cache = cache;
     this.next = next;
     this.keyGenerator = keyGenerator;
     this.valueGenerator = valueGenerator;
-    return functionExecutor;
   }
 
   @Override
