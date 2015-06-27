@@ -20,8 +20,9 @@ import io.rainfall.Configuration;
 import org.ehcache.Cache;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Aurelien Broszniowski
@@ -30,6 +31,7 @@ import java.util.List;
 public class CacheConfig<K, V> extends Configuration {
 
   private List<Cache<K, V>> caches = new ArrayList<Cache<K, V>>();
+  private Map<Cache,String > cacheNames = new HashMap();
   private int bulkBatchSize = 10;     // Default nb of objects used for bulk operations
 
   public static <K, V> CacheConfig<K, V> cacheConfig(Class<K> keyClass, final Class<V> valueClass) {
@@ -49,7 +51,10 @@ public class CacheConfig<K, V> extends Configuration {
    */
 
   public CacheConfig<K, V> caches(final Cache<K, V>... caches) throws ClassCastException {
-    Collections.addAll(this.caches, caches);
+    for (Cache<K, V> cache : caches) {
+      this.caches.add(cache);
+      this.cacheNames.put(cache, cache.toString());
+    }
     return this;
   }
 
@@ -67,5 +72,9 @@ public class CacheConfig<K, V> extends Configuration {
 
   public int getBulkBatchSize() {
     return bulkBatchSize;
+  }
+
+  public String getCacheName(final Cache<K, V> cache) {
+    return cacheNames.get(cache);
   }
 }
