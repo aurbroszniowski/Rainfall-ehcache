@@ -52,17 +52,17 @@ import static org.ehcache.CacheManagerBuilder.newCacheManagerBuilder;
  */
 public class Ehcache3Test {
 
-  private Cache<String, byte[]> cache = null;
+  private Cache<String, Byte[]> cache = null;
   private CacheManager cacheManager = null;
 
   @Before
   public void setUp() {
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", CacheConfigurationBuilder.newCacheConfigurationBuilder()
-            .buildConfig(String.class, byte[].class))
+            .buildConfig(String.class, Byte[].class))
         .build(true);
 
-    cache = cacheManager.getCache("one", String.class, byte[].class);
+    cache = cacheManager.getCache("one", String.class, Byte[].class);
 
     if (cache == null) {
       throw new AssertionError("Cache couldn't be initialized");
@@ -79,24 +79,24 @@ public class Ehcache3Test {
   @Test
   @Ignore
   public void test3() throws SyntaxException {
-    CacheConfig<String, byte[]> cacheConfig = cacheConfig(String.class, byte[].class).caches(cache);
+    CacheConfig<String, Byte[]> cacheConfig = cacheConfig(String.class, Byte[].class).cache("cache", cache);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
     ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text());
 
     ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
-    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
+    ObjectGenerator<Byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(
-            put(String.class, byte[].class)
+            put(String.class, Byte[].class)
                 .withWeight(0.10)
                 .using(keyGenerator, valueGenerator)
                 .sequentially(),
-            get(String.class, byte[].class)
+            get(String.class, Byte[].class)
                 .withWeight(0.80)
                 .using(keyGenerator, valueGenerator)
                 .sequentially(),
-            remove(String.class, byte[].class)
+            remove(String.class, Byte[].class)
                 .withWeight(0.10)
                 .using(keyGenerator, valueGenerator)
                 .sequentially()

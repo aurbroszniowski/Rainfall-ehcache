@@ -69,7 +69,7 @@ public class Ehcache2Test {
 
   @Test
   public void testMultipleExec() {
-    CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
+    CacheConfig<String, Byte[]> cacheConfig = CacheConfig.<String, Byte[]>cacheConfig()
         .caches(cache1, cache2, cache3);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
@@ -85,7 +85,7 @@ public class Ehcache2Test {
 
   @Test
   public void testLoad() throws SyntaxException {
-    CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
+    CacheConfig<String, Byte[]> cacheConfig = CacheConfig.<String, Byte[]>cacheConfig()
         .caches(cache1, cache2, cache3);
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(5, MINUTES);
@@ -108,7 +108,7 @@ public class Ehcache2Test {
 
   @Test
   public void testLength() throws SyntaxException {
-    CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
+    CacheConfig<String, Byte[]> cacheConfig = CacheConfig.<String, Byte[]>cacheConfig()
         .caches(cache1, cache2, cache3);
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
@@ -116,7 +116,7 @@ public class Ehcache2Test {
     ReportingConfig<EhcacheResult> reporting = ReportingConfig.report(EhcacheResult.class).log(text(), html());
 
     ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
-    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
+    ObjectGenerator<Byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(
             put().withWeight(0.10).using(keyGenerator, valueGenerator).sequentially(),
@@ -132,7 +132,7 @@ public class Ehcache2Test {
 
   @Test
   public void testRandomAccess() throws SyntaxException {
-    CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
+    CacheConfig<String, Byte[]> cacheConfig = CacheConfig.<String, Byte[]>cacheConfig()
         .caches(cache1, cache2, cache3);
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
@@ -140,7 +140,7 @@ public class Ehcache2Test {
     ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text(), html());
 
     ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
-    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
+    ObjectGenerator<Byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(
             put().withWeight(0.10).using(keyGenerator, valueGenerator).atRandom(GAUSSIAN, 0, 10000, 1000),
@@ -156,7 +156,7 @@ public class Ehcache2Test {
 
   @Test
   public void testRemove() throws SyntaxException {
-    CacheConfig<String, byte[]> cacheConfig = CacheConfig.<String, byte[]>cacheConfig()
+    CacheConfig<String, Byte[]> cacheConfig = CacheConfig.<String, Byte[]>cacheConfig()
         .caches(cache1, cache2, cache3);
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
@@ -164,7 +164,7 @@ public class Ehcache2Test {
     ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text(), html());
 
     ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
-    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
+    ObjectGenerator<Byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(
             put().withWeight(0.10).using(keyGenerator, valueGenerator).sequentially(),

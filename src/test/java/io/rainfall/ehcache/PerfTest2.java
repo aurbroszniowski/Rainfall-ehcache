@@ -60,7 +60,7 @@ public class PerfTest2 {
 
       int nbElements = 250000;
       ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
-      ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000);
+      ObjectGenerator<Byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000);
 
       System.out.println("----------> Warm up phase");
 

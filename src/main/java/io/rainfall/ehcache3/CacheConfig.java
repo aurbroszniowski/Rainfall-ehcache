@@ -31,7 +31,7 @@ import java.util.Map;
 public class CacheConfig<K, V> extends Configuration {
 
   private List<Cache<K, V>> caches = new ArrayList<Cache<K, V>>();
-  private Map<Cache,String > cacheNames = new HashMap();
+  private Map<Cache<K, V>, String> cacheNames = new HashMap<Cache<K, V>, String>();
   private int bulkBatchSize = 10;     // Default nb of objects used for bulk operations
 
   public static <K, V> CacheConfig<K, V> cacheConfig(Class<K> keyClass, final Class<V> valueClass) {
@@ -42,25 +42,16 @@ public class CacheConfig<K, V> extends Configuration {
     return caches;
   }
 
-  /**
-   * This builder pattern has been implemented in order to avoid the warning of using generics with varargs
-   *
-   * @param caches
-   * @return this config
-   * @throws java.lang.ClassCastException when the caches passed as parameter are not of the type K, V
-   */
-
-  public CacheConfig<K, V> caches(final Cache<K, V>... caches) throws ClassCastException {
-    for (Cache<K, V> cache : caches) {
-      this.caches.add(cache);
-      this.cacheNames.put(cache, cache.toString());
-    }
+  public CacheConfig<K, V> cache(final String cacheName, final Cache<K, V> cache) {
+    this.caches.add(cache);
+    this.cacheNames.put(cache, cacheName);
     return this;
   }
 
-  public CacheConfig<K, V> caches(final List<Cache<K, V>> caches) throws ClassCastException {
+  public CacheConfig<K, V> caches(final List<Cache<K, V>> caches) {
     for (Cache<K, V> cache : caches) {
       this.caches.add(cache);
+      this.cacheNames.put(cache, cache.toString());
     }
     return this;
   }
@@ -77,4 +68,5 @@ public class CacheConfig<K, V> extends Configuration {
   public String getCacheName(final Cache<K, V> cache) {
     return cacheNames.get(cache);
   }
+
 }
