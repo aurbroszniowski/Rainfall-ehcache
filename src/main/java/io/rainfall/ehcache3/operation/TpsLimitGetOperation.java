@@ -48,7 +48,7 @@ public class TpsLimitGetOperation<K, V> extends GetOperation<K, V> {
     long currentTps = statisticsHolder.getCurrentTps(EhcacheResult.GET);
     if (currentTps < this.tpsLimit) {
       for (final Cache<K, V> cache : caches) {
-        statisticsHolder.measure(cache.toString(), new GetOperationFunction<K, V>(cache, next, keyGenerator));
+        statisticsHolder.measure(cacheConfig.getCacheName(cache), new GetOperationFunction<K, V>(cache, next, keyGenerator));
       }
     }
   }

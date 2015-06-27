@@ -40,7 +40,7 @@ public class PutIfAbsentOperation<K, V> extends EhcacheOperation<K, V> {
     final long next = this.sequenceGenerator.next();
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      statisticsHolder.measure(cache.toString(), new PutIfAbsentOperationFunction<K, V>(cache, next, keyGenerator, valueGenerator));
+      statisticsHolder.measure(cacheConfig.getCacheName(cache), new PutIfAbsentOperationFunction<K, V>(cache, next, keyGenerator, valueGenerator));
     }
   }
 }

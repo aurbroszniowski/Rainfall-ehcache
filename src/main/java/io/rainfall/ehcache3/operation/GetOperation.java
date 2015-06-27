@@ -40,7 +40,7 @@ public class GetOperation<K, V> extends EhcacheOperation<K, V> {
     final long next = sequenceGenerator.next();
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      statisticsHolder.measure(cache.toString(), new GetOperationFunction<K, V>(cache, next, keyGenerator));
+      statisticsHolder.measure(cacheConfig.getCacheName(cache), new GetOperationFunction<K, V>(cache, next, keyGenerator));
     }
   }
 }
