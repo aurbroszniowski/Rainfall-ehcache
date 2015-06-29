@@ -27,6 +27,9 @@ import org.ehcache.Cache;
 import java.util.List;
 import java.util.Map;
 
+import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
+import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
+
 /**
  * @author Aurelien Broszniowski
  */
@@ -48,7 +51,15 @@ public class TpsLimitPutOperation<K, V> extends PutOperation<K, V> {
     long currentTps = statisticsHolder.getCurrentTps(EhcacheResult.PUT);
     if (currentTps < this.tpsLimit) {
       for (final Cache<K, V> cache : caches) {
-        statisticsHolder.measure(cacheConfig.getCacheName(cache), new PutOperationFunction<K, V>(cache, next, keyGenerator, valueGenerator));
+        long start = getTimeInNs();
+        try {
+          cache.put(keyGenerator.generate(next), valueGenerator.generate(next));
+          long end = getTimeInNs();
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUT);
+        } catch (Exception e) {
+          long end = getTimeInNs();
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
+        }
       }
     }
   }

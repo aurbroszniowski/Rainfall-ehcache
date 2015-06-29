@@ -27,6 +27,10 @@ import org.ehcache.Cache;
 import java.util.List;
 import java.util.Map;
 
+import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
+import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
+import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVEVALUE;
+
 /**
  * @author Aurelien Broszniowski
  */
@@ -40,7 +44,20 @@ public class RemoveForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V> 
     final long next = this.sequenceGenerator.next();
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      statisticsHolder.measure(cacheConfig.getCacheName(cache), new RemoveForKeyAndValueOperationFunction<K, V>(cache, next, keyGenerator, valueGenerator));
+      boolean removed;
+      long start = getTimeInNs();
+      try {
+        removed = cache.remove(keyGenerator.generate(next), valueGenerator.generate(next));
+        long end = getTimeInNs();
+        if (!removed) {
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), MISS);
+        } else {
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVEVALUE);
+        }
+      } catch (Exception e) {
+        long end = getTimeInNs();
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
+      }
     }
   }
 }

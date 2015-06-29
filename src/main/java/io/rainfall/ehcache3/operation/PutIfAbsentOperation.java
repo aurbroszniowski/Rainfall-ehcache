@@ -27,6 +27,10 @@ import org.ehcache.Cache;
 import java.util.List;
 import java.util.Map;
 
+import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
+import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
+import static io.rainfall.ehcache.statistics.EhcacheResult.PUTIFABSENT;
+
 /**
  * @author Aurelien Broszniowski
  */
@@ -40,7 +44,20 @@ public class PutIfAbsentOperation<K, V> extends EhcacheOperation<K, V> {
     final long next = this.sequenceGenerator.next();
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      statisticsHolder.measure(cacheConfig.getCacheName(cache), new PutIfAbsentOperationFunction<K, V>(cache, next, keyGenerator, valueGenerator));
+      V v;
+      long start = getTimeInNs();
+      try {
+        v = cache.putIfAbsent(keyGenerator.generate(next), valueGenerator.generate(next));
+        long end = getTimeInNs();
+        if (v != null) {
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), MISS);
+        } else {
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUTIFABSENT);
+        }
+      } catch (Exception e) {
+        long end = getTimeInNs();
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
+      }
     }
   }
 }

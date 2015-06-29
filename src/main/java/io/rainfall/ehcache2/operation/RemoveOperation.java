@@ -27,6 +27,10 @@ import net.sf.ehcache.Ehcache;
 import java.util.List;
 import java.util.Map;
 
+import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
+import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
+import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVE;
+
 /**
  * Execute and measure a Ehcache remove operation
  *
@@ -42,7 +46,20 @@ public class RemoveOperation<K, V> extends EhcacheOperation {
     final long next = this.sequenceGenerator.next();
     List<Ehcache> caches = cacheConfig.getCaches();
     for (final Ehcache cache : caches) {
-      statisticsHolder.measure(cache.getName(), new RemoveOperationFunction<K>(cache, next, keyGenerator));
+      boolean removed;
+      long start = getTimeInNs();
+      try {
+        removed = cache.remove(keyGenerator.generate(next));
+        long end = getTimeInNs();
+        if (removed) {
+          statisticsHolder.record(cache.getName(), (end - start), REMOVE);
+        } else {
+          statisticsHolder.record(cache.getName(), (end - start), MISS);
+        }
+      } catch (Exception e) {
+        long end = getTimeInNs();
+        statisticsHolder.record(cache.getName(), (end - start), EXCEPTION);
+      }
     }
   }
 }

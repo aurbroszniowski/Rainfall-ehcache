@@ -23,9 +23,14 @@ import io.rainfall.TestException;
 import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
 import net.sf.ehcache.Ehcache;
+import net.sf.ehcache.Element;
 
 import java.util.List;
 import java.util.Map;
+
+import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
+import static io.rainfall.ehcache.statistics.EhcacheResult.GET;
+import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
 
 /**
  * Execute and measure a Ehcache get operation
@@ -42,7 +47,20 @@ public class GetOperation<K, V> extends EhcacheOperation {
     final long next = this.sequenceGenerator.next();
     List<Ehcache> caches = cacheConfig.getCaches();
     for (final Ehcache cache : caches) {
-      statisticsHolder.measure(cache.getName(), new GetOperationFunction<K>(cache, next, keyGenerator));
+      Element value;
+      long start = getTimeInNs();
+      try {
+        value = cache.get(keyGenerator.generate(next));
+        long end = getTimeInNs();
+        if (value == null) {
+          statisticsHolder.record(cache.getName(), (end - start), MISS);
+        } else {
+          statisticsHolder.record(cache.getName(), (end - start), GET);
+        }
+      } catch (Exception e) {
+        long end = getTimeInNs();
+        statisticsHolder.record(cache.getName(), (end - start), EXCEPTION);
+      }
     }
   }
 

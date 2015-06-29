@@ -24,8 +24,14 @@ import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
+
+import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
+import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVEALL;
 
 /**
  * @author Aurelien Broszniowski
@@ -39,9 +45,21 @@ public class RemoveAllOperation<K, V> extends EhcacheOperation<K, V> {
     CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
     int bulkBatchSize = cacheConfig.getBulkBatchSize();
     final long next = this.sequenceGenerator.next();
+    Set<K> set = Collections.newSetFromMap(new WeakHashMap<K, Boolean>());
+    for (int i = 0; i < bulkBatchSize; i++) {
+      set.add(keyGenerator.generate(next));
+    }
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      statisticsHolder.measure(cacheConfig.getCacheName(cache), new RemoveAllOperationFunction<K, V>(cache, next, keyGenerator, bulkBatchSize));
+      long start = getTimeInNs();
+      try {
+        cache.removeAll(set);
+        long end = getTimeInNs();
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVEALL);
+      } catch (Exception e) {
+        long end = getTimeInNs();
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
+      }
     }
   }
 

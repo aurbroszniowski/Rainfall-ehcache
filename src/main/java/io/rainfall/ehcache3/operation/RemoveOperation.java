@@ -27,6 +27,9 @@ import org.ehcache.Cache;
 import java.util.List;
 import java.util.Map;
 
+import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
+import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVE;
+
 /**
  * @author Aurelien Broszniowski
  */
@@ -40,7 +43,16 @@ public class RemoveOperation<K, V> extends EhcacheOperation<K, V> {
     final long next = this.sequenceGenerator.next();
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      statisticsHolder.measure(cacheConfig.getCacheName(cache), new RemoveOperationFunction<K, V>(cache, next, keyGenerator));
+      boolean removed;
+      long start = getTimeInNs();
+      try {
+        cache.remove(keyGenerator.generate(next));
+        long end = getTimeInNs();
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVE);
+      } catch (Exception e) {
+        long end = getTimeInNs();
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
+      }
     }
   }
 }
