@@ -56,6 +56,14 @@ public class CacheConfig<K, V> extends Configuration {
     return this;
   }
 
+  public CacheConfig<K, V> caches(final Cache<K, V>... caches) throws ClassCastException {
+    for (Cache<K, V> cache : caches) {
+      this.caches.add(cache);
+      this.cacheNames.put(cache, cache.toString());
+    }
+    return this;
+  }
+
   public Configuration bulkBatchSize(final int bulkBatchSize) {
     this.bulkBatchSize = bulkBatchSize;
     return this;
