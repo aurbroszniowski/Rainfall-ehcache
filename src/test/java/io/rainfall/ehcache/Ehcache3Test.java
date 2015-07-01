@@ -85,18 +85,18 @@ public class Ehcache3Test {
     ReportingConfig reporting = ReportingConfig.report(EhcacheResult.class).log(text());
 
     ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
-    ObjectGenerator<Byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
+    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(
-            put(String.class, Byte[].class)
+            put(String.class, byte[].class)
                 .withWeight(0.10)
                 .using(keyGenerator, valueGenerator)
                 .sequentially(),
-            get(String.class, Byte[].class)
+            get(String.class, byte[].class)
                 .withWeight(0.80)
                 .using(keyGenerator, valueGenerator)
                 .sequentially(),
-            remove(String.class, Byte[].class)
+            remove(String.class, byte[].class)
                 .withWeight(0.10)
                 .using(keyGenerator, valueGenerator)
                 .sequentially()
