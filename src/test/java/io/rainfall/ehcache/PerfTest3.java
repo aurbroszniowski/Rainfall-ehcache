@@ -315,10 +315,10 @@ public class PerfTest3 {
       e.printStackTrace();
     }
 
-    System.out.println(one.getStatistics().getCachePuts());
-    System.out.println(two.getStatistics().getCachePuts());
-    System.out.println(three.getStatistics().getCachePuts());
-    System.out.println(four.getStatistics().getCachePuts());
+//    System.out.println(one.getStatistics().getCachePuts());
+//    System.out.println(two.getStatistics().getCachePuts());
+//    System.out.println(three.getStatistics().getCachePuts());
+//    System.out.println(four.getStatistics().getCachePuts());
 
     System.out.println("----------> Test phase");
 
