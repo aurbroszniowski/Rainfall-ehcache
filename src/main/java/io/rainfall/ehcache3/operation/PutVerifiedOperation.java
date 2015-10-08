@@ -1,20 +1,17 @@
-/*
- * Copyright 2014 Aurélien Broszniowski
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package io.rainfall.ehcache3.operation;
+
+import io.rainfall.AssertionEvaluator;
+import io.rainfall.Configuration;
+import io.rainfall.EhcacheOperation;
+import io.rainfall.TestException;
+import io.rainfall.ehcache3.CacheConfig;
+import io.rainfall.statistics.StatisticsHolder;
+import org.ehcache.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Map;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
@@ -35,7 +32,7 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
 /**
  * @author Aurelien Broszniowski
  */
-public class PutOperation<K, V> extends EhcacheOperation<K, V> {
+public class PutVerifiedOperation<K, V> extends PutOperation<K, V> {
 
   private static final Logger log = LoggerFactory.getLogger(PutOperation.class);
 
@@ -61,7 +58,7 @@ public class PutOperation<K, V> extends EhcacheOperation<K, V> {
       }
 
       V v1 = cache.get(k);
-      if (v!=null && !v.equals(v1)) {
+      if (v != null && !v.equals(v1)) {
         log.error("incorrect value found in cache for the key {} : {}", k, v);
         statisticsHolder.increaseAssertionsErrorsCount(cacheConfig.getCacheName(cache));
       }

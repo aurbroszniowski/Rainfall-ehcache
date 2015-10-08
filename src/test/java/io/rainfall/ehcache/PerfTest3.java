@@ -24,8 +24,11 @@ import io.rainfall.configuration.ConcurrencyConfig;
 import io.rainfall.configuration.ReportingConfig;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
+import io.rainfall.ehcache3.operation.PutVerifiedOperation;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.LongGenerator;
+import io.rainfall.generator.VerifiedValueGenerator;
+import io.rainfall.generator.VerifiedValueGenerator.VerifiedValue;
 import io.rainfall.statistics.StatisticsPeekHolder;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
@@ -60,6 +63,63 @@ import static org.ehcache.config.ResourcePoolsBuilder.newResourcePoolsBuilder;
  * @author Aurelien Broszniowski
  */
 public class PerfTest3 {
+
+  @Test
+  @Ignore
+  public void testVerifiedValue() {
+    ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig().threads(16).timeout(30, MINUTES);
+
+    ObjectGenerator<Long> keyGenerator = new LongGenerator();
+    ObjectGenerator<VerifiedValue> valueGenerator = new VerifiedValueGenerator<Long>(keyGenerator);
+    long nbElements = 100;
+    CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    builder.withResourcePools(newResourcePoolsBuilder().heap(nbElements, EntryUnit.ENTRIES).build());
+
+    CacheManager cacheManager = newCacheManagerBuilder()
+        .withCache("one", builder.buildConfig(Long.class, VerifiedValue.class))
+        .build(true);
+
+    Cache<Long, VerifiedValue> one = cacheManager.getCache("one", Long.class, VerifiedValue.class);
+
+    try {
+      long start = System.nanoTime();
+
+      System.out.println("Cache Warmup");
+      Runner.setUp(
+          Scenario.scenario("Cache warm up phase")
+              .exec(
+                  put(Long.class, VerifiedValue.class).using(keyGenerator, valueGenerator).sequentially()))
+          .executed(times(nbElements))
+          .config(report(EhcacheResult.class))
+          .config(concurrency)
+          .config(cacheConfig(Long.class, VerifiedValue.class).cache("one", one)
+          )
+          .start();
+      long end = System.nanoTime();
+      System.out.println("Warmup length : " + (end - start) / 1000000L + "ms");
+
+
+      System.out.println("Cache Test");
+      StatisticsPeekHolder finalStats = Runner.setUp(
+          Scenario.scenario("Cache test phase")
+              .exec(
+                  new PutVerifiedOperation().using(keyGenerator, valueGenerator).sequentially().withWeight(0.10),
+                  get(Long.class, VerifiedValue.class).using(keyGenerator, valueGenerator).sequentially().withWeight(0.90)))
+//          .warmup(during(1, TimeDivision.minutes))
+          .executed(during(20, seconds))
+          .config(concurrency)
+          .config(report(EhcacheResult.class, new EhcacheResult[] { GET, PUT, MISS }).log(text()))
+          .config(cacheConfig(Long.class, VerifiedValue.class).cache("one", one))
+          .start();
+
+      System.out.println("Nb errors : " + finalStats.getTotalAssertionsErrorsCount());
+
+    } catch (SyntaxException e) {
+      e.printStackTrace();
+    } finally {
+      cacheManager.close();
+    }
+  }
 
   @Test
   @Ignore
@@ -107,30 +167,6 @@ public class PerfTest3 {
         Object o = one.get(keyGenerator.generate(seed));
         if (o == null) System.out.println("null for key " + seed);
       }
-      System.out.println("done");
-
-
-/*
-
-      System.out.println("Test");
-      StatisticsPeekHolder finalStats = Runner.setUp(
-          Scenario.scenario("Test phase")
-              .exec(
-                  get(Long.class, Byte[].class).using(keyGenerator, valueGenerator)
-                      .atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10)
-                      .withWeight(0.90)
-              ))
-          .warmup(over(1, minutes))
-          .executed(over(1, minutes))
-          .config(concurrency)
-          .config(report(EhcacheResult.class, new EhcacheResult[] { PUT, GET, MISS })
-              .log(text(), html("target/perf-cache-hr-test")))
-          .config(cacheConfig(Long.class, Byte[].class)
-                  .caches(one)
-          )
-          .start();
-*/
-
       System.out.println("----------> Done");
     } catch (SyntaxException e) {
       e.printStackTrace();
