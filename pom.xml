@@ -7,11 +7,11 @@
   <groupId>io.rainfall</groupId>
   <artifactId>rainfall-ehcache</artifactId>
   <name>Rainfall-ehcache</name>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>1.1.0</version>
   <packaging>jar</packaging>
 
   <properties>
-    <rainfall.core.version>1.1.0-SNAPSHOT</rainfall.core.version>
+    <rainfall.core.version>1.1.0</rainfall.core.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
