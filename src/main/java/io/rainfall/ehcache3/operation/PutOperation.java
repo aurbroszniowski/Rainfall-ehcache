@@ -59,12 +59,6 @@ public class PutOperation<K, V> extends EhcacheOperation<K, V> {
         long end = getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
-
-      V v1 = cache.get(k);
-      if (v!=null && !v.equals(v1)) {
-        log.error("incorrect value found in cache for the key {} : {}", k, v);
-        statisticsHolder.increaseAssertionsErrorsCount(cacheConfig.getCacheName(cache));
-      }
     }
   }
 }

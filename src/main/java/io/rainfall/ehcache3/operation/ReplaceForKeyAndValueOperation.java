@@ -45,9 +45,12 @@ public class ReplaceForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V>
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
       boolean replaced;
+      K k = keyGenerator.generate(next);
+      V v = valueGenerator.generate(next + 1);
+
       long start = getTimeInNs();
       try {
-        replaced = cache.replace(keyGenerator.generate(next), valueGenerator.generate(next), valueGenerator.generate(next));
+        replaced = cache.replace(k, v, v);
         long end = getTimeInNs();
         if (!replaced) {
           statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), MISS);

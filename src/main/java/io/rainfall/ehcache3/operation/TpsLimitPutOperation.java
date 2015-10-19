@@ -51,9 +51,12 @@ public class TpsLimitPutOperation<K, V> extends PutOperation<K, V> {
     long currentTps = statisticsHolder.getCurrentTps(EhcacheResult.PUT);
     if (currentTps < this.tpsLimit) {
       for (final Cache<K, V> cache : caches) {
+        K k = keyGenerator.generate(next);
+        V v = valueGenerator.generate(next);
+
         long start = getTimeInNs();
         try {
-          cache.put(keyGenerator.generate(next), valueGenerator.generate(next));
+          cache.put(k, v);
           long end = getTimeInNs();
           statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUT);
         } catch (Exception e) {

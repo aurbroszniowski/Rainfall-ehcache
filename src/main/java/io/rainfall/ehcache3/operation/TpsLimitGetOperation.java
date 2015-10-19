@@ -52,10 +52,12 @@ public class TpsLimitGetOperation<K, V> extends GetOperation<K, V> {
     long currentTps = statisticsHolder.getCurrentTps(EhcacheResult.GET);
     if (currentTps < this.tpsLimit) {
       for (final Cache<K, V> cache : caches) {
+        K k = keyGenerator.generate(next);
         V value;
+
         long start = getTimeInNs();
         try {
-          value = cache.get(keyGenerator.generate(next));
+          value = cache.get(k);
           long end = getTimeInNs();
           if (value == null) {
             statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), MISS);

@@ -45,9 +45,12 @@ public class PutIfAbsentOperation<K, V> extends EhcacheOperation<K, V> {
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
       V v;
+      K k = keyGenerator.generate(next);
+      V v1 = valueGenerator.generate(next);
+
       long start = getTimeInNs();
       try {
-        v = cache.putIfAbsent(keyGenerator.generate(next), valueGenerator.generate(next));
+        v = cache.putIfAbsent(k, v1);
         long end = getTimeInNs();
         if (v != null) {
           statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), MISS);
