@@ -27,15 +27,22 @@ import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.ehcache3.operation.PutVerifiedOperation;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.LongGenerator;
+import io.rainfall.generator.StringGenerator;
 import io.rainfall.generator.VerifiedValueGenerator;
 import io.rainfall.generator.VerifiedValueGenerator.VerifiedValue;
+import io.rainfall.generator.sequence.Distribution;
 import io.rainfall.statistics.StatisticsPeekHolder;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.CacheConfigurationBuilder;
+import org.ehcache.config.persistence.CacheManagerPersistenceConfiguration;
 import org.ehcache.config.units.EntryUnit;
+import org.ehcache.config.units.MemoryUnit;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import static io.rainfall.Unit.users;
 import static io.rainfall.configuration.ReportingConfig.html;
@@ -472,5 +479,82 @@ public class PerfTest3 {
         .start()
     ;
     cacheManager.close();
+  }
+
+  @Test
+  @Ignore
+  public void tier() {
+    int heap = 200000;
+    int offheap = 1;
+    int disk = 2;
+
+    long nbElementsHeap = MemoryUnit.MB.toBytes(heap) / MemoryUnit.KB.toBytes(1);
+    long nbElements = MemoryUnit.GB.toBytes(disk) / MemoryUnit.KB.toBytes(1);
+
+    CacheConfigurationBuilder<Object, Object> cacheBuilder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    cacheBuilder = cacheBuilder.withResourcePools(newResourcePoolsBuilder()
+        .heap(nbElementsHeap, EntryUnit.ENTRIES)
+        .offheap(offheap, MemoryUnit.GB)
+        .disk(disk, MemoryUnit.GB)
+        .build());
+
+    ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
+        .threads(4).timeout(30, MINUTES);
+
+    ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
+    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1024);
+
+    CacheManager cacheManager = newCacheManagerBuilder()
+        .with(new CacheManagerPersistenceConfiguration(new File("/data/PerfTest3")))
+        .withCache("one", cacheBuilder.buildConfig(String.class, byte[].class))
+        .build(true);
+
+    Cache one = cacheManager.getCache("one", String.class, byte[].class);
+    try {
+      System.out.println("----------> Cache Warm up phase");
+      long start = System.nanoTime();
+
+      Runner.setUp(
+          Scenario.scenario("Cache warm up phase")
+              .exec(put(String.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()))
+          .executed(times(nbElements))
+          .config(concurrency)
+          .config(report(EhcacheResult.class, new EhcacheResult[] { PUT }).log(text(), html("warmup-tier")))
+          .config(cacheConfig(String.class, byte[].class)
+                  .cache("one", one)
+          )
+          .start();
+
+      long end = System.nanoTime();
+      System.out.println("Warmup time = " + TimeUnit.NANOSECONDS.toMillis((end - start)) + "ms");
+
+      Integer testLength = Integer.parseInt(System.getProperty("testLength", "7"));
+
+      System.out.println("----------> Test phase");
+      StatisticsPeekHolder finalStats = Runner.setUp(
+          Scenario.scenario("Test phase")
+              .exec(
+                  get(String.class, byte[].class).using(keyGenerator, valueGenerator)
+                      .atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10)
+                      .withWeight(0.90),
+                  put(String.class, byte[].class).using(keyGenerator, valueGenerator)
+                      .atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10)
+                      .withWeight(0.10)
+              ))
+          .warmup(during(3, minutes))
+          .executed(during(testLength, minutes))
+          .config(concurrency)
+          .config(report(EhcacheResult.class, new EhcacheResult[] { PUT, GET, MISS })
+              .log(text(), html("test-tier")))
+          .config(cacheConfig(String.class, byte[].class)
+                  .cache("one", one)
+          )
+          .start();
+      System.out.println("----------> Done");
+    } catch (SyntaxException e) {
+      e.printStackTrace();
+    } finally {
+      cacheManager.close();
+    }
   }
 }
