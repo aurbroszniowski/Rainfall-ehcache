@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Map;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
 import static io.rainfall.ehcache.statistics.EhcacheResult.PUTIFABSENT;
+import static io.rainfall.ehcache.statistics.EhcacheResult.PUTIFABSENT_MISS;
 
 /**
  * @author Aurelien Broszniowski
@@ -53,7 +53,7 @@ public class PutIfAbsentOperation<K, V> extends EhcacheOperation<K, V> {
         v = cache.putIfAbsent(k, v1);
         long end = getTimeInNs();
         if (v != null) {
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), MISS);
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUTIFABSENT_MISS);
         } else {
           statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUTIFABSENT);
         }
