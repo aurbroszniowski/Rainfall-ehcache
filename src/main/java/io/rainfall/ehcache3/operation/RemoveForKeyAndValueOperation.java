@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Map;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
 import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVEVALUE;
+import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVEVALUE_MISS;
 
 /**
  * @author Aurelien Broszniowski
@@ -53,7 +53,7 @@ public class RemoveForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V> 
         removed = cache.remove(k, v);
         long end = getTimeInNs();
         if (!removed) {
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), MISS);
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVEVALUE_MISS);
         } else {
           statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVEVALUE);
         }
