@@ -46,9 +46,12 @@ public class PutOperation<K, V> extends EhcacheOperation {
     final long next = this.sequenceGenerator.next();
     List<Ehcache> caches = cacheConfig.getCaches();
     for (final Ehcache cache : caches) {
+      Object k = keyGenerator.generate(next);
+      Object v = valueGenerator.generate(next);
+
       long start = getTimeInNs();
       try {
-        cache.put(new Element(keyGenerator.generate(next), valueGenerator.generate(next)));
+        cache.put(new Element(k, v));
         long end = getTimeInNs();
         statisticsHolder.record(cache.getName(), (end - start), PUT);
       } catch (Exception e) {

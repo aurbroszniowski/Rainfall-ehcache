@@ -48,9 +48,11 @@ public class GetOperation<K, V> extends EhcacheOperation {
     List<Ehcache> caches = cacheConfig.getCaches();
     for (final Ehcache cache : caches) {
       Element value;
+      Object k = keyGenerator.generate(next);
+
       long start = getTimeInNs();
       try {
-        value = cache.get(keyGenerator.generate(next));
+        value = cache.get(k);
         long end = getTimeInNs();
         if (value == null) {
           statisticsHolder.record(cache.getName(), (end - start), MISS);

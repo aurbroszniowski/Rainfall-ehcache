@@ -47,9 +47,11 @@ public class RemoveOperation<K, V> extends EhcacheOperation {
     List<Ehcache> caches = cacheConfig.getCaches();
     for (final Ehcache cache : caches) {
       boolean removed;
+      Object k = keyGenerator.generate(next);
+
       long start = getTimeInNs();
       try {
-        removed = cache.remove(keyGenerator.generate(next));
+        removed = cache.remove(k);
         long end = getTimeInNs();
         if (removed) {
           statisticsHolder.record(cache.getName(), (end - start), REMOVE);
