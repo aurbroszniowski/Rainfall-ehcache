@@ -24,6 +24,7 @@ import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -65,5 +66,13 @@ public class TpsLimitPutOperation<K, V> extends PutOperation<K, V> {
         }
       }
     }
+  }
+
+  @Override
+  public List<String> getDescription() {
+    List<String> desc = new ArrayList<String>();
+    desc.add(getWeightInPercent() + "% THROTTLED put(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
+    desc.add(sequenceGenerator.getDescription());
+    return desc;
   }
 }

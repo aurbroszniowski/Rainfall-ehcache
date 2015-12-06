@@ -77,4 +77,11 @@ public class CacheConfig<K, V> extends Configuration {
     return cacheNames.get(cache);
   }
 
+  @Override
+  public List<String> getDescription() {
+    List<String> desc = new ArrayList<String>();
+    desc.add("Using " + caches.size() + " cache" + (caches.size() > 1 ? "s" : ""));
+    desc.add("Size of batch operations : " + bulkBatchSize);
+    return desc;
+  }
 }

@@ -8,6 +8,7 @@ import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -44,5 +45,14 @@ public class PutAllOperation<K, V> extends EhcacheOperation<K, V> {
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
+  }
+
+  @Override
+  public List<String> getDescription() {
+    List<String> desc = new ArrayList<String>();
+    desc.add(getWeightInPercent() + "% putAll(Map<? extends " + keyGenerator.getDescription() + ", ? extends "
+             + valueGenerator.getDescription() + "> entries)");
+    desc.add(sequenceGenerator.getDescription());
+    return desc;
   }
 }

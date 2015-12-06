@@ -24,6 +24,7 @@ import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -70,5 +71,13 @@ public class TpsLimitGetOperation<K, V> extends GetOperation<K, V> {
         }
       }
     }
+  }
+
+  @Override
+  public List<String> getDescription() {
+    List<String> desc = new ArrayList<String>();
+    desc.add(getWeightInPercent() + "% THROTTLED get(" + keyGenerator.getDescription() + " key)");
+    desc.add(sequenceGenerator.getDescription());
+    return desc;
   }
 }

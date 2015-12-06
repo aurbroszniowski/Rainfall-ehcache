@@ -26,6 +26,7 @@ import org.ehcache.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -60,5 +61,13 @@ public class PutOperation<K, V> extends EhcacheOperation<K, V> {
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
+  }
+
+  @Override
+  public List<String> getDescription() {
+    List<String> desc = new ArrayList<String>();
+    desc.add(getWeightInPercent() + "% put(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
+    desc.add(sequenceGenerator.getDescription());
+    return desc;
   }
 }

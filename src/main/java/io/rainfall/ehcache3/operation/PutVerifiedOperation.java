@@ -2,7 +2,6 @@ package io.rainfall.ehcache3.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
-import io.rainfall.EhcacheOperation;
 import io.rainfall.TestException;
 import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
@@ -10,19 +9,7 @@ import org.ehcache.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
-
-import io.rainfall.AssertionEvaluator;
-import io.rainfall.Configuration;
-import io.rainfall.EhcacheOperation;
-import io.rainfall.TestException;
-import io.rainfall.ehcache3.CacheConfig;
-import io.rainfall.statistics.StatisticsHolder;
-import org.ehcache.Cache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -63,5 +50,13 @@ public class PutVerifiedOperation<K, V> extends PutOperation<K, V> {
         statisticsHolder.increaseAssertionsErrorsCount(cacheConfig.getCacheName(cache));
       }
     }
+  }
+
+  @Override
+  public List<String> getDescription() {
+    List<String> desc = new ArrayList<String>();
+    desc.add(getWeightInPercent() + "% put(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value) with ASSERTION");
+    desc.add(sequenceGenerator.getDescription());
+    return desc;
   }
 }

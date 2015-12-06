@@ -24,6 +24,7 @@ import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,14 @@ public class RemoveAllOperation<K, V> extends EhcacheOperation<K, V> {
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
+  }
+
+  @Override
+  public List<String> getDescription() {
+    List<String> desc = new ArrayList<String>();
+    desc.add("removeAll(Set<? extends " + keyGenerator.getDescription() + "> keys)");
+    desc.add(sequenceGenerator.getDescription());
+    return desc;
   }
 
 }

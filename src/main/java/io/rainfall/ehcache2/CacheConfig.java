@@ -20,6 +20,7 @@ import io.rainfall.Configuration;
 import net.sf.ehcache.Ehcache;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,4 +45,8 @@ public class CacheConfig<K, V> extends Configuration {
     return caches;
   }
 
+  @Override
+  public List<String> getDescription() {
+    return Arrays.asList("Using " + caches.size() + " cache" + (caches.size() > 1 ? "s" : ""));
+  }
 }

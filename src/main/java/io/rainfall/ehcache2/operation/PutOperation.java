@@ -25,6 +25,7 @@ import io.rainfall.statistics.StatisticsHolder;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -59,5 +60,13 @@ public class PutOperation<K, V> extends EhcacheOperation {
         statisticsHolder.record(cache.getName(), (end - start), EXCEPTION);
       }
     }
+  }
+
+  @Override
+  public List<String> getDescription() {
+    List<String> desc = new ArrayList<String>();
+    desc.add( getWeightInPercent() + "% put(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
+    desc.add(sequenceGenerator.getDescription());
+    return desc;
   }
 }

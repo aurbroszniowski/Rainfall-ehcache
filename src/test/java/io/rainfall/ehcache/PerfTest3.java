@@ -44,7 +44,6 @@ import org.junit.Test;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
-import static io.rainfall.Unit.users;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.report;
 import static io.rainfall.configuration.ReportingConfig.text;
@@ -60,6 +59,7 @@ import static io.rainfall.execution.Executions.during;
 import static io.rainfall.execution.Executions.once;
 import static io.rainfall.execution.Executions.times;
 import static io.rainfall.generator.sequence.Distribution.GAUSSIAN;
+import static io.rainfall.unit.Instance.instances;
 import static io.rainfall.unit.TimeDivision.minutes;
 import static io.rainfall.unit.TimeDivision.seconds;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -111,7 +111,9 @@ public class PerfTest3 {
           Scenario.scenario("Cache test phase")
               .exec(
                   new PutVerifiedOperation().using(keyGenerator, valueGenerator).sequentially().withWeight(0.10),
-                  get(Long.class, VerifiedValue.class).using(keyGenerator, valueGenerator).sequentially().withWeight(0.90)))
+                  get(Long.class, VerifiedValue.class).using(keyGenerator, valueGenerator)
+                      .sequentially()
+                      .withWeight(0.90)))
 //          .warmup(during(1, TimeDivision.minutes))
           .executed(during(20, seconds))
           .config(concurrency)
@@ -138,6 +140,11 @@ public class PerfTest3 {
       public Long generate(final Long seed) {
         System.out.println("seed = " + seed);
         return seed;
+      }
+
+      @Override
+      public String getDescription() {
+        return "";
       }
     };
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1024);
@@ -208,7 +215,7 @@ public class PerfTest3 {
 
     System.out.println("----------> Test phase");
     Runner.setUp(scenario)
-        .executed(once(4, users), during(10, seconds))
+        .executed(once(4, instances), during(10, seconds))
         .config(concurrency,
             ReportingConfig.report(EhcacheResult.class, resultsReported)
                 .log(text(), html()))
