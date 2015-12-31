@@ -67,12 +67,12 @@ public class PerfTest2 {
       Runner.setUp(
           Scenario.scenario("Warm up phase")
               .exec(
-                  put().using(keyGenerator, valueGenerator).sequentially()
+                  put(String.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
               ))
           .executed(new UntilCacheFull())
           .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
-                  .caches(one, two, three, four)
+              .caches(one, two, three, four)
           )
           .start();
 
@@ -91,17 +91,17 @@ public class PerfTest2 {
 
       StatisticsPeekHolder finalStats = Runner.setUp(
           Scenario.scenario("Test phase").exec(
-              put().withWeight(0.90)
+              put(String.class, byte[].class).withWeight(0.90)
                   .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
                   .using(keyGenerator, valueGenerator),
-              get().withWeight(0.10)
+              get(String.class, byte[].class).withWeight(0.10)
                   .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
                   .using(keyGenerator, valueGenerator)
           ))
           .executed(during(5, minutes))
           .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
-                  .caches(one, two, three, four)
+              .caches(one, two, three, four)
           )
           .start();
 

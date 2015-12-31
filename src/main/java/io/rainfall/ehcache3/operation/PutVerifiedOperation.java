@@ -23,6 +23,9 @@ public class PutVerifiedOperation<K, V> extends PutOperation<K, V> {
 
   private static final Logger log = LoggerFactory.getLogger(PutOperation.class);
 
+  public PutVerifiedOperation(Class<K> keyClass, Class<V> valueClass) {
+  }
+
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {

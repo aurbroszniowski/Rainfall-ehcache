@@ -37,7 +37,7 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
  *
  * @author Aurelien Broszniowski
  */
-public class PutOperation<K, V> extends EhcacheOperation {
+public class PutOperation<K, V> extends EhcacheOperation<K, V> {
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,

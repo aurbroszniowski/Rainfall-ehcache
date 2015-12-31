@@ -27,15 +27,15 @@ import io.rainfall.ehcache2.operation.RemoveOperation;
  */
 public class Ehcache2Operations {
 
-  public static <K, V> PutOperation<K, V> put() {
+  public static <K, V> PutOperation<K, V> put(Class<K> keyClass, Class<V> valueClass) {
     return new PutOperation<K, V>();
   }
 
-  public static <K, V> GetOperation<K, V> get() {
+  public static <K, V> GetOperation<K, V> get(Class<K> keyClass, Class<V> valueClass) {
     return new GetOperation<K, V>();
   }
 
-  public static <K, V> RemoveOperation<K, V> remove() {
+  public static <K, V> RemoveOperation<K, V> remove(Class<K> keyClass, Class<V> valueClass) {
     return new RemoveOperation<K, V>();
   }
 

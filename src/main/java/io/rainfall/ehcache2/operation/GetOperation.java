@@ -38,7 +38,7 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
  *
  * @author Aurelien Broszniowski
  */
-public class GetOperation<K, V> extends EhcacheOperation {
+public class GetOperation<K, V> extends EhcacheOperation<K, V> {
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,

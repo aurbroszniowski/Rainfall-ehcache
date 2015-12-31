@@ -37,7 +37,7 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVE;
  *
  * @author Aurelien Broszniowski
  */
-public class RemoveOperation<K, V> extends EhcacheOperation {
+public class RemoveOperation<K, V> extends EhcacheOperation<K, V> {
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,

@@ -110,7 +110,7 @@ public class PerfTest3 {
       StatisticsPeekHolder finalStats = Runner.setUp(
           Scenario.scenario("Cache test phase")
               .exec(
-                  new PutVerifiedOperation().using(keyGenerator, valueGenerator).sequentially().withWeight(0.10),
+                  new PutVerifiedOperation(Long.class, VerifiedValue.class).using(keyGenerator, valueGenerator).sequentially().withWeight(0.10),
                   get(Long.class, VerifiedValue.class).using(keyGenerator, valueGenerator)
                       .sequentially()
                       .withWeight(0.90)))

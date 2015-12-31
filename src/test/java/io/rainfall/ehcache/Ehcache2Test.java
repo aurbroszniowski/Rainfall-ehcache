@@ -77,10 +77,9 @@ public class Ehcache2Test {
 
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(
-            put().using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128)).sequentially(),
-            get().using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128)).sequentially(),
-            remove().using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128)).sequentially());
-
+            get(String.class, byte[].class).using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128)).sequentially(),
+            put(String.class, byte[].class).using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128)).sequentially(),
+            remove(String.class, byte[].class).using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128)).sequentially());
   }
 
   @Test
@@ -93,7 +92,7 @@ public class Ehcache2Test {
 
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(
-            put().using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128)).sequentially()
+            put(String.class, byte[].class).using(StringGenerator.fixedLength(10), ByteArrayGenerator.fixedLength(128)).sequentially()
         );
 
     StatisticsPeekHolder finalStats = Runner.setUp(scenario)
@@ -119,9 +118,9 @@ public class Ehcache2Test {
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(
-            put().withWeight(0.10).using(keyGenerator, valueGenerator).sequentially(),
-            get().withWeight(0.80).using(keyGenerator, valueGenerator).sequentially(),
-            remove().withWeight(0.10).using(keyGenerator, valueGenerator).sequentially()
+            put(String.class, byte[].class).withWeight(0.10).using(keyGenerator, valueGenerator).sequentially(),
+            get(String.class, byte[].class).withWeight(0.80).using(keyGenerator, valueGenerator).sequentially(),
+            remove(String.class, byte[].class).withWeight(0.10).using(keyGenerator, valueGenerator).sequentially()
         );
 
     StatisticsPeekHolder finalStats = Runner.setUp(scenario)
@@ -143,9 +142,9 @@ public class Ehcache2Test {
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(
-            put().withWeight(0.10).using(keyGenerator, valueGenerator).atRandom(GAUSSIAN, 0, 10000, 1000),
-            get().withWeight(0.80).using(keyGenerator, valueGenerator).atRandom(GAUSSIAN, 0, 10000, 1000),
-            remove().withWeight(0.10).using(keyGenerator, valueGenerator).atRandom(GAUSSIAN, 0, 10000, 1000)
+            put(String.class, byte[].class).withWeight(0.10).using(keyGenerator, valueGenerator).atRandom(GAUSSIAN, 0, 10000, 1000),
+            get(String.class, byte[].class).withWeight(0.80).using(keyGenerator, valueGenerator).atRandom(GAUSSIAN, 0, 10000, 1000),
+            remove(String.class, byte[].class).withWeight(0.10).using(keyGenerator, valueGenerator).atRandom(GAUSSIAN, 0, 10000, 1000)
         );
 
     Runner.setUp(scenario)
@@ -167,9 +166,9 @@ public class Ehcache2Test {
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(128);
     Scenario scenario = Scenario.scenario("Cache load")
         .exec(
-            put().withWeight(0.10).using(keyGenerator, valueGenerator).sequentially(),
-            get().withWeight(0.80).using(keyGenerator, valueGenerator).sequentially(),
-            remove().withWeight(0.10).using(keyGenerator, valueGenerator).sequentially()
+            put(String.class, byte[].class).withWeight(0.10).using(keyGenerator, valueGenerator).sequentially(),
+            get(String.class, byte[].class).withWeight(0.80).using(keyGenerator, valueGenerator).sequentially(),
+            remove(String.class, byte[].class).withWeight(0.10).using(keyGenerator, valueGenerator).sequentially()
         );
 
     Runner.setUp(scenario)
