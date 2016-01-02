@@ -349,13 +349,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.terracotta.internal</groupId>
-      <artifactId>statistics</artifactId>
-      <version>1.0.3</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
       <groupId>nf.fr.eraasoft</groupId>
       <artifactId>objectpool</artifactId>
       <version>1.1.2</version>
