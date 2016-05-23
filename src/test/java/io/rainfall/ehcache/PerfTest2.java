@@ -13,6 +13,7 @@ import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.StringGenerator;
 import io.rainfall.generator.sequence.Distribution;
 import io.rainfall.statistics.StatisticsPeekHolder;
+import io.rainfall.utils.SystemTest;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.config.CacheConfiguration;
@@ -20,6 +21,7 @@ import net.sf.ehcache.config.Configuration;
 import net.sf.ehcache.config.MemoryUnit;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.text;
@@ -32,6 +34,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 /**
  * @author Aurelien Broszniowski
  */
+@Category(SystemTest.class)
 public class PerfTest2 {
 
   @Test
