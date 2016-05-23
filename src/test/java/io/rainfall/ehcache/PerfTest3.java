@@ -34,10 +34,10 @@ import io.rainfall.generator.sequence.Distribution;
 import io.rainfall.statistics.StatisticsPeekHolder;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
-import org.ehcache.config.CacheConfigurationBuilder;
-import org.ehcache.config.persistence.CacheManagerPersistenceConfiguration;
+import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.units.EntryUnit;
 import org.ehcache.config.units.MemoryUnit;
+import org.ehcache.impl.config.persistence.CacheManagerPersistenceConfiguration;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -63,8 +63,8 @@ import static io.rainfall.unit.Instance.instances;
 import static io.rainfall.unit.TimeDivision.minutes;
 import static io.rainfall.unit.TimeDivision.seconds;
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.ehcache.CacheManagerBuilder.newCacheManagerBuilder;
-import static org.ehcache.config.ResourcePoolsBuilder.newResourcePoolsBuilder;
+import static org.ehcache.config.builders.CacheManagerBuilder.newCacheManagerBuilder;
+import static org.ehcache.config.builders.ResourcePoolsBuilder.newResourcePoolsBuilder;
 
 /**
  * @author Aurelien Broszniowski
@@ -79,11 +79,11 @@ public class PerfTest3 {
     ObjectGenerator<Long> keyGenerator = new LongGenerator();
     ObjectGenerator<VerifiedValue> valueGenerator = new VerifiedValueGenerator<Long>(keyGenerator);
     long nbElements = 100;
-    CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    CacheConfigurationBuilder<Long, VerifiedValue> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, VerifiedValue.class);
     builder.withResourcePools(newResourcePoolsBuilder().heap(nbElements, EntryUnit.ENTRIES).build());
 
     CacheManager cacheManager = newCacheManagerBuilder()
-        .withCache("one", builder.buildConfig(Long.class, VerifiedValue.class))
+        .withCache("one", builder.build())
         .build(true);
 
     Cache<Long, VerifiedValue> one = cacheManager.getCache("one", Long.class, VerifiedValue.class);
@@ -110,7 +110,9 @@ public class PerfTest3 {
       StatisticsPeekHolder finalStats = Runner.setUp(
           Scenario.scenario("Cache test phase")
               .exec(
-                  new PutVerifiedOperation(Long.class, VerifiedValue.class).using(keyGenerator, valueGenerator).sequentially().withWeight(0.10),
+                  new PutVerifiedOperation(Long.class, VerifiedValue.class).using(keyGenerator, valueGenerator)
+                      .sequentially()
+                      .withWeight(0.10),
                   get(Long.class, VerifiedValue.class).using(keyGenerator, valueGenerator)
                       .sequentially()
                       .withWeight(0.90)))
@@ -150,11 +152,11 @@ public class PerfTest3 {
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1024);
 
     long nbElements = 100;
-    CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class);
     builder.withResourcePools(newResourcePoolsBuilder().heap(nbElements, EntryUnit.ENTRIES).build());
 
     CacheManager cacheManager = newCacheManagerBuilder()
-        .withCache("one", builder.buildConfig(Long.class, Byte[].class))
+        .withCache("one", builder.build())
         .build(true);
 
     Cache<Long, Byte[]> one = cacheManager.getCache("one", Long.class, Byte[].class);
@@ -170,7 +172,7 @@ public class PerfTest3 {
           .config(concurrency)
           .config(report(EhcacheResult.class, new EhcacheResult[] { PUT }).log(text()))
           .config(cacheConfig(Long.class, Byte[].class)
-                  .cache("one", one)
+              .cache("one", one)
           )
           .start();
 
@@ -193,11 +195,11 @@ public class PerfTest3 {
   @Test
   @Ignore
   public void testTpsLimit() throws SyntaxException {
-    CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class);
     builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
 
     final CacheManager cacheManager = newCacheManagerBuilder()
-        .withCache("one", builder.buildConfig(Long.class, Byte[].class))
+        .withCache("one", builder.build())
         .build(true);
 
     final Cache<Long, Byte[]> one = cacheManager.getCache("one", Long.class, Byte[].class);
@@ -230,11 +232,11 @@ public class PerfTest3 {
   @Test
   @Ignore
   public void testWarmup() throws SyntaxException {
-    CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class);
     builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
 
     final CacheManager cacheManager = newCacheManagerBuilder()
-        .withCache("one", builder.buildConfig(Long.class, Byte[].class))
+        .withCache("one", builder.build())
         .build(true);
 
     final Cache<Long, Byte[]> one = cacheManager.getCache("one", Long.class, Byte[].class);
@@ -271,12 +273,12 @@ public class PerfTest3 {
   @Test
   @Ignore
   public void testHisto() throws SyntaxException {
-    CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class);
     builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
 
     final CacheManager cacheManager = newCacheManagerBuilder()
-        .withCache("one", builder.buildConfig(Long.class, Byte[].class))
-        .withCache("two", builder.buildConfig(Long.class, Byte[].class))
+        .withCache("one", builder.build())
+        .withCache("two", builder.build())
         .build(true);
 
     final Cache<Long, Byte[]> one = cacheManager.getCache("one", Long.class, Byte[].class);
@@ -321,14 +323,14 @@ public class PerfTest3 {
   @Test
   @Ignore
   public void testLoad() throws SyntaxException {
-    CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class);
     builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
 
     final CacheManager cacheManager = newCacheManagerBuilder()
-        .withCache("one", builder.buildConfig(Long.class, Byte[].class))
-        .withCache("two", builder.buildConfig(Long.class, Byte[].class))
-        .withCache("three", builder.buildConfig(Long.class, Byte[].class))
-        .withCache("four", builder.buildConfig(Long.class, Byte[].class))
+        .withCache("one", builder.build())
+        .withCache("two", builder.build())
+        .withCache("three", builder.build())
+        .withCache("four", builder.build())
         .build(true);
 
     final Cache<Long, Byte[]> one = cacheManager.getCache("one", Long.class, Byte[].class);
@@ -353,8 +355,8 @@ public class PerfTest3 {
         .executed(times(nbElements))
         .config(concurrency, ReportingConfig.report(EhcacheResult.class, resultsReported).log(text()))
         .config(cacheConfig(Long.class, Byte[].class)
-                .cache("one", one).cache("two", two).cache("three", three).cache("four", four)
-                .bulkBatchSize(5)
+            .cache("one", one).cache("two", two).cache("three", three).cache("four", four)
+            .bulkBatchSize(5)
         )
         .start()
     ;
@@ -414,11 +416,11 @@ public class PerfTest3 {
   @Test
   @Ignore
   public void testReplace() throws SyntaxException {
-    CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    CacheConfigurationBuilder<Long, Long> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Long.class);
     builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
 
     final CacheManager cacheManager = newCacheManagerBuilder()
-        .withCache("one", builder.buildConfig(Long.class, Long.class))
+        .withCache("one", builder.build())
         .build(true);
 
     final Cache<Long, Long> one = cacheManager.getCache("one", Long.class, Long.class);
@@ -457,11 +459,11 @@ public class PerfTest3 {
   @Ignore
   public void testMemory() throws SyntaxException {
     int nbElements = 5000000;
-    CacheConfigurationBuilder<Object, Object> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    CacheConfigurationBuilder<Long, Long> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Long.class);
     builder.withResourcePools(newResourcePoolsBuilder().heap(nbElements, EntryUnit.ENTRIES).build());
 
     final CacheManager cacheManager = newCacheManagerBuilder()
-        .withCache("one", builder.buildConfig(Long.class, Long.class))
+        .withCache("one", builder.build())
         .build(true);
 
     final Cache<Long, Long> one = cacheManager.getCache("one", Long.class, Long.class);
@@ -498,7 +500,7 @@ public class PerfTest3 {
     long nbElementsHeap = MemoryUnit.MB.toBytes(heap) / MemoryUnit.KB.toBytes(1);
     long nbElements = MemoryUnit.GB.toBytes(disk) / MemoryUnit.KB.toBytes(1);
 
-    CacheConfigurationBuilder<Object, Object> cacheBuilder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    CacheConfigurationBuilder<String, byte[]> cacheBuilder = CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, byte[].class);
     cacheBuilder = cacheBuilder.withResourcePools(newResourcePoolsBuilder()
         .heap(nbElementsHeap, EntryUnit.ENTRIES)
         .offheap(offheap, MemoryUnit.GB)
@@ -513,7 +515,7 @@ public class PerfTest3 {
 
     CacheManager cacheManager = newCacheManagerBuilder()
         .with(new CacheManagerPersistenceConfiguration(new File("/data/PerfTest3")))
-        .withCache("one", cacheBuilder.buildConfig(String.class, byte[].class))
+        .withCache("one", cacheBuilder.build())
         .build(true);
 
     Cache one = cacheManager.getCache("one", String.class, byte[].class);
@@ -528,7 +530,7 @@ public class PerfTest3 {
           .config(concurrency)
           .config(report(EhcacheResult.class, new EhcacheResult[] { PUT }).log(text(), html("warmup-tier")))
           .config(cacheConfig(String.class, byte[].class)
-                  .cache("one", one)
+              .cache("one", one)
           )
           .start();
 
@@ -554,7 +556,7 @@ public class PerfTest3 {
           .config(report(EhcacheResult.class, new EhcacheResult[] { PUT, GET, MISS })
               .log(text(), html("test-tier")))
           .config(cacheConfig(String.class, byte[].class)
-                  .cache("one", one)
+              .cache("one", one)
           )
           .start();
       System.out.println("----------> Done");
@@ -576,7 +578,7 @@ public class PerfTest3 {
     long nbElementsHeap = MemoryUnit.MB.toBytes(heap) / MemoryUnit.KB.toBytes(1);
     long nbElements = MemoryUnit.GB.toBytes(disk) / MemoryUnit.KB.toBytes(1);
 
-    CacheConfigurationBuilder<Object, Object> cacheBuilder = CacheConfigurationBuilder.newCacheConfigurationBuilder();
+    CacheConfigurationBuilder<String, byte[]> cacheBuilder = CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, byte[].class);
     cacheBuilder = cacheBuilder.withResourcePools(newResourcePoolsBuilder()
         .heap(nbElementsHeap, EntryUnit.ENTRIES)
         .offheap(offheap, MemoryUnit.GB)
@@ -590,7 +592,7 @@ public class PerfTest3 {
 
     CacheManager cacheManager = newCacheManagerBuilder()
         .with(new CacheManagerPersistenceConfiguration(new File("/data/PerfTest3")))
-        .withCache("one", cacheBuilder.buildConfig(String.class, byte[].class))
+        .withCache("one", cacheBuilder.build())
         .build(true);
 
     Cache one = cacheManager.getCache("one", String.class, byte[].class);
@@ -605,7 +607,7 @@ public class PerfTest3 {
           .config(concurrency)
           .config(report(EhcacheResult.class, new EhcacheResult[] { PUT }).log(text()))
           .config(cacheConfig(String.class, byte[].class)
-                  .cache("one", one)
+              .cache("one", one)
           )
 //          .start()
       ;
@@ -632,7 +634,7 @@ public class PerfTest3 {
           .config(report(EhcacheResult.class, new EhcacheResult[] { PUT, GET, MISS })
               .log(text(), html("test-basic")))
           .config(cacheConfig(String.class, byte[].class)
-                  .cache("one", one)
+              .cache("one", one)
           )
           .start();
       System.out.println("----------> Done");

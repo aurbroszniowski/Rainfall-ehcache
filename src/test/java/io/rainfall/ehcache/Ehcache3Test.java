@@ -29,7 +29,7 @@ import io.rainfall.generator.StringGenerator;
 import io.rainfall.statistics.StatisticsPeekHolder;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
-import org.ehcache.config.CacheConfigurationBuilder;
+import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -38,14 +38,13 @@ import org.junit.Test;
 import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache3.CacheConfig.cacheConfig;
 import static io.rainfall.ehcache3.Ehcache3Operations.get;
-
 import static io.rainfall.ehcache3.Ehcache3Operations.put;
 import static io.rainfall.ehcache3.Ehcache3Operations.remove;
 import static io.rainfall.execution.Executions.nothingFor;
 import static io.rainfall.execution.Executions.times;
 import static io.rainfall.unit.TimeDivision.seconds;
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.ehcache.CacheManagerBuilder.newCacheManagerBuilder;
+import static org.ehcache.config.builders.CacheManagerBuilder.newCacheManagerBuilder;
 
 /**
  * @author Aurelien Broszniowski
@@ -58,8 +57,8 @@ public class Ehcache3Test {
   @Before
   public void setUp() {
     final CacheManager cacheManager = newCacheManagerBuilder()
-        .withCache("one", CacheConfigurationBuilder.newCacheConfigurationBuilder()
-            .buildConfig(String.class, Byte[].class))
+        .withCache("one", CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, Byte[].class)
+            .build())
         .build(true);
 
     cache = cacheManager.getCache("one", String.class, Byte[].class);
