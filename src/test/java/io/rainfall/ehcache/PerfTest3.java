@@ -32,6 +32,7 @@ import io.rainfall.generator.VerifiedValueGenerator;
 import io.rainfall.generator.VerifiedValueGenerator.VerifiedValue;
 import io.rainfall.generator.sequence.Distribution;
 import io.rainfall.statistics.StatisticsPeekHolder;
+import io.rainfall.utils.SystemTest;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
@@ -40,6 +41,7 @@ import org.ehcache.config.units.MemoryUnit;
 import org.ehcache.impl.config.persistence.CacheManagerPersistenceConfiguration;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -69,6 +71,7 @@ import static org.ehcache.config.builders.ResourcePoolsBuilder.newResourcePoolsB
 /**
  * @author Aurelien Broszniowski
  */
+@Category(SystemTest.class)
 public class PerfTest3 {
 
   @Test
@@ -79,8 +82,9 @@ public class PerfTest3 {
     ObjectGenerator<Long> keyGenerator = new LongGenerator();
     ObjectGenerator<VerifiedValue> valueGenerator = new VerifiedValueGenerator<Long>(keyGenerator);
     long nbElements = 100;
-    CacheConfigurationBuilder<Long, VerifiedValue> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, VerifiedValue.class);
-    builder.withResourcePools(newResourcePoolsBuilder().heap(nbElements, EntryUnit.ENTRIES).build());
+    CacheConfigurationBuilder<Long, VerifiedValue> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, VerifiedValue.class,
+        newResourcePoolsBuilder().heap(nbElements, EntryUnit.ENTRIES)
+            .build());
 
     CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", builder.build())
@@ -152,8 +156,8 @@ public class PerfTest3 {
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1024);
 
     long nbElements = 100;
-    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class);
-    builder.withResourcePools(newResourcePoolsBuilder().heap(nbElements, EntryUnit.ENTRIES).build());
+    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class,
+        newResourcePoolsBuilder().heap(nbElements, EntryUnit.ENTRIES).build());
 
     CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", builder.build())
@@ -195,8 +199,8 @@ public class PerfTest3 {
   @Test
   @Ignore
   public void testTpsLimit() throws SyntaxException {
-    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class);
-    builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
+    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class,
+        newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
 
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", builder.build())
@@ -232,8 +236,8 @@ public class PerfTest3 {
   @Test
   @Ignore
   public void testWarmup() throws SyntaxException {
-    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class);
-    builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
+    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class,
+        newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
 
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", builder.build())
@@ -273,8 +277,8 @@ public class PerfTest3 {
   @Test
   @Ignore
   public void testHisto() throws SyntaxException {
-    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class);
-    builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
+    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class,
+        newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
 
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", builder.build())
@@ -323,8 +327,8 @@ public class PerfTest3 {
   @Test
   @Ignore
   public void testLoad() throws SyntaxException {
-    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class);
-    builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
+    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class,
+        newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
 
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", builder.build())
@@ -416,8 +420,8 @@ public class PerfTest3 {
   @Test
   @Ignore
   public void testReplace() throws SyntaxException {
-    CacheConfigurationBuilder<Long, Long> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Long.class);
-    builder.withResourcePools(newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
+    CacheConfigurationBuilder<Long, Long> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Long.class,
+        newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
 
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", builder.build())
@@ -459,8 +463,8 @@ public class PerfTest3 {
   @Ignore
   public void testMemory() throws SyntaxException {
     int nbElements = 5000000;
-    CacheConfigurationBuilder<Long, Long> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Long.class);
-    builder.withResourcePools(newResourcePoolsBuilder().heap(nbElements, EntryUnit.ENTRIES).build());
+    CacheConfigurationBuilder<Long, Long> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Long.class,
+        newResourcePoolsBuilder().heap(nbElements, EntryUnit.ENTRIES).build());
 
     final CacheManager cacheManager = newCacheManagerBuilder()
         .withCache("one", builder.build())
@@ -500,12 +504,12 @@ public class PerfTest3 {
     long nbElementsHeap = MemoryUnit.MB.toBytes(heap) / MemoryUnit.KB.toBytes(1);
     long nbElements = MemoryUnit.GB.toBytes(disk) / MemoryUnit.KB.toBytes(1);
 
-    CacheConfigurationBuilder<String, byte[]> cacheBuilder = CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, byte[].class);
-    cacheBuilder = cacheBuilder.withResourcePools(newResourcePoolsBuilder()
-        .heap(nbElementsHeap, EntryUnit.ENTRIES)
-        .offheap(offheap, MemoryUnit.GB)
-        .disk(disk, MemoryUnit.GB)
-        .build());
+    CacheConfigurationBuilder<String, byte[]> cacheBuilder = CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, byte[].class,
+        newResourcePoolsBuilder()
+            .heap(nbElementsHeap, EntryUnit.ENTRIES)
+            .offheap(offheap, MemoryUnit.GB)
+            .disk(disk, MemoryUnit.GB)
+            .build());
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(30, MINUTES);
@@ -578,11 +582,11 @@ public class PerfTest3 {
     long nbElementsHeap = MemoryUnit.MB.toBytes(heap) / MemoryUnit.KB.toBytes(1);
     long nbElements = MemoryUnit.GB.toBytes(disk) / MemoryUnit.KB.toBytes(1);
 
-    CacheConfigurationBuilder<String, byte[]> cacheBuilder = CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, byte[].class);
-    cacheBuilder = cacheBuilder.withResourcePools(newResourcePoolsBuilder()
-        .heap(nbElementsHeap, EntryUnit.ENTRIES)
-        .offheap(offheap, MemoryUnit.GB)
-        .build());
+    CacheConfigurationBuilder<String, byte[]> cacheBuilder = CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, byte[].class,
+        newResourcePoolsBuilder()
+            .heap(nbElementsHeap, EntryUnit.ENTRIES)
+            .offheap(offheap, MemoryUnit.GB)
+            .build());
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(30, MINUTES);
