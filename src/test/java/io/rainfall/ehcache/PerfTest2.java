@@ -5,6 +5,7 @@ import io.rainfall.Runner;
 import io.rainfall.Scenario;
 import io.rainfall.SyntaxException;
 import io.rainfall.configuration.ConcurrencyConfig;
+import io.rainfall.configuration.DistributedConfig;
 import io.rainfall.configuration.ReportingConfig;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache2.CacheConfig;
@@ -23,12 +24,14 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import static io.rainfall.configuration.DistributedConfig.address;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache2.Ehcache2Operations.get;
 import static io.rainfall.ehcache2.Ehcache2Operations.put;
 import static io.rainfall.execution.Executions.during;
 import static io.rainfall.unit.TimeDivision.minutes;
+import static io.rainfall.unit.TimeDivision.seconds;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
@@ -36,6 +39,51 @@ import static java.util.concurrent.TimeUnit.MINUTES;
  */
 @Category(SystemTest.class)
 public class PerfTest2 {
+
+  @Test
+  @Ignore
+  public void testDistributedLoad() throws SyntaxException {
+
+    CacheManager cacheManager = null;
+    try {
+      Configuration configuration = new Configuration().name("EhcacheTest")
+          .defaultCache(new CacheConfiguration("default", 0).eternal(true))
+          .cache(new CacheConfiguration().name("one")
+              .maxBytesLocalHeap(100, MemoryUnit.MEGABYTES)
+              .maxBytesLocalOffHeap(200, MemoryUnit.MEGABYTES));
+      cacheManager = CacheManager.create(configuration);
+
+      Ehcache one = cacheManager.getEhcache("one");
+
+      ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
+          .threads(4).timeout(50, MINUTES);
+
+      int nbElements = 250000;
+      ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
+      ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000);
+
+      StatisticsPeekHolder finalStats = Runner.setUp(
+          Scenario.scenario("Test phase").exec(
+              put(String.class, byte[].class).withWeight(0.20)
+                  .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
+                  .using(keyGenerator, valueGenerator),
+              get(String.class, byte[].class).withWeight(0.80)
+                  .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
+                  .using(keyGenerator, valueGenerator)
+          ))
+          .executed(during(1, minutes))
+          .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()))
+          .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
+          .config(DistributedConfig.distributedConfig().master(address("localhost", 9911))
+              .clients(address("localhost", 9912), address("localhost", 9913)))
+          .start();
+
+    } finally {
+      if (cacheManager != null) {
+        cacheManager.shutdown();
+      }
+    }
+  }
 
   @Test
   @Ignore
