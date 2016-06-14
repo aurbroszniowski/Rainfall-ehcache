@@ -49,8 +49,7 @@ public class PerfTest2 {
       Configuration configuration = new Configuration().name("EhcacheTest")
           .defaultCache(new CacheConfiguration("default", 0).eternal(true))
           .cache(new CacheConfiguration().name("one")
-              .maxBytesLocalHeap(100, MemoryUnit.MEGABYTES)
-              .maxBytesLocalOffHeap(200, MemoryUnit.MEGABYTES));
+              .maxBytesLocalHeap(100, MemoryUnit.MEGABYTES));
       cacheManager = CacheManager.create(configuration);
 
       Ehcache one = cacheManager.getEhcache("one");
@@ -71,11 +70,10 @@ public class PerfTest2 {
                   .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
                   .using(keyGenerator, valueGenerator)
           ))
-          .executed(during(1, minutes))
+          .executed(during(20, seconds))
           .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
-          .config(DistributedConfig.distributedConfig().master(address("localhost", 9911))
-              .clients(address("localhost", 9912), address("localhost", 9913)))
+          .config(DistributedConfig.distributedConfig().master(address("localhost", 9911), 2))
           .start();
 
     } finally {
