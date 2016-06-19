@@ -55,10 +55,10 @@ public class PutOperation<K, V> extends EhcacheOperation<K, V> {
       try {
         cache.put(element);
         long end = getTimeInNs();
-        statisticsHolder.record(cache.getName(), (end - start), PUT);
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUT);
       } catch (Exception e) {
         long end = getTimeInNs();
-        statisticsHolder.record(cache.getName(), (end - start), EXCEPTION);
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
   }

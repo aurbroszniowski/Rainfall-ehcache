@@ -55,13 +55,13 @@ public class RemoveOperation<K, V> extends EhcacheOperation<K, V> {
         removed = cache.remove(k);
         long end = getTimeInNs();
         if (removed) {
-          statisticsHolder.record(cache.getName(), (end - start), REMOVE);
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVE);
         } else {
-          statisticsHolder.record(cache.getName(), (end - start), MISS);
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), MISS);
         }
       } catch (Exception e) {
         long end = getTimeInNs();
-        statisticsHolder.record(cache.getName(), (end - start), EXCEPTION);
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
   }

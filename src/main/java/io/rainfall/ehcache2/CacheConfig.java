@@ -21,8 +21,9 @@ import net.sf.ehcache.Ehcache;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Aurelien Broszniowski
@@ -31,18 +32,40 @@ import java.util.List;
 public class CacheConfig<K, V> extends Configuration {
 
   private List<Ehcache> caches = new ArrayList<Ehcache>();
+  private Map<Ehcache, String> cacheNames = new HashMap<Ehcache, String>();
 
   public static <K, V> CacheConfig<K, V> cacheConfig() {
     return new CacheConfig<K, V>();
   }
 
-  public CacheConfig<K, V> caches(final Ehcache... caches) {
-    Collections.addAll(this.caches, caches);
+  public List<Ehcache> getCaches() {
+    return caches;
+  }
+
+  public CacheConfig<K, V> cache(final String cacheName, final Ehcache cache) {
+    this.caches.add(cache);
+    this.cacheNames.put(cache, cacheName);
     return this;
   }
 
-  public List<Ehcache> getCaches() {
-    return caches;
+  public CacheConfig<K, V> caches(final List<Ehcache> caches) {
+    for (Ehcache cache : caches) {
+      this.caches.add(cache);
+      this.cacheNames.put(cache, cache.getName());
+    }
+    return this;
+  }
+
+  public CacheConfig<K, V> caches(final Ehcache... caches) {
+    for (Ehcache cache : caches) {
+      this.caches.add(cache);
+      this.cacheNames.put(cache, cache.getName());
+    }
+    return this;
+  }
+
+  public String getCacheName(Ehcache cache) {
+    return cacheNames.get(cache);
   }
 
   @Override

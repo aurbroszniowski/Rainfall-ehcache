@@ -56,13 +56,13 @@ public class GetOperation<K, V> extends EhcacheOperation<K, V> {
         value = cache.get(k);
         long end = getTimeInNs();
         if (value == null) {
-          statisticsHolder.record(cache.getName(), (end - start), MISS);
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), MISS);
         } else {
-          statisticsHolder.record(cache.getName(), (end - start), GET);
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), GET);
         }
       } catch (Exception e) {
         long end = getTimeInNs();
-        statisticsHolder.record(cache.getName(), (end - start), EXCEPTION);
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
   }
