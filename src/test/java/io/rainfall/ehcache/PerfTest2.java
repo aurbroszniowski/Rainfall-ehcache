@@ -30,6 +30,7 @@ import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache2.Ehcache2Operations.get;
 import static io.rainfall.ehcache2.Ehcache2Operations.put;
 import static io.rainfall.execution.Executions.during;
+import static io.rainfall.execution.Executions.times;
 import static io.rainfall.unit.TimeDivision.minutes;
 import static io.rainfall.unit.TimeDivision.seconds;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -60,6 +61,15 @@ public class PerfTest2 {
       int nbElements = 250000;
       ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
       ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000);
+
+      Runner.setUp(
+          Scenario.scenario("warmup phase").exec(
+              put(String.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
+          ))
+          .executed(times(nbElements))
+          .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text()))
+          .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
+          .start();
 
       StatisticsPeekHolder finalStats = Runner.setUp(
           Scenario.scenario("Test phase").exec(
