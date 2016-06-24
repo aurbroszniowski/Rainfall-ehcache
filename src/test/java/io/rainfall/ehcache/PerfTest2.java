@@ -67,6 +67,7 @@ public class PerfTest2 {
               put(String.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
           ))
           .executed(times(nbElements))
+          .config(DistributedConfig.distributedConfig(address("localhost", 9911), 2))
           .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text()))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
           .start();
@@ -83,7 +84,7 @@ public class PerfTest2 {
           .executed(during(20, seconds))
           .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
-          .config(DistributedConfig.distributedConfig().master(address("localhost", 9911), 2))
+          .config(DistributedConfig.distributedConfig(address("localhost", 9911), 2))
           .start();
 
     } finally {
