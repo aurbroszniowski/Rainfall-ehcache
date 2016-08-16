@@ -36,6 +36,7 @@ import io.rainfall.utils.SystemTest;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
+import org.ehcache.config.builders.CacheManagerConfiguration;
 import org.ehcache.config.units.EntryUnit;
 import org.ehcache.config.units.MemoryUnit;
 import org.ehcache.impl.config.persistence.CacheManagerPersistenceConfiguration;
@@ -46,6 +47,7 @@ import org.junit.experimental.categories.Category;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import static io.rainfall.configuration.ReportingConfig.gcStatistics;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.report;
 import static io.rainfall.configuration.ReportingConfig.text;
@@ -690,6 +692,54 @@ public class PerfTest3 {
               .cache("one", one)
           )
           .start();
+    } catch (SyntaxException e) {
+      e.printStackTrace();
+    } finally {
+      cacheManager.close();
+    }
+  }
+
+
+  @Test
+  @Ignore
+  public void testStatisticsCollectors() {
+    int nbElements = 1000;
+
+    CacheConfigurationBuilder<String, byte[]> cacheBuilder = CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, byte[].class,
+        newResourcePoolsBuilder()
+            .heap(nbElements, EntryUnit.ENTRIES)
+            .build());
+
+    ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
+        .threads(4).timeout(30, MINUTES);
+
+    ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
+    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(10);
+
+    CacheManager cacheManager = newCacheManagerBuilder()
+        .withCache("one", cacheBuilder.build())
+        .build(true);
+
+    Cache one = cacheManager.getCache("one", String.class, byte[].class);
+    try {
+      Runner.setUp(
+          Scenario.scenario("Test reporters")
+              .exec(
+                  put(String.class, byte[].class)
+                      .withWeight(1.0)
+                      .using(keyGenerator, valueGenerator).sequentially())
+                    )
+          .executed(during(1, minutes))
+          .config(concurrency)
+          .config(report(EhcacheResult.class, new EhcacheResult[] { PUT })
+              .collect(gcStatistics()).log(html()))
+          .config(cacheConfig(String.class, byte[].class)
+              .cache("one", one)
+          )
+          .start()
+      ;
+
+
     } catch (SyntaxException e) {
       e.printStackTrace();
     } finally {
