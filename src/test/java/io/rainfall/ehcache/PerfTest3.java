@@ -638,7 +638,7 @@ public class PerfTest3 {
           .executed(during(2, minutes))
           .config(concurrency)
           .config(report(EhcacheResult.class, new EhcacheResult[] { PUT, GET, MISS })
-              .log(text(), html("test-basic")))
+              .collect(gcStatistics()).log(text(), html("test-basic")))
           .config(cacheConfig(String.class, byte[].class)
               .cache("one", one)
           )
