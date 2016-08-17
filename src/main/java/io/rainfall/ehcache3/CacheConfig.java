@@ -18,6 +18,8 @@ package io.rainfall.ehcache3;
 
 import io.rainfall.Configuration;
 import org.ehcache.Cache;
+import org.ehcache.config.CacheRuntimeConfiguration;
+import org.ehcache.core.HumanReadable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,6 +83,12 @@ public class CacheConfig<K, V> extends Configuration {
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
     desc.add("Using " + caches.size() + " cache" + (caches.size() > 1 ? "s" : ""));
+    for (Cache<K, V> cache : caches) {
+      CacheRuntimeConfiguration<K, V> runtimeConfiguration = cache.getRuntimeConfiguration();
+      if (runtimeConfiguration instanceof HumanReadable) {
+        desc.add(((HumanReadable)runtimeConfiguration).readableString());
+      }
+    }
     desc.add("Size of batch operations : " + bulkBatchSize);
     return desc;
   }
