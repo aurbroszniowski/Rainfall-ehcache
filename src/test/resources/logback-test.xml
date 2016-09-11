@@ -21,7 +21,7 @@
   <logger name="com.terracotta.qa" level="info"/>
 
   <root level="off">
-    <appender-ref ref="FILE"/>
+    <appender-ref ref="STDOUT"/>
   </root>
 
 </configuration>
