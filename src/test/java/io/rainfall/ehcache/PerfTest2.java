@@ -1,9 +1,11 @@
 package io.rainfall.ehcache;
 
 import io.rainfall.ObjectGenerator;
+import io.rainfall.RainfallMaster;
 import io.rainfall.Runner;
 import io.rainfall.Scenario;
 import io.rainfall.SyntaxException;
+import io.rainfall.TestException;
 import io.rainfall.configuration.ConcurrencyConfig;
 import io.rainfall.configuration.DistributedConfig;
 import io.rainfall.configuration.ReportingConfig;
@@ -43,10 +45,13 @@ public class PerfTest2 {
 
   @Test
   @Ignore
-  public void testDistributedLoad() throws SyntaxException {
-
+  public void testDistributedLoad() throws SyntaxException, TestException {
+    DistributedConfig distributedConfig = DistributedConfig.distributedConfig(address("localhost", 9911), 2);
+    RainfallMaster rainfallMaster = null;
     CacheManager cacheManager = null;
     try {
+      rainfallMaster = RainfallMaster.master(distributedConfig).start();
+
       Configuration configuration = new Configuration().name("EhcacheTest")
           .defaultCache(new CacheConfiguration("default", 0).eternal(true))
           .cache(new CacheConfiguration().name("one")
@@ -67,7 +72,7 @@ public class PerfTest2 {
               put(String.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
           ))
           .executed(times(nbElements))
-          .config(DistributedConfig.distributedConfig(address("localhost", 9911), 2))
+          .config(distributedConfig)
           .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text()))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
           .start();
@@ -84,12 +89,15 @@ public class PerfTest2 {
           .executed(during(20, seconds))
           .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
-          .config(DistributedConfig.distributedConfig(address("localhost", 9911), 2))
+          .config(distributedConfig)
           .start();
 
     } finally {
       if (cacheManager != null) {
         cacheManager.shutdown();
+      }
+      if (rainfallMaster!=null) {
+        rainfallMaster.stop();
       }
     }
   }
