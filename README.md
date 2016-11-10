@@ -79,13 +79,7 @@ Use it in your project
     <dependency>
       <groupId>io.rainfall</groupId>
       <artifactId>rainfall-ehcache</artifactId>
-      <version>1.0.4</version>
-    </dependency>
-
-    <dependency>
-      <groupId>io.rainfall</groupId>
-      <artifactId>rainfall-core</artifactId>
-      <version>1.0.4</version>
+      <version>1.2.1</version>
     </dependency>
   </dependencies>
 ```
