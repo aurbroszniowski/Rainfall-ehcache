@@ -17,6 +17,7 @@
 package io.rainfall.ehcache2;
 
 import io.rainfall.ehcache2.operation.GetOperation;
+import io.rainfall.ehcache2.operation.PutIfAbsentOperation;
 import io.rainfall.ehcache2.operation.PutOperation;
 import io.rainfall.ehcache2.operation.RemoveOperation;
 
@@ -38,5 +39,10 @@ public class Ehcache2Operations {
   public static <K, V> RemoveOperation<K, V> remove(Class<K> keyClass, Class<V> valueClass) {
     return new RemoveOperation<K, V>();
   }
+
+  public static <K, V> PutIfAbsentOperation<K, V> putIfAbsent(Class<K> keyClass, Class<V> valueClass) {
+    return new PutIfAbsentOperation<K, V>();
+  }
+
 
 }
