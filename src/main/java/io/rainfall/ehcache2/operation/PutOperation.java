@@ -51,13 +51,13 @@ public class PutOperation<K, V> extends EhcacheOperation<K, V> {
       Object v = valueGenerator.generate(next);
 
       Element element = new Element(k, v);
-      long start = getTimeInNs();
+      long start = statisticsHolder.getTimeInNs();
       try {
         cache.put(element);
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUT);
       } catch (Exception e) {
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
@@ -66,7 +66,7 @@ public class PutOperation<K, V> extends EhcacheOperation<K, V> {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add( getWeightInPercent() + "% put(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
+    desc.add("put(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }

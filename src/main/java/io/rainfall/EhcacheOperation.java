@@ -26,7 +26,7 @@ import io.rainfall.utils.NullSequenceGenerator;
  * @author Aurelien Broszniowski
  */
 
-public abstract class EhcacheOperation<K, V> extends Operation {
+public abstract class EhcacheOperation<K, V> implements Operation {
 
   protected ObjectGenerator<K> keyGenerator = NullObjectGenerator.instance();
   protected ObjectGenerator<V> valueGenerator = NullObjectGenerator.instance();
@@ -65,8 +65,4 @@ public abstract class EhcacheOperation<K, V> extends Operation {
     return this;
   }
 
-  @SuppressWarnings("unchecked")
-  public EhcacheOperation<K, V> withWeight(Double weight) {
-    return (EhcacheOperation<K, V>)super.withWeight(weight);
-  }
 }

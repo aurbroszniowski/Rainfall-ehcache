@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
 import static io.rainfall.ehcache.statistics.EhcacheResult.PUTIFABSENT;
 import static io.rainfall.ehcache.statistics.EhcacheResult.PUTIFABSENT_MISS;
 
@@ -54,17 +53,17 @@ public class PutIfAbsentOperation<K, V> extends EhcacheOperation<K, V> {
       Object v1 = valueGenerator.generate(next);
 
       Element element = new Element(k, v1);
-      long start = getTimeInNs();
+      long start = statisticsHolder.getTimeInNs();
       try {
         v = cache.putIfAbsent(element);
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         if (v != null) {
           statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUTIFABSENT_MISS);
         } else {
           statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUTIFABSENT);
         }
       } catch (Exception e) {
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
@@ -73,7 +72,7 @@ public class PutIfAbsentOperation<K, V> extends EhcacheOperation<K, V> {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add( getWeightInPercent() + "% put(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
+    desc.add("putifAbsent(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }

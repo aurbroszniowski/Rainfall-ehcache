@@ -49,17 +49,17 @@ public class RemoveForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V> 
       K k = keyGenerator.generate(next);
       V v = valueGenerator.generate(next);
 
-      long start = getTimeInNs();
+      long start = statisticsHolder.getTimeInNs();
       try {
         removed = cache.remove(k, v);
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         if (!removed) {
           statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVEVALUE_MISS);
         } else {
           statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVEVALUE);
         }
       } catch (Exception e) {
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
@@ -68,7 +68,7 @@ public class RemoveForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V> 
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add(getWeightInPercent() + "% remove(" + keyGenerator.getDescription() + " key, " +
+    desc.add("remove(" + keyGenerator.getDescription() + " key, " +
              valueGenerator.getDescription() + " value)");
     desc.add(sequenceGenerator.getDescription());
     return desc;

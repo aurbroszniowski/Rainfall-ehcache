@@ -37,13 +37,13 @@ public class PutVerifiedOperation<K, V> extends PutOperation<K, V> {
       K k = keyGenerator.generate(next);
       V v = valueGenerator.generate(next);
 
-      long start = getTimeInNs();
+      long start = statisticsHolder.getTimeInNs();
       try {
         cache.put(k, v);
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUT);
       } catch (Exception e) {
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
 
@@ -58,7 +58,7 @@ public class PutVerifiedOperation<K, V> extends PutOperation<K, V> {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add(getWeightInPercent() + "% put(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value) with ASSERTION");
+    desc.add( "put(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value) with ASSERTION");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }

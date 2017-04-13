@@ -26,6 +26,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import static io.rainfall.Scenario.weighted;
 import static io.rainfall.configuration.DistributedConfig.address;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.text;
@@ -79,12 +80,13 @@ public class PerfTest2 {
 
       StatisticsPeekHolder finalStats = Runner.setUp(
           Scenario.scenario("Test phase").exec(
-              put(String.class, byte[].class).withWeight(0.20)
+              weighted(0.20,
+                  put(String.class, byte[].class)
+                      .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
+                      .using(keyGenerator, valueGenerator)),
+              weighted(0.80, get(String.class, byte[].class)
                   .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
-                  .using(keyGenerator, valueGenerator),
-              get(String.class, byte[].class).withWeight(0.80)
-                  .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
-                  .using(keyGenerator, valueGenerator)
+                  .using(keyGenerator, valueGenerator))
           ))
           .executed(during(20, seconds))
           .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()))
@@ -96,7 +98,7 @@ public class PerfTest2 {
       if (cacheManager != null) {
         cacheManager.shutdown();
       }
-      if (rainfallMaster!=null) {
+      if (rainfallMaster != null) {
         rainfallMaster.stop();
       }
     }
@@ -159,12 +161,12 @@ public class PerfTest2 {
 
       StatisticsPeekHolder finalStats = Runner.setUp(
           Scenario.scenario("Test phase").exec(
-              put(String.class, byte[].class).withWeight(0.90)
+              weighted(0.90, put(String.class, byte[].class)
                   .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
-                  .using(keyGenerator, valueGenerator),
-              get(String.class, byte[].class).withWeight(0.10)
+                  .using(keyGenerator, valueGenerator)),
+              weighted(0.10, get(String.class, byte[].class)
                   .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
-                  .using(keyGenerator, valueGenerator)
+                  .using(keyGenerator, valueGenerator))
           ))
           .executed(during(5, minutes))
           .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()))

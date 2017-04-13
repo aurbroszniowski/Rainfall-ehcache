@@ -52,13 +52,13 @@ public class RemoveAllOperation<K, V> extends EhcacheOperation<K, V> {
     }
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      long start = getTimeInNs();
+      long start = statisticsHolder.getTimeInNs();
       try {
         cache.removeAll(set);
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVEALL);
       } catch (Exception e) {
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }

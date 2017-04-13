@@ -35,13 +35,13 @@ public class PutAllOperation<K, V> extends EhcacheOperation<K, V> {
 
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      long start = getTimeInNs();
+      long start = statisticsHolder.getTimeInNs();
       try {
         cache.putAll(maps);
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUTALL);
       } catch (Exception e) {
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
@@ -50,7 +50,7 @@ public class PutAllOperation<K, V> extends EhcacheOperation<K, V> {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add(getWeightInPercent() + "% putAll(Map<? extends " + keyGenerator.getDescription() + ", ? extends "
+    desc.add("putAll(Map<? extends " + keyGenerator.getDescription() + ", ? extends "
              + valueGenerator.getDescription() + "> entries)");
     desc.add(sequenceGenerator.getDescription());
     return desc;

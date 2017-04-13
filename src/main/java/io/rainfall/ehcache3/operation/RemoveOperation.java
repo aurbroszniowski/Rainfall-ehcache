@@ -47,13 +47,13 @@ public class RemoveOperation<K, V> extends EhcacheOperation<K, V> {
       boolean removed;
       K k = keyGenerator.generate(next);
 
-      long start = getTimeInNs();
+      long start = statisticsHolder.getTimeInNs();
       try {
         cache.remove(k);
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVE);
       } catch (Exception e) {
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
@@ -62,7 +62,7 @@ public class RemoveOperation<K, V> extends EhcacheOperation<K, V> {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add(getWeightInPercent() + "% remove(" + keyGenerator.getDescription() + " key)");
+    desc.add("remove(" + keyGenerator.getDescription() + " key)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }

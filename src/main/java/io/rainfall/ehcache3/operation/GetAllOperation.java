@@ -56,10 +56,10 @@ public class GetAllOperation<K, V> extends EhcacheOperation<K, V> {
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
       Map<K, V> all;
-      long start = getTimeInNs();
+      long start = statisticsHolder.getTimeInNs();
       try {
         all = cache.getAll(set);
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         EhcacheResult result = GETALL;
         for (V v : all.values()) {
           if (v == null) {
@@ -70,7 +70,7 @@ public class GetAllOperation<K, V> extends EhcacheOperation<K, V> {
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), result);
 
       } catch (Exception e) {
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
@@ -79,7 +79,7 @@ public class GetAllOperation<K, V> extends EhcacheOperation<K, V> {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add(getWeightInPercent() + "% getAll(Set<? extends " + keyGenerator.getDescription() + "> keys)");
+    desc.add("getAll(Set<? extends " + keyGenerator.getDescription() + "> keys)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }

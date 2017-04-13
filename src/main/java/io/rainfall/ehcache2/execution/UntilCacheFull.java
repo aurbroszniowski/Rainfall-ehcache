@@ -22,6 +22,7 @@ import io.rainfall.Execution;
 import io.rainfall.Operation;
 import io.rainfall.Scenario;
 import io.rainfall.TestException;
+import io.rainfall.WeightedOperation;
 import io.rainfall.configuration.ConcurrencyConfig;
 import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
@@ -60,11 +61,11 @@ public class UntilCacheFull extends Execution {
 
         @Override
         public Object call() throws Exception {
-          List<RangeMap<Operation>> operations = scenario.getOperations();
+          List<RangeMap<WeightedOperation>> operations = scenario.getOperations();
           while (!cachesAreFull(sizes, caches)) {
-            for (RangeMap<Operation> operation : operations) {
+            for (RangeMap<WeightedOperation> operation : operations) {
               operation.get(weightRnd.nextFloat(operation.getHigherBound()))
-                  .exec(statisticsHolder, configurations, assertions);
+                  .getOperation().exec(statisticsHolder, configurations, assertions);
             }
           }
           return null;

@@ -48,17 +48,17 @@ public class GetOperation<K, V> extends EhcacheOperation<K, V> {
       K k = keyGenerator.generate(next);
       V value;
 
-      long start = getTimeInNs();
+      long start = statisticsHolder.getTimeInNs();
       try {
         value = cache.get(k);
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         if (value == null) {
           statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), MISS);
         } else {
           statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), GET);
         }
       } catch (Exception e) {
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
@@ -67,7 +67,7 @@ public class GetOperation<K, V> extends EhcacheOperation<K, V> {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add(getWeightInPercent() + "% get(" + keyGenerator.getDescription() + " key)");
+    desc.add("get(" + keyGenerator.getDescription() + " key)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }

@@ -49,17 +49,17 @@ public class ReplaceOperation<K, V> extends EhcacheOperation<K, V> {
       K k = keyGenerator.generate(next);
       V v1 = valueGenerator.generate(next);
 
-      long start = getTimeInNs();
+      long start = statisticsHolder.getTimeInNs();
       try {
         v = cache.replace(k, v1);
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         if (v == null) {
           statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REPLACE_MISS);
         } else {
           statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REPLACE);
         }
       } catch (Exception e) {
-        long end = getTimeInNs();
+        long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
@@ -68,7 +68,7 @@ public class ReplaceOperation<K, V> extends EhcacheOperation<K, V> {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add(getWeightInPercent() + "% replace(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
+    desc.add("replace(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }
