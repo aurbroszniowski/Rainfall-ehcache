@@ -19,7 +19,6 @@ package io.rainfall.ehcache2.execution;
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
 import io.rainfall.Execution;
-import io.rainfall.Operation;
 import io.rainfall.Scenario;
 import io.rainfall.TestException;
 import io.rainfall.WeightedOperation;
@@ -46,7 +45,7 @@ public class UntilCacheFull extends Execution {
   public <E extends Enum<E>> void execute(final StatisticsHolder<E> statisticsHolder, final Scenario scenario, final Map<Class<? extends Configuration>, Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
     ConcurrencyConfig concurrencyConfig = (ConcurrencyConfig)configurations.get(ConcurrencyConfig.class);
-    int nbThreads = concurrencyConfig.getNbThreads();
+    int nbThreads = concurrencyConfig.getThreadsCount();
     ExecutorService executor = Executors.newFixedThreadPool(nbThreads);
 
     CacheConfig cachesConfig = (CacheConfig)configurations.get(CacheConfig.class);
