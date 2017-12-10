@@ -18,9 +18,12 @@ package io.rainfall.ehcache3.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
+import io.rainfall.ObjectGenerator;
+import io.rainfall.SequenceGenerator;
 import io.rainfall.TestException;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
+import io.rainfall.ehcache3.CacheDefinition;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
 
@@ -38,7 +41,9 @@ public class TpsLimitPutOperation<K, V> extends PutOperation<K, V> {
 
   private final long tpsLimit;
 
-  public TpsLimitPutOperation(final long tpsLimit) {
+  public TpsLimitPutOperation(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
+                              final SequenceGenerator sequenceGenerator, final long tpsLimit, final CacheDefinition<K, V>... caches) {
+    super(keyGenerator, valueGenerator, sequenceGenerator, caches);
     this.tpsLimit = tpsLimit;
   }
 

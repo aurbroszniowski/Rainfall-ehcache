@@ -2,8 +2,11 @@ package io.rainfall.ehcache3.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
+import io.rainfall.ObjectGenerator;
+import io.rainfall.SequenceGenerator;
 import io.rainfall.TestException;
 import io.rainfall.ehcache3.CacheConfig;
+import io.rainfall.ehcache3.CacheDefinition;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
 import org.slf4j.Logger;
@@ -23,7 +26,9 @@ public class PutVerifiedOperation<K, V> extends PutOperation<K, V> {
 
   private static final Logger log = LoggerFactory.getLogger(PutOperation.class);
 
-  public PutVerifiedOperation(Class<K> keyClass, Class<V> valueClass) {
+  public PutVerifiedOperation(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
+                              final SequenceGenerator sequenceGenerator, final CacheDefinition<K, V>... caches) {
+    super(keyGenerator, valueGenerator, sequenceGenerator, caches);
   }
 
   @Override

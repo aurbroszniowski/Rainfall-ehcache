@@ -56,6 +56,7 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
 import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
 import static io.rainfall.ehcache.statistics.EhcacheResult.PUTALL;
 import static io.rainfall.ehcache3.CacheConfig.cacheConfig;
+import static io.rainfall.ehcache3.CacheDefinition.cache;
 import static io.rainfall.ehcache3.Ehcache3Operations.get;
 import static io.rainfall.ehcache3.Ehcache3Operations.put;
 import static io.rainfall.ehcache3.Ehcache3Operations.remove;
@@ -63,6 +64,8 @@ import static io.rainfall.ehcache3.Ehcache3Operations.removeForKeyAndValue;
 import static io.rainfall.execution.Executions.during;
 import static io.rainfall.execution.Executions.once;
 import static io.rainfall.execution.Executions.times;
+import static io.rainfall.generator.SequencesGenerator.atRandom;
+import static io.rainfall.generator.SequencesGenerator.sequentially;
 import static io.rainfall.generator.sequence.Distribution.GAUSSIAN;
 import static io.rainfall.unit.Instance.instances;
 import static io.rainfall.unit.TimeDivision.minutes;
@@ -102,7 +105,8 @@ public class PerfTest3 {
       Runner.setUp(
           Scenario.scenario("Cache warm up phase")
               .exec(
-                  put(Long.class, VerifiedValue.class).using(keyGenerator, valueGenerator).sequentially()))
+                  put(keyGenerator, valueGenerator, sequentially(), cache("one", one))
+              ))
           .executed(times(nbElements))
           .config(report(EhcacheResult.class))
           .config(concurrency)
@@ -118,8 +122,8 @@ public class PerfTest3 {
           Scenario.scenario("Cache test phase")
               .exec(
                   weighted(0.10,
-                      new PutVerifiedOperation(Long.class, VerifiedValue.class).using(keyGenerator, valueGenerator)
-                          .sequentially()),
+                      new PutVerifiedOperation<Long, VerifiedValue>(keyGenerator, valueGenerator, sequentially(), cache("one", one))
+                  ),
                   weighted(0.90, get(Long.class, VerifiedValue.class).using(keyGenerator, valueGenerator)
                       .sequentially())))
 //          .warmup(during(1, TimeDivision.minutes))
@@ -173,7 +177,7 @@ public class PerfTest3 {
       System.out.println("Warmup");
       Runner.setUp(
           Scenario.scenario("Cache warm up phase")
-              .exec(put(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()))
+              .exec(put(keyGenerator, valueGenerator, sequentially(), cache("one", one))))
           .executed(times(nbElements))
           .config(concurrency)
           .config(report(EhcacheResult.class, new EhcacheResult[] { PUT }).log(text()))
@@ -218,7 +222,7 @@ public class PerfTest3 {
     EhcacheResult[] resultsReported = new EhcacheResult[] { GET, PUT, MISS };
 
     Scenario scenario = Scenario.scenario("Test phase").exec(
-        put(Long.class, byte[].class, 50000).using(keyGenerator, valueGenerator).sequentially()
+        put(keyGenerator, valueGenerator, sequentially(), 50000, cache("one", one))
     );
 
     System.out.println("----------> Test phase");
@@ -256,7 +260,7 @@ public class PerfTest3 {
     EhcacheResult[] resultsReported = new EhcacheResult[] { GET, PUT, MISS };
 
     Scenario scenario = Scenario.scenario("Test phase").exec(
-        put(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially(),
+        put(keyGenerator, valueGenerator, sequentially(), cache("one", one)),
         get(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
     );
 
@@ -299,7 +303,7 @@ public class PerfTest3 {
     EhcacheResult[] resultsReported = new EhcacheResult[] { GET, PUT, MISS };
 
     Scenario scenario = Scenario.scenario("Test phase").exec(
-        put(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially(),
+        put(keyGenerator, valueGenerator, sequentially(), cache("one", one), cache("two", two)),
         get(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
     );
 
@@ -356,7 +360,7 @@ public class PerfTest3 {
     System.out.println("----------> Warm up phase");
     Runner.setUp(
         Scenario.scenario("Warm up phase").exec(
-            put(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
+            put(keyGenerator, valueGenerator, sequentially(), cache("one", one), cache("two", two), cache("three", three), cache("four", four))
         ))
         .executed(times(nbElements))
         .config(concurrency, ReportingConfig.report(EhcacheResult.class, resultsReported).log(text()))
@@ -382,9 +386,8 @@ public class PerfTest3 {
 
     StatisticsPeekHolder finalStats = Runner.setUp(
         Scenario.scenario("Test phase").exec(
-            weighted(0.10, put(Long.class, byte[].class)
-                .using(keyGenerator, valueGenerator)
-                .atRandom(GAUSSIAN, 0, nbElements, 10000)),
+            weighted(0.10, put(keyGenerator, valueGenerator, atRandom(GAUSSIAN, 0, nbElements, 10000),
+                cache("one", one), cache("two", two), cache("three", three), cache("four", four))),
             weighted(0.80, get(Long.class, byte[].class)
                 .using(keyGenerator, valueGenerator)
                 .atRandom(GAUSSIAN, 0, nbElements, 10000))
@@ -442,8 +445,8 @@ public class PerfTest3 {
     CacheConfig<Long, Long> cacheConfig = cacheConfig(Long.class, Long.class).cache("one", one);
     Runner.setUp(
         Scenario.scenario("warmup phase").exec(
-            put(Long.class, Long.class).using(keyGenerator, valueGenerator).sequentially()
-        ))
+            put(keyGenerator, valueGenerator, sequentially(), cache("one", one)
+            )))
         .executed(times(nbElements))
         .config(concurrency, reportingConfig)
         .config(cacheConfig)
@@ -485,8 +488,7 @@ public class PerfTest3 {
 
     Runner.setUp(
         Scenario.scenario("Test phase").exec(
-            put(Long.class, Long.class).using(keyGenerator, valueGenerator)
-                .atRandom(GAUSSIAN, 0, nbElements, nbElements / 10)
+            put(keyGenerator, valueGenerator, atRandom(GAUSSIAN, 0, nbElements, nbElements / 10), cache("one", one))
         ))
         .executed(during(10, minutes))
         .config(concurrency, reportingConfig)
@@ -531,7 +533,7 @@ public class PerfTest3 {
 
       Runner.setUp(
           Scenario.scenario("Cache warm up phase")
-              .exec(put(String.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()))
+              .exec(put(keyGenerator, valueGenerator, sequentially(), cache("one", one))))
           .executed(times(nbElements))
           .config(concurrency)
           .config(report(EhcacheResult.class, new EhcacheResult[] { PUT }).log(text(), html("warmup-tier")))
@@ -551,9 +553,9 @@ public class PerfTest3 {
               .exec(
                   weighted(0.90, get(String.class, byte[].class).using(keyGenerator, valueGenerator)
                       .atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10)),
-                  weighted(0.10, put(String.class, byte[].class).using(keyGenerator, valueGenerator)
-                      .atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10))
-              ))
+                  weighted(0.10, put(keyGenerator, valueGenerator, atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10),
+                      cache("one", one))
+                  )))
           .warmup(during(3, minutes))
           .executed(during(testLength, minutes))
           .config(concurrency)
@@ -606,7 +608,7 @@ public class PerfTest3 {
 
       Runner.setUp(
           Scenario.scenario("Cache warm up phase")
-              .exec(put(String.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()))
+              .exec(put(keyGenerator, valueGenerator, sequentially(), cache("one", one))))
           .executed(times(nbElements))
           .config(concurrency)
           .config(report(EhcacheResult.class, new EhcacheResult[] { PUT }).log(text()))
@@ -627,8 +629,8 @@ public class PerfTest3 {
               .exec(
                   weighted(0.90, get(String.class, byte[].class).using(keyGenerator, valueGenerator)
                       .atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10)),
-                  weighted(0.10, put(String.class, byte[].class).using(keyGenerator, valueGenerator)
-                      .atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10))
+                  weighted(0.10, put(keyGenerator, valueGenerator, atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10),
+                      cache("one", one)))
               ))
           .warmup(during(30, seconds))
           .executed(during(2, minutes))
@@ -674,8 +676,8 @@ public class PerfTest3 {
               .exec(
                   weighted(0.50, get(String.class, byte[].class).using(keyGenerator, valueGenerator)
                       .atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10)),
-                  weighted(0.50, put(String.class, byte[].class).using(keyGenerator, valueGenerator)
-                      .atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10))
+                  weighted(0.50, put(keyGenerator, valueGenerator, atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10),
+                      cache("one", one)))
               ))
           .warmup(during(30, seconds))
           .executed(during(2, minutes))
@@ -719,8 +721,7 @@ public class PerfTest3 {
       Runner.setUp(
           Scenario.scenario("Test reporters")
               .exec(
-                  put(String.class, byte[].class)
-                      .using(keyGenerator, valueGenerator).sequentially())
+                  put(keyGenerator, valueGenerator, sequentially(), cache("one", one)))
       )
           .executed(during(1, minutes))
           .config(concurrency)
@@ -779,10 +780,12 @@ public class PerfTest3 {
                           .atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10)
                   ),
                   Scenario.weighted(0.1,
-                      put(String.class, byte[].class).using(keyGenerator, valueGenerator)
+                      put(keyGenerator, valueGenerator, atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10),
+                          cache("one", one))
                   ),
                   Scenario.fixed(
-                      remove(String.class, byte[].class).using(keyGenerator, valueGenerator)
+                      remove(String.class, byte[].class).using(keyGenerator, valueGenerator).
+                          atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10)
                   )
               ))
           .executed(during(2, minutes))
@@ -800,4 +803,55 @@ public class PerfTest3 {
       cacheManager.close();
     }
   }
+
+  @Test
+  @Ignore
+  public void testMultipleCaches() {
+    int eltCount = 200000;
+
+
+    ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
+        .threads(4).timeout(30, MINUTES);
+
+    ObjectGenerator<String> onekeyGenerator = StringGenerator.fixedLength(10);
+    ObjectGenerator<Long> twokeyGenerator = new LongGenerator();
+    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1024);
+
+    CacheManager cacheManager = newCacheManagerBuilder()
+        .with(new CacheManagerPersistenceConfiguration(new File("/data/PerfTest3")))
+        .withCache("one", CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, byte[].class,
+            newResourcePoolsBuilder().heap(eltCount, EntryUnit.ENTRIES).build()).build())
+        .withCache("two", CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, byte[].class,
+            newResourcePoolsBuilder().heap(eltCount, EntryUnit.ENTRIES).build()).build())
+        .build(true);
+
+    Cache<String, byte[]> one = cacheManager.getCache("one", String.class, byte[].class);
+    Cache<Long, byte[]> two = cacheManager.getCache("two", Long.class, byte[].class);
+    try {
+      System.out.println("----------> Cache Warm up phase");
+      long start = System.nanoTime();
+
+      Runner.setUp(
+          Scenario.scenario("Cache warm up phase")
+              .exec(
+                  put(onekeyGenerator, valueGenerator, sequentially(), cache("one", one)),
+                  put(twokeyGenerator, valueGenerator, sequentially(), cache("two", two))
+              ))
+          .executed(times(eltCount))
+          .config(concurrency)
+          .config(report(EhcacheResult.class, new EhcacheResult[] { PUT }).log(text()))
+          .start()
+      ;
+
+      long end = System.nanoTime();
+      System.out.println("Warmup time = " + TimeUnit.NANOSECONDS.toMillis((end - start)) + "ms");
+
+      System.out.println("----------> Done");
+    } catch (SyntaxException e) {
+      e.printStackTrace();
+    } finally {
+      cacheManager.close();
+    }
+  }
+
 }

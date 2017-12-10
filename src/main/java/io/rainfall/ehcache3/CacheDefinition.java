@@ -1,0 +1,30 @@
+package io.rainfall.ehcache3;
+
+import org.ehcache.Cache;
+
+/**
+ * @author Aurelien Broszniowski
+ */
+
+public class CacheDefinition<K, V> {
+
+  private String name;
+  private Cache<K, V> cache;
+
+  public CacheDefinition(final String name, final Cache<K, V> cache) {
+    this.name = name;
+    this.cache = cache;
+  }
+
+  public static <K, V> CacheDefinition cache(String name, Cache<K, V> cache) {
+    return new CacheDefinition<K, V>(name, cache);
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public Cache<K, V> getCache() {
+    return cache;
+  }
+}
