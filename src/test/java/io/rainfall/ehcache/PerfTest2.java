@@ -30,10 +30,13 @@ import static io.rainfall.Scenario.weighted;
 import static io.rainfall.configuration.DistributedConfig.address;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.text;
+import static io.rainfall.ehcache2.CacheDefinition.cache;
 import static io.rainfall.ehcache2.Ehcache2Operations.get;
 import static io.rainfall.ehcache2.Ehcache2Operations.put;
 import static io.rainfall.execution.Executions.during;
 import static io.rainfall.execution.Executions.times;
+import static io.rainfall.generator.SequencesGenerator.atRandom;
+import static io.rainfall.generator.SequencesGenerator.sequentially;
 import static io.rainfall.unit.TimeDivision.minutes;
 import static io.rainfall.unit.TimeDivision.seconds;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -70,7 +73,7 @@ public class PerfTest2 {
 
       Runner.setUp(
           Scenario.scenario("warmup phase").exec(
-              put(String.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
+              put(keyGenerator, valueGenerator, sequentially(), cache("one", one))
           ))
           .executed(times(nbElements))
           .config(distributedConfig)
@@ -81,9 +84,9 @@ public class PerfTest2 {
       StatisticsPeekHolder finalStats = Runner.setUp(
           Scenario.scenario("Test phase").exec(
               weighted(0.20,
-                  put(String.class, byte[].class)
-                      .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
-                      .using(keyGenerator, valueGenerator)),
+                  put(keyGenerator, valueGenerator,
+                      atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000), cache("one", one)))
+              ,
               weighted(0.80, get(String.class, byte[].class)
                   .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
                   .using(keyGenerator, valueGenerator))
@@ -114,7 +117,8 @@ public class PerfTest2 {
           .defaultCache(new CacheConfiguration("default", 0).eternal(true))
           .cache(new CacheConfiguration().name("one")
               .maxBytesLocalHeap(100, MemoryUnit.MEGABYTES)
-              .maxBytesLocalOffHeap(200, MemoryUnit.MEGABYTES))
+//              .maxBytesLocalOffHeap(200, MemoryUnit.MEGABYTES)
+          )
           .cache(new CacheConfiguration("two", 250000))
           .cache(new CacheConfiguration("three", 250000))
           .cache(new CacheConfiguration("four", 250000));
@@ -137,10 +141,12 @@ public class PerfTest2 {
       Runner.setUp(
           Scenario.scenario("Warm up phase")
               .exec(
-                  put(String.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
+                  put(keyGenerator, valueGenerator, sequentially(), cache("one", one), cache("two", two)),
+                  put(keyGenerator, valueGenerator, sequentially(), cache("three", three), cache("four", four))
               ))
           .executed(new UntilCacheFull())
-          .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text()))
+          .config(concurrency, ReportingConfig.report(EhcacheResult.class, new EhcacheResult[] { EhcacheResult.PUT })
+              .log(text()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
               .caches(one, two, three, four)
           )
@@ -161,9 +167,9 @@ public class PerfTest2 {
 
       StatisticsPeekHolder finalStats = Runner.setUp(
           Scenario.scenario("Test phase").exec(
-              weighted(0.90, put(String.class, byte[].class)
-                  .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
-                  .using(keyGenerator, valueGenerator)),
+              weighted(0.90, put(keyGenerator, valueGenerator,
+                  atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000),
+                  cache("three", three), cache("four", four))),
               weighted(0.10, get(String.class, byte[].class)
                   .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
                   .using(keyGenerator, valueGenerator))

@@ -16,6 +16,8 @@
 
 package io.rainfall.ehcache2;
 
+import io.rainfall.ObjectGenerator;
+import io.rainfall.SequenceGenerator;
 import io.rainfall.ehcache2.operation.GetOperation;
 import io.rainfall.ehcache2.operation.PutIfAbsentOperation;
 import io.rainfall.ehcache2.operation.PutOperation;
@@ -28,8 +30,14 @@ import io.rainfall.ehcache2.operation.RemoveOperation;
  */
 public class Ehcache2Operations {
 
-  public static <K, V> PutOperation<K, V> put(Class<K> keyClass, Class<V> valueClass) {
-    return new PutOperation<K, V>();
+  public static <K, V> PutOperation<K, V> put(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
+                                              final SequenceGenerator sequenceGenerator, final CacheDefinition cacheDefinition) {
+    return new PutOperation<K, V>(keyGenerator, valueGenerator, sequenceGenerator, cacheDefinition);
+  }
+
+  public static <K, V> PutOperation<K, V> put(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
+                                              final SequenceGenerator sequenceGenerator, final CacheDefinition... cacheDefinitions) {
+    return new PutOperation<K, V>(keyGenerator, valueGenerator, sequenceGenerator, cacheDefinitions);
   }
 
   public static <K, V> GetOperation<K, V> get(Class<K> keyClass, Class<V> valueClass) {

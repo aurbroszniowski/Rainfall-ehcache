@@ -18,9 +18,11 @@ package io.rainfall.ehcache2.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
-import io.rainfall.EhcacheOperation;
+import io.rainfall.ObjectGenerator;
+import io.rainfall.Operation;
+import io.rainfall.SequenceGenerator;
 import io.rainfall.TestException;
-import io.rainfall.ehcache2.CacheConfig;
+import io.rainfall.ehcache2.CacheDefinition;
 import io.rainfall.statistics.StatisticsHolder;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
@@ -37,16 +39,33 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
  *
  * @author Aurelien Broszniowski
  */
-public class PutOperation<K, V> extends EhcacheOperation<K, V> {
+public class PutOperation<K, V> implements Operation {
+
+  protected final ObjectGenerator<K> keyGenerator;
+  protected final ObjectGenerator<V> valueGenerator;
+  protected final SequenceGenerator sequenceGenerator;
+  protected final CacheDefinition[] caches;
+
+  public PutOperation(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
+                      final SequenceGenerator sequenceGenerator, final CacheDefinition cache) {
+    this(keyGenerator, valueGenerator, sequenceGenerator, new CacheDefinition[] { cache });
+  }
+
+  public PutOperation(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
+                      final SequenceGenerator sequenceGenerator, final CacheDefinition... caches) {
+    this.keyGenerator = keyGenerator;
+    this.valueGenerator = valueGenerator;
+    this.sequenceGenerator = sequenceGenerator;
+    this.caches = caches;
+  }
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
-    CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
     final long next = this.sequenceGenerator.next();
-    List<Ehcache> caches = cacheConfig.getCaches();
-    for (final Ehcache cache : caches) {
+    for (final CacheDefinition cacheDefinition : caches) {
+      Ehcache cache = cacheDefinition.getCache();
       Object k = keyGenerator.generate(next);
       Object v = valueGenerator.generate(next);
 
@@ -55,10 +74,11 @@ public class PutOperation<K, V> extends EhcacheOperation<K, V> {
       try {
         cache.put(element);
         long end = statisticsHolder.getTimeInNs();
-        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUT);
+        statisticsHolder.record(cacheDefinition.getName(), (end - start), PUT);
       } catch (Exception e) {
+        e.printStackTrace();
         long end = statisticsHolder.getTimeInNs();
-        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
+        statisticsHolder.record(cacheDefinition.getName(), (end - start), EXCEPTION);
       }
     }
   }

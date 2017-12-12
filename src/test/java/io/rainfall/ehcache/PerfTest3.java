@@ -834,12 +834,12 @@ public class PerfTest3 {
       Runner.setUp(
           Scenario.scenario("Cache warm up phase")
               .exec(
-                  put(onekeyGenerator, valueGenerator, sequentially(), cache("one", one)),
-                  put(twokeyGenerator, valueGenerator, sequentially(), cache("two", two))
+                  put(onekeyGenerator, valueGenerator, atRandom(GAUSSIAN, 0, eltCount, eltCount), cache("one", one)),
+                  put(twokeyGenerator, valueGenerator, atRandom(GAUSSIAN, 0, eltCount, eltCount), cache("two", two))
               ))
-          .executed(times(eltCount))
+          .executed(during(2, minutes))
           .config(concurrency)
-          .config(report(EhcacheResult.class, new EhcacheResult[] { PUT }).log(text()))
+          .config(report(EhcacheResult.class, new EhcacheResult[] { PUT }).log(text(), html()))
           .start()
       ;
 
