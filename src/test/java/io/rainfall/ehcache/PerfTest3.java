@@ -19,11 +19,13 @@ package io.rainfall.ehcache;
 import io.rainfall.ObjectGenerator;
 import io.rainfall.Runner;
 import io.rainfall.Scenario;
+import io.rainfall.ScenarioRun;
 import io.rainfall.SyntaxException;
 import io.rainfall.configuration.ConcurrencyConfig;
 import io.rainfall.configuration.ReportingConfig;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
+import io.rainfall.ehcache3.CacheDefinition;
 import io.rainfall.ehcache3.operation.PutVerifiedOperation;
 import io.rainfall.generator.ByteArrayGenerator;
 import io.rainfall.generator.LongGenerator;
@@ -36,12 +38,14 @@ import io.rainfall.utils.SystemTest;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
+import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.config.units.EntryUnit;
 import org.ehcache.config.units.MemoryUnit;
 import org.ehcache.impl.config.persistence.CacheManagerPersistenceConfiguration;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.openjdk.jol.info.GraphLayout;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +58,7 @@ import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache.statistics.EhcacheResult.GET;
 import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
 import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
-import static io.rainfall.ehcache.statistics.EhcacheResult.PUTALL;
+import static io.rainfall.ehcache3.Ehcache3Operations.putIfAbsent;
 import static io.rainfall.ehcache3.CacheConfig.cacheConfig;
 import static io.rainfall.ehcache3.CacheDefinition.cache;
 import static io.rainfall.ehcache3.Ehcache3Operations.get;
@@ -332,91 +336,47 @@ public class PerfTest3 {
 
   @Test
   @Ignore
-  public void testLoad() throws SyntaxException {
-    CacheConfigurationBuilder<Long, Byte[]> builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Byte[].class,
-        newResourcePoolsBuilder().heap(250000, EntryUnit.ENTRIES).build());
+  public void testLoad() throws SyntaxException, InterruptedException {
+    int nbCaches = 10;
+    int nbElements = 500000;
+    CacheConfigurationBuilder<Long, byte[]> configurationBuilder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, byte[].class,
+        newResourcePoolsBuilder().heap(nbElements, EntryUnit.ENTRIES).build());
 
-    final CacheManager cacheManager = newCacheManagerBuilder()
-        .withCache("one", builder.build())
-        .withCache("two", builder.build())
-        .withCache("three", builder.build())
-        .withCache("four", builder.build())
-        .build(true);
+    CacheManagerBuilder<CacheManager> cacheManagerBuilder = newCacheManagerBuilder();
+    for (int i = 0; i < nbCaches; i++) {
+      cacheManagerBuilder = cacheManagerBuilder.withCache("cache" + i, configurationBuilder.build());
+    }
+    CacheManager cacheManager = cacheManagerBuilder.build(true);
 
-    final Cache<Long, Byte[]> one = cacheManager.getCache("one", Long.class, Byte[].class);
-    final Cache<Long, Byte[]> two = cacheManager.getCache("two", Long.class, Byte[].class);
-    final Cache<Long, Byte[]> three = cacheManager.getCache("three", Long.class, Byte[].class);
-    final Cache<Long, Byte[]> four = cacheManager.getCache("four", Long.class, Byte[].class);
+    CacheDefinition<Long, byte[]>[] cacheDefinitions = new CacheDefinition[nbCaches];
+    CacheConfig<Long, byte[]> cacheConfig = cacheConfig(Long.class, byte[].class);
+    for (int i = 0; i < nbCaches; i++) {
+      String alias = "cache" + i;
+      cacheDefinitions[i] = new CacheDefinition<Long, byte[]>(alias, cacheManager.getCache(alias, Long.class, byte[].class));
+      cacheConfig.cache(alias, cacheManager.getCache(alias, Long.class, byte[].class));
+    }
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
         .threads(4).timeout(50, MINUTES);
 
-    int nbElements = 250000;
     ObjectGenerator<Long> keyGenerator = new LongGenerator();
     ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000);
 
-    EhcacheResult[] resultsReported = new EhcacheResult[] { PUT, PUTALL, MISS };
-
     System.out.println("----------> Warm up phase");
-    Runner.setUp(
+    ScenarioRun run = Runner.setUp(
         Scenario.scenario("Warm up phase").exec(
-            put(keyGenerator, valueGenerator, sequentially(), cache("one", one), cache("two", two), cache("three", three), cache("four", four))
+            put(keyGenerator, valueGenerator, sequentially(), cacheDefinitions),
+            get(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially(),
+            remove(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially(),
+            putIfAbsent(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
         ))
         .executed(times(nbElements))
-        .config(concurrency, ReportingConfig.report(EhcacheResult.class, resultsReported).log(text()))
-        .config(cacheConfig(Long.class, Byte[].class)
-            .cache("one", one).cache("two", two).cache("three", three).cache("four", four)
-            .bulkBatchSize(5)
-        )
-        .start()
-    ;
+        .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text()))
+        .config(cacheConfig);
+    run.start();
 
-    try {
-      Thread.sleep(1000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-
-//    System.out.println(one.getStatistics().getCachePuts());
-//    System.out.println(two.getStatistics().getCachePuts());
-//    System.out.println(three.getStatistics().getCachePuts());
-//    System.out.println(four.getStatistics().getCachePuts());
-
-    System.out.println("----------> Test phase");
-
-    StatisticsPeekHolder finalStats = Runner.setUp(
-        Scenario.scenario("Test phase").exec(
-            weighted(0.10, put(keyGenerator, valueGenerator, atRandom(GAUSSIAN, 0, nbElements, 10000),
-                cache("one", one), cache("two", two), cache("three", three), cache("four", four))),
-            weighted(0.80, get(Long.class, byte[].class)
-                .using(keyGenerator, valueGenerator)
-                .atRandom(GAUSSIAN, 0, nbElements, 10000))
-//            putAll(Long.class, Byte[].class).withWeight(0.10)
-//                .using(keyGenerator, valueGenerator)
-//                .atRandom(GAUSSIAN, 0, nbElements, 10000),
-//            getAll(Long.class, Byte[].class).withWeight(0.40)
-//                .using(keyGenerator, valueGenerator)
-//                .atRandom(GAUSSIAN, 0, nbElements, 10000)
-//            removeAll(Long.class, Byte[].class).withWeight(0.10)
-//                .using(keyGenerator, valueGenerator)
-//                .atRandom(GAUSSIAN, 0, nbElements, 10000),
-//            putIfAbsent(Long.class, Byte[].class).withWeight(0.10)
-//                .using(keyGenerator, valueGenerator)
-//                .atRandom(GAUSSIAN, 0, nbElements, 10000),
-//            replace(Long.class, Byte[].class).withWeight(0.10)
-//                .using(keyGenerator, valueGenerator)
-//                .atRandom(GAUSSIAN, 0, nbElements, 10000)
-//            replaceForKeyAndValue(Long.class, Byte[].class).withWeight(0.10)
-//                .using(keyGenerator, valueGenerator)
-//                .atRandom(GAUSSIAN, 0, nbElements, 10000)
-        ))
-        .executed(during(1, minutes))
-        .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()))
-        .config(cacheConfig(Long.class, Byte[].class)
-            .cache("one", one).cache("two", two).cache("three", three).cache("four", four)
-            .bulkBatchSize(10))
-        .start();
-
+    GraphLayout graphLayout = GraphLayout.parseInstance(run);
+    System.out.println(graphLayout.totalSize());
     System.out.println("----------> Done");
 
     cacheManager.close();
