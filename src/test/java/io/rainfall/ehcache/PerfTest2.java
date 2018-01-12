@@ -13,6 +13,7 @@ import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.ehcache2.execution.UntilCacheFull;
 import io.rainfall.generator.ByteArrayGenerator;
+import io.rainfall.generator.DistributedLongSequenceGenerator;
 import io.rainfall.generator.StringGenerator;
 import io.rainfall.generator.sequence.Distribution;
 import io.rainfall.statistics.StatisticsPeekHolder;
@@ -73,11 +74,11 @@ public class PerfTest2 {
 
       Runner.setUp(
           Scenario.scenario("warmup phase").exec(
-              put(keyGenerator, valueGenerator, sequentially(), cache("one", one))
+              put(keyGenerator, valueGenerator, new DistributedLongSequenceGenerator(distributedConfig), cache("one", one))
           ))
           .executed(times(nbElements))
           .config(distributedConfig)
-          .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text()))
+          .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
           .start();
 
@@ -116,7 +117,7 @@ public class PerfTest2 {
       Configuration configuration = new Configuration().name("EhcacheTest")
           .defaultCache(new CacheConfiguration("default", 0).eternal(true))
           .cache(new CacheConfiguration().name("one")
-              .maxBytesLocalHeap(100, MemoryUnit.MEGABYTES)
+                  .maxBytesLocalHeap(100, MemoryUnit.MEGABYTES)
 //              .maxBytesLocalOffHeap(200, MemoryUnit.MEGABYTES)
           )
           .cache(new CacheConfiguration("two", 250000))
