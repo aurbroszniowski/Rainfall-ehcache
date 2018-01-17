@@ -27,6 +27,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import java.util.UUID;
+
 import static io.rainfall.Scenario.weighted;
 import static io.rainfall.configuration.DistributedConfig.address;
 import static io.rainfall.configuration.ReportingConfig.html;
@@ -78,7 +80,8 @@ public class PerfTest2 {
           ))
           .executed(times(nbElements))
           .config(distributedConfig)
-          .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()))
+          .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(),
+              html("rainfall-distributed-" + UUID.randomUUID().toString())))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
           .start();
 
@@ -93,7 +96,8 @@ public class PerfTest2 {
                   .using(keyGenerator, valueGenerator))
           ))
           .executed(during(20, seconds))
-          .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()))
+          .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(),
+              html("rainfall-distributed-" + UUID.randomUUID().toString())))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
           .config(distributedConfig)
           .start();
