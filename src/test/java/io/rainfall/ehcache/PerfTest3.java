@@ -336,7 +336,7 @@ public class PerfTest3 {
 
   @Test
   @Ignore
-  public void testLoad() throws SyntaxException, InterruptedException {
+  public void testLoad() throws SyntaxException {
     int nbCaches = 10;
     int nbElements = 500000;
     CacheConfigurationBuilder<Long, byte[]> configurationBuilder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, byte[].class,
