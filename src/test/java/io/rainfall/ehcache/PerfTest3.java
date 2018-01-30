@@ -52,17 +52,18 @@ import java.util.concurrent.TimeUnit;
 
 import static io.rainfall.Scenario.weighted;
 import static io.rainfall.configuration.ReportingConfig.gcStatistics;
+import static io.rainfall.configuration.ReportingConfig.hlog;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.report;
 import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache.statistics.EhcacheResult.GET;
 import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
 import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
-import static io.rainfall.ehcache3.Ehcache3Operations.putIfAbsent;
 import static io.rainfall.ehcache3.CacheConfig.cacheConfig;
 import static io.rainfall.ehcache3.CacheDefinition.cache;
 import static io.rainfall.ehcache3.Ehcache3Operations.get;
 import static io.rainfall.ehcache3.Ehcache3Operations.put;
+import static io.rainfall.ehcache3.Ehcache3Operations.putIfAbsent;
 import static io.rainfall.ehcache3.Ehcache3Operations.remove;
 import static io.rainfall.ehcache3.Ehcache3Operations.removeForKeyAndValue;
 import static io.rainfall.execution.Executions.during;
@@ -814,4 +815,57 @@ public class PerfTest3 {
     }
   }
 
+  @Test
+  @Ignore
+  public void testHlog() {
+    int heap = 200000;
+    int offheap = 1;
+    int disk = 2;
+
+    long nbElementsHeap = MemoryUnit.MB.toBytes(heap) / MemoryUnit.KB.toBytes(1);
+    long nbElements = MemoryUnit.GB.toBytes(disk) / MemoryUnit.KB.toBytes(1);
+
+    CacheConfigurationBuilder<String, byte[]> cacheBuilder = CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, byte[].class,
+        newResourcePoolsBuilder()
+            .heap(nbElementsHeap, EntryUnit.ENTRIES)
+            .offheap(offheap, MemoryUnit.GB)
+            .build());
+
+    ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
+        .threads(4).timeout(30, MINUTES);
+
+    ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
+    ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1024);
+
+    CacheManager cacheManager = newCacheManagerBuilder()
+        .with(new CacheManagerPersistenceConfiguration(new File("/data/PerfTest3")))
+        .withCache("one", cacheBuilder.build())
+        .build(true);
+
+    Cache<String, byte[]> one = cacheManager.getCache("one", String.class, byte[].class);
+    try {
+      System.out.println("----------> Test phase");
+      StatisticsPeekHolder finalStats = Runner.setUp(
+          Scenario.scenario("Test phase")
+              .exec(
+                  weighted(0.50, get(String.class, byte[].class).using(keyGenerator, valueGenerator).atRandom(GAUSSIAN, 0, nbElements, nbElements / 10)),
+                  weighted(0.50, put(keyGenerator, valueGenerator, atRandom(Distribution.GAUSSIAN, 0, nbElements, nbElements / 10),
+                      new CacheDefinition<String, byte[]>("one", one)))
+              ))
+          .warmup(during(30, seconds))
+          .executed(during(1, minutes))
+          .config(concurrency)
+          .config(report(EhcacheResult.class, new EhcacheResult[] { PUT, GET, MISS })
+              .log(text(), hlog("test-basic-hlog", true)))
+          .config(cacheConfig(String.class, byte[].class)
+              .cache("one", one)
+          )
+          .start();
+      System.out.println("----------> Done");
+    } catch (SyntaxException e) {
+      e.printStackTrace();
+    } finally {
+      cacheManager.close();
+    }
+  }
 }

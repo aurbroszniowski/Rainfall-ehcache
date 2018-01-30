@@ -27,6 +27,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import java.io.File;
 import java.util.UUID;
 
 import static io.rainfall.Scenario.weighted;
@@ -57,7 +58,7 @@ public class PerfTest2 {
     RainfallMaster rainfallMaster = null;
     CacheManager cacheManager = null;
     try {
-      rainfallMaster = RainfallMaster.master(distributedConfig).start();
+      rainfallMaster = RainfallMaster.master(distributedConfig, new File("rainfall-dist")).start();
 
       Configuration configuration = new Configuration().name("EhcacheTest")
           .defaultCache(new CacheConfiguration("default", 0).eternal(true))
