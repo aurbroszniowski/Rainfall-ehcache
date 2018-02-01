@@ -32,6 +32,7 @@ import java.util.UUID;
 
 import static io.rainfall.Scenario.weighted;
 import static io.rainfall.configuration.DistributedConfig.address;
+import static io.rainfall.configuration.ReportingConfig.hlog;
 import static io.rainfall.configuration.ReportingConfig.html;
 import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache2.CacheDefinition.cache;
@@ -84,7 +85,8 @@ public class PerfTest2 {
           .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(),
               html("rainfall-distributed-" + UUID.randomUUID().toString())))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
-          .start();
+//          .start()
+          ;
 
       StatisticsPeekHolder finalStats = Runner.setUp(
           Scenario.scenario("Test phase").exec(
@@ -98,7 +100,7 @@ public class PerfTest2 {
           ))
           .executed(during(20, seconds))
           .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(),
-              html("rainfall-distributed-" + UUID.randomUUID().toString())))
+              hlog("rainfall-distributed-" + UUID.randomUUID().toString(), true)))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
           .config(distributedConfig)
           .start();
