@@ -26,15 +26,10 @@ public class PutOperation<K, V> implements Operation {
   protected final ObjectGenerator<K> keyGenerator;
   protected final ObjectGenerator<V> valueGenerator;
   protected final SequenceGenerator sequenceGenerator;
-  protected final CacheDefinition<K, V>[] caches;
+  protected final Iterable<CacheDefinition<K, V>> caches;
 
   public PutOperation(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
-                      final SequenceGenerator sequenceGenerator, final CacheDefinition<K, V> cache) {
-    this(keyGenerator, valueGenerator, sequenceGenerator, new CacheDefinition[] { cache });
-  }
-
-  public PutOperation(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
-                      final SequenceGenerator sequenceGenerator, final CacheDefinition<K, V>... caches) {
+                      final SequenceGenerator sequenceGenerator, final Iterable<CacheDefinition<K, V>> caches) {
     this.keyGenerator = keyGenerator;
     this.valueGenerator = valueGenerator;
     this.sequenceGenerator = sequenceGenerator;
@@ -46,6 +41,7 @@ public class PutOperation<K, V> implements Operation {
     final long next = this.sequenceGenerator.next();
     for (final CacheDefinition<K, V> cacheDefinition : caches) {
       Cache<K, V> cache = cacheDefinition.getCache();
+
       K k = keyGenerator.generate(next);
       V v = valueGenerator.generate(next);
       long start = statisticsHolder.getTimeInNs();

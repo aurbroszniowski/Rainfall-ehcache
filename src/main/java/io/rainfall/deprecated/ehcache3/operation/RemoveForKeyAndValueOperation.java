@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package io.rainfall.ehcache3.operation;
+package io.rainfall.deprecated.ehcache3.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
 import io.rainfall.EhcacheOperation;
-import io.rainfall.ObjectGenerator;
-import io.rainfall.SequenceGenerator;
 import io.rainfall.TestException;
 import io.rainfall.ehcache3.CacheConfig;
-import io.rainfall.ehcache3.CacheDefinition;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
 
@@ -32,48 +29,39 @@ import java.util.List;
 import java.util.Map;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.GET;
-import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
+import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVEVALUE;
+import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVEVALUE_MISS;
 
 /**
  * @author Aurelien Broszniowski
  */
-public class GetOperation<K, V> extends EhcacheOperation<K, V> {
-
-  private final ObjectGenerator<K> keyGenerator;
-  private final SequenceGenerator sequenceGenerator;
-  private final Iterable<CacheDefinition<K, V>> cacheDefinitions;
-
-  public GetOperation(final ObjectGenerator<K> keyGenerator,
-                      final SequenceGenerator sequenceGenerator, final Iterable<CacheDefinition<K, V>> cacheDefinitions) {
-    this.keyGenerator = keyGenerator;
-    this.sequenceGenerator = sequenceGenerator;
-    this.cacheDefinitions = cacheDefinitions;
-  }
+@Deprecated
+public class RemoveForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V> {
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
-    final long next = sequenceGenerator.next();
-    for (final CacheDefinition<K, V> cacheDefinition : cacheDefinitions) {
-      Cache<K, V> cache = cacheDefinition.getCache();
-
+    CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
+    final long next = this.sequenceGenerator.next();
+    List<Cache<K, V>> caches = cacheConfig.getCaches();
+    for (final Cache<K, V> cache : caches) {
+      boolean removed;
       K k = keyGenerator.generate(next);
-      V value;
+      V v = valueGenerator.generate(next);
 
       long start = statisticsHolder.getTimeInNs();
       try {
-        value = cache.get(k);
+        removed = cache.remove(k, v);
         long end = statisticsHolder.getTimeInNs();
-        if (value == null) {
-          statisticsHolder.record(cacheDefinition.getName(), (end - start), MISS);
+        if (!removed) {
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVEVALUE_MISS);
         } else {
-          statisticsHolder.record(cacheDefinition.getName(), (end - start), GET);
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVEVALUE);
         }
       } catch (Exception e) {
         long end = statisticsHolder.getTimeInNs();
-        statisticsHolder.record(cacheDefinition.getName(), (end - start), EXCEPTION);
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
   }
@@ -81,7 +69,8 @@ public class GetOperation<K, V> extends EhcacheOperation<K, V> {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add("get(" + keyGenerator.getDescription() + " key)");
+    desc.add("remove(" + keyGenerator.getDescription() + " key, " +
+             valueGenerator.getDescription() + " value)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }

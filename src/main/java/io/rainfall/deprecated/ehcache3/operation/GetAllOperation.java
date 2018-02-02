@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Aurélien Broszniowski
+ * Copyright 2015 Aurélien Broszniowski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,50 +14,62 @@
  * limitations under the License.
  */
 
-package io.rainfall.ehcache3.operation;
+package io.rainfall.deprecated.ehcache3.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
 import io.rainfall.EhcacheOperation;
 import io.rainfall.TestException;
+import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.REPLACE;
-import static io.rainfall.ehcache.statistics.EhcacheResult.REPLACE_MISS;
+import static io.rainfall.ehcache.statistics.EhcacheResult.GETALL;
+import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
 
 /**
  * @author Aurelien Broszniowski
  */
-public class ReplaceOperation<K, V> extends EhcacheOperation<K, V> {
+@Deprecated
+public class GetAllOperation<K, V> extends EhcacheOperation<K, V> {
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
     CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
+    int bulkBatchSize = cacheConfig.getBulkBatchSize();
     final long next = this.sequenceGenerator.next();
+    Set<K> set = Collections.newSetFromMap(new WeakHashMap<K, Boolean>());
+    for (int i = 0; i < bulkBatchSize; i++) {
+      set.add(keyGenerator.generate(next));
+    }
+
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      V v;
-      K k = keyGenerator.generate(next);
-      V v1 = valueGenerator.generate(next);
-
+      Map<K, V> all;
       long start = statisticsHolder.getTimeInNs();
       try {
-        v = cache.replace(k, v1);
+        all = cache.getAll(set);
         long end = statisticsHolder.getTimeInNs();
-        if (v == null) {
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REPLACE_MISS);
-        } else {
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REPLACE);
+        EhcacheResult result = GETALL;
+        for (V v : all.values()) {
+          if (v == null) {
+            result = MISS;
+            break;
+          }
         }
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), result);
+
       } catch (Exception e) {
         long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
@@ -68,7 +80,7 @@ public class ReplaceOperation<K, V> extends EhcacheOperation<K, V> {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add("replace(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
+    desc.add("getAll(Set<? extends " + keyGenerator.getDescription() + "> keys)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }

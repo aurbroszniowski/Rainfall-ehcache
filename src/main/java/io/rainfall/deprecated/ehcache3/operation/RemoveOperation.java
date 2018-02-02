@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.rainfall.ehcache3.operation;
+package io.rainfall.deprecated.ehcache3.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
@@ -29,13 +29,13 @@ import java.util.List;
 import java.util.Map;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVEVALUE;
-import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVEVALUE_MISS;
+import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVE;
 
 /**
  * @author Aurelien Broszniowski
  */
-public class RemoveForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V> {
+@Deprecated
+public class RemoveOperation<K, V> extends EhcacheOperation<K, V> {
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
@@ -47,17 +47,12 @@ public class RemoveForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V> 
     for (final Cache<K, V> cache : caches) {
       boolean removed;
       K k = keyGenerator.generate(next);
-      V v = valueGenerator.generate(next);
 
       long start = statisticsHolder.getTimeInNs();
       try {
-        removed = cache.remove(k, v);
+        cache.remove(k);
         long end = statisticsHolder.getTimeInNs();
-        if (!removed) {
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVEVALUE_MISS);
-        } else {
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVEVALUE);
-        }
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVE);
       } catch (Exception e) {
         long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
@@ -68,8 +63,7 @@ public class RemoveForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V> 
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add("remove(" + keyGenerator.getDescription() + " key, " +
-             valueGenerator.getDescription() + " value)");
+    desc.add("remove(" + keyGenerator.getDescription() + " key)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }

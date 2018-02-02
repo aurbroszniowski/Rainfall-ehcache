@@ -29,13 +29,14 @@ import java.util.Map;
 /**
  * @author Aurelien Broszniowski
  */
-
+@Deprecated
 public class CacheConfig<K, V> extends Configuration {
 
   private List<Cache<K, V>> caches = new ArrayList<Cache<K, V>>();
   private Map<Cache<K, V>, String> cacheNames = new HashMap<Cache<K, V>, String>();
   private int bulkBatchSize = 10;     // Default nb of objects used for bulk operations
 
+  @Deprecated
   public static <K, V> CacheConfig<K, V> cacheConfig(Class<K> keyClass, final Class<V> valueClass) {
     return new CacheConfig<K, V>();
   }

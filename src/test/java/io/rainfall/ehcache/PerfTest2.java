@@ -73,8 +73,8 @@ public class PerfTest2 {
           .threads(4).timeout(50, MINUTES);
 
       int nbElements = 250000;
-      ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
-      ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000);
+      ObjectGenerator<String> keyGenerator = StringGenerator.fixedLengthString(10);
+      ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLengthByteArray(1000);
 
       Runner.setUp(
           Scenario.scenario("warmup phase").exec(
@@ -141,8 +141,8 @@ public class PerfTest2 {
           .threads(4).timeout(50, MINUTES);
 
       int nbElements = 250000;
-      ObjectGenerator<String> keyGenerator = StringGenerator.fixedLength(10);
-      ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000);
+      ObjectGenerator<String> keyGenerator = StringGenerator.fixedLengthString(10);
+      ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLengthByteArray(1000);
 
       System.out.println("----------> Warm up phase");
 

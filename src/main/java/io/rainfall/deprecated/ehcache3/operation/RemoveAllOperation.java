@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Aurélien Broszniowski
+ * Copyright 2014 Aurélien Broszniowski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package io.rainfall.ehcache3.operation;
+package io.rainfall.deprecated.ehcache3.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
 import io.rainfall.EhcacheOperation;
 import io.rainfall.TestException;
-import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
@@ -33,13 +32,13 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.GETALL;
-import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
+import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVEALL;
 
 /**
  * @author Aurelien Broszniowski
  */
-public class GetAllOperation<K, V> extends EhcacheOperation<K, V> {
+@Deprecated
+public class RemoveAllOperation<K, V> extends EhcacheOperation<K, V> {
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
@@ -52,23 +51,13 @@ public class GetAllOperation<K, V> extends EhcacheOperation<K, V> {
     for (int i = 0; i < bulkBatchSize; i++) {
       set.add(keyGenerator.generate(next));
     }
-
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      Map<K, V> all;
       long start = statisticsHolder.getTimeInNs();
       try {
-        all = cache.getAll(set);
+        cache.removeAll(set);
         long end = statisticsHolder.getTimeInNs();
-        EhcacheResult result = GETALL;
-        for (V v : all.values()) {
-          if (v == null) {
-            result = MISS;
-            break;
-          }
-        }
-        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), result);
-
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVEALL);
       } catch (Exception e) {
         long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
@@ -79,8 +68,9 @@ public class GetAllOperation<K, V> extends EhcacheOperation<K, V> {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add("getAll(Set<? extends " + keyGenerator.getDescription() + "> keys)");
+    desc.add("removeAll(Set<? extends " + keyGenerator.getDescription() + "> keys)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }
+
 }

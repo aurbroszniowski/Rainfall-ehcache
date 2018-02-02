@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.rainfall.ehcache3.operation;
+package io.rainfall.deprecated.ehcache3.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
@@ -29,13 +29,14 @@ import java.util.List;
 import java.util.Map;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.REPLACEVALUE;
-import static io.rainfall.ehcache.statistics.EhcacheResult.REPLACEVALUE_MISS;
+import static io.rainfall.ehcache.statistics.EhcacheResult.PUTIFABSENT;
+import static io.rainfall.ehcache.statistics.EhcacheResult.PUTIFABSENT_MISS;
 
 /**
  * @author Aurelien Broszniowski
  */
-public class ReplaceForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V> {
+@Deprecated
+public class PutIfAbsentOperation<K, V> extends EhcacheOperation<K, V> {
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
@@ -45,18 +46,18 @@ public class ReplaceForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V>
     final long next = this.sequenceGenerator.next();
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      boolean replaced;
+      V v;
       K k = keyGenerator.generate(next);
-      V v = valueGenerator.generate(next + 1);
+      V v1 = valueGenerator.generate(next);
 
       long start = statisticsHolder.getTimeInNs();
       try {
-        replaced = cache.replace(k, v, v);
+        v = cache.putIfAbsent(k, v1);
         long end = statisticsHolder.getTimeInNs();
-        if (!replaced) {
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REPLACEVALUE_MISS);
+        if (v != null) {
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUTIFABSENT_MISS);
         } else {
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REPLACEVALUE);
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUTIFABSENT);
         }
       } catch (Exception e) {
         long end = statisticsHolder.getTimeInNs();
@@ -68,8 +69,7 @@ public class ReplaceForKeyAndValueOperation<K, V> extends EhcacheOperation<K, V>
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add("replace(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " oldValue, " + valueGenerator
-        .getDescription() + " newValue)");
+    desc.add("putIfAbsent(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }

@@ -16,8 +16,8 @@ public class CacheDefinition<K, V> {
     this.cache = cache;
   }
 
-  public static <K, V> CacheDefinition cache(String name, Cache<K, V> cache) {
-    return new CacheDefinition<K, V>(name, cache);
+  public static <X, Y> CacheDefinition<X, Y> cache(String name, Cache<X, Y> cache) {
+    return new CacheDefinition<X, Y>(name, cache);
   }
 
   public String getName() {

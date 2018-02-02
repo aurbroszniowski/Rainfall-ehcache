@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.rainfall.ehcache3.operation;
+package io.rainfall.deprecated.ehcache3.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
@@ -23,18 +23,23 @@ import io.rainfall.TestException;
 import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVE;
+import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
 
 /**
  * @author Aurelien Broszniowski
  */
-public class RemoveOperation<K, V> extends EhcacheOperation<K, V> {
+@Deprecated
+public class PutOperation<K, V> extends EhcacheOperation<K, V> {
+
+  private static final Logger log = LoggerFactory.getLogger(PutOperation.class);
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
@@ -44,14 +49,14 @@ public class RemoveOperation<K, V> extends EhcacheOperation<K, V> {
     final long next = this.sequenceGenerator.next();
     List<Cache<K, V>> caches = cacheConfig.getCaches();
     for (final Cache<K, V> cache : caches) {
-      boolean removed;
       K k = keyGenerator.generate(next);
+      V v = valueGenerator.generate(next);
 
       long start = statisticsHolder.getTimeInNs();
       try {
-        cache.remove(k);
+        cache.put(k, v);
         long end = statisticsHolder.getTimeInNs();
-        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVE);
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUT);
       } catch (Exception e) {
         long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
@@ -62,7 +67,7 @@ public class RemoveOperation<K, V> extends EhcacheOperation<K, V> {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add("remove(" + keyGenerator.getDescription() + " key)");
+    desc.add("put(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }

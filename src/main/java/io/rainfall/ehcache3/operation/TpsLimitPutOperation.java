@@ -21,6 +21,7 @@ import io.rainfall.Configuration;
 import io.rainfall.ObjectGenerator;
 import io.rainfall.SequenceGenerator;
 import io.rainfall.TestException;
+import io.rainfall.ehcache3.operation.PutOperation;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.ehcache3.CacheDefinition;
@@ -42,7 +43,7 @@ public class TpsLimitPutOperation<K, V> extends PutOperation<K, V> {
   private final long tpsLimit;
 
   public TpsLimitPutOperation(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
-                              final SequenceGenerator sequenceGenerator, final long tpsLimit, final CacheDefinition<K, V>... caches) {
+                              final SequenceGenerator sequenceGenerator, final long tpsLimit, final Iterable<CacheDefinition<K, V>> caches) {
     super(keyGenerator, valueGenerator, sequenceGenerator, caches);
     this.tpsLimit = tpsLimit;
   }
@@ -51,12 +52,11 @@ public class TpsLimitPutOperation<K, V> extends PutOperation<K, V> {
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
-    CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
     final long next = this.sequenceGenerator.next();
-    List<Cache<K, V>> caches = cacheConfig.getCaches();
     long currentTps = statisticsHolder.getCurrentTps(EhcacheResult.PUT);
     if (currentTps < this.tpsLimit) {
-      for (final Cache<K, V> cache : caches) {
+      for (final CacheDefinition<K, V> cacheDefinition : caches) {
+        Cache<K, V> cache = cacheDefinition.getCache();
         K k = keyGenerator.generate(next);
         V v = valueGenerator.generate(next);
 
@@ -64,10 +64,10 @@ public class TpsLimitPutOperation<K, V> extends PutOperation<K, V> {
         try {
           cache.put(k, v);
           long end = statisticsHolder.getTimeInNs();
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUT);
+          statisticsHolder.record(cacheDefinition.getName(), (end - start), PUT);
         } catch (Exception e) {
           long end = statisticsHolder.getTimeInNs();
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
+          statisticsHolder.record(cacheDefinition.getName(), (end - start), EXCEPTION);
         }
       }
     }

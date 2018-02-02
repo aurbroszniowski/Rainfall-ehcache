@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.rainfall.ehcache3.operation;
+package io.rainfall.deprecated.ehcache3.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
-import io.rainfall.EhcacheOperation;
 import io.rainfall.TestException;
+import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
@@ -29,13 +29,19 @@ import java.util.List;
 import java.util.Map;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.PUTIFABSENT;
-import static io.rainfall.ehcache.statistics.EhcacheResult.PUTIFABSENT_MISS;
+import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
 
 /**
  * @author Aurelien Broszniowski
  */
-public class PutIfAbsentOperation<K, V> extends EhcacheOperation<K, V> {
+@Deprecated
+public class TpsLimitPutOperation<K, V> extends PutOperation<K, V> {
+
+  private final long tpsLimit;
+
+  public TpsLimitPutOperation(final long tpsLimit) {
+    this.tpsLimit = tpsLimit;
+  }
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
@@ -44,23 +50,21 @@ public class PutIfAbsentOperation<K, V> extends EhcacheOperation<K, V> {
     CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
     final long next = this.sequenceGenerator.next();
     List<Cache<K, V>> caches = cacheConfig.getCaches();
-    for (final Cache<K, V> cache : caches) {
-      V v;
-      K k = keyGenerator.generate(next);
-      V v1 = valueGenerator.generate(next);
+    long currentTps = statisticsHolder.getCurrentTps(EhcacheResult.PUT);
+    if (currentTps < this.tpsLimit) {
+      for (final Cache<K, V> cache : caches) {
+        K k = keyGenerator.generate(next);
+        V v = valueGenerator.generate(next);
 
-      long start = statisticsHolder.getTimeInNs();
-      try {
-        v = cache.putIfAbsent(k, v1);
-        long end = statisticsHolder.getTimeInNs();
-        if (v != null) {
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUTIFABSENT_MISS);
-        } else {
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUTIFABSENT);
+        long start = statisticsHolder.getTimeInNs();
+        try {
+          cache.put(k, v);
+          long end = statisticsHolder.getTimeInNs();
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), PUT);
+        } catch (Exception e) {
+          long end = statisticsHolder.getTimeInNs();
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
         }
-      } catch (Exception e) {
-        long end = statisticsHolder.getTimeInNs();
-        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
   }
@@ -68,7 +72,7 @@ public class PutIfAbsentOperation<K, V> extends EhcacheOperation<K, V> {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add("putIfAbsent(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
+    desc.add("THROTTLED put(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }

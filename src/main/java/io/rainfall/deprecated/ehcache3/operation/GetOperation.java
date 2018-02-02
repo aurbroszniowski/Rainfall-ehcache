@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.rainfall.ehcache3.operation;
+package io.rainfall.deprecated.ehcache3.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
+import io.rainfall.EhcacheOperation;
 import io.rainfall.TestException;
-import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
@@ -35,40 +35,32 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
 /**
  * @author Aurelien Broszniowski
  */
-public class TpsLimitGetOperation<K, V> extends GetOperation<K, V> {
-
-  private final long tpsLimit;
-
-  public TpsLimitGetOperation(final long tpsLimit) {
-    this.tpsLimit = tpsLimit;
-  }
+@Deprecated
+public class GetOperation<K, V> extends EhcacheOperation<K, V> {
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
     CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
-    final long next = this.sequenceGenerator.next();
+    final long next = sequenceGenerator.next();
     List<Cache<K, V>> caches = cacheConfig.getCaches();
-    long currentTps = statisticsHolder.getCurrentTps(EhcacheResult.GET);
-    if (currentTps < this.tpsLimit) {
-      for (final Cache<K, V> cache : caches) {
-        K k = keyGenerator.generate(next);
-        V value;
+    for (final Cache<K, V> cache : caches) {
+      K k = keyGenerator.generate(next);
+      V value;
 
-        long start = statisticsHolder.getTimeInNs();
-        try {
-          value = cache.get(k);
-          long end = statisticsHolder.getTimeInNs();
-          if (value == null) {
-            statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), MISS);
-          } else {
-            statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), GET);
-          }
-        } catch (Exception e) {
-          long end = statisticsHolder.getTimeInNs();
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
+      long start = statisticsHolder.getTimeInNs();
+      try {
+        value = cache.get(k);
+        long end = statisticsHolder.getTimeInNs();
+        if (value == null) {
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), MISS);
+        } else {
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), GET);
         }
+      } catch (Exception e) {
+        long end = statisticsHolder.getTimeInNs();
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
   }
@@ -76,7 +68,7 @@ public class TpsLimitGetOperation<K, V> extends GetOperation<K, V> {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add("THROTTLED get(" + keyGenerator.getDescription() + " key)");
+    desc.add("get(" + keyGenerator.getDescription() + " key)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }
