@@ -14,43 +14,45 @@
  * limitations under the License.
  */
 
-package io.rainfall.ehcache2.operation;
+package io.rainfall.ehcache3.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
+import io.rainfall.EhcacheOperation;
 import io.rainfall.ObjectGenerator;
 import io.rainfall.Operation;
 import io.rainfall.SequenceGenerator;
 import io.rainfall.TestException;
-import io.rainfall.ehcache2.CacheDefinition;
+import io.rainfall.ehcache3.CacheConfig;
+import io.rainfall.ehcache3.CacheDefinition;
 import io.rainfall.statistics.StatisticsHolder;
-import net.sf.ehcache.Ehcache;
-import net.sf.ehcache.Element;
+import org.ehcache.Cache;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
+import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVEALL;
 
 /**
- * Execute and measure a Ehcache put operation
- *
  * @author Aurelien Broszniowski
  */
-public class PutOperation<K, V> implements Operation {
+public class RemoveAllOperation<K, V> implements Operation {
 
-  protected final ObjectGenerator<K> keyGenerator;
-  protected final ObjectGenerator<V> valueGenerator;
-  protected final SequenceGenerator sequenceGenerator;
-  private final Iterable<CacheDefinition> cacheDefinitions;
+  private final ObjectGenerator<K> keyGenerator;
+  private final SequenceGenerator sequenceGenerator;
+  private final int bulkBatchSize;
+  private final Iterable<CacheDefinition<K, V>> cacheDefinitions;
 
-  public PutOperation(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
-                      final SequenceGenerator sequenceGenerator, final Iterable<CacheDefinition> cacheDefinitions) {
+  public RemoveAllOperation(final ObjectGenerator<K> keyGenerator, final SequenceGenerator sequenceGenerator,
+                            final int bulkBatchSize, final Iterable<CacheDefinition<K, V>> cacheDefinitions) {
     this.keyGenerator = keyGenerator;
-    this.valueGenerator = valueGenerator;
     this.sequenceGenerator = sequenceGenerator;
+    this.bulkBatchSize = bulkBatchSize;
     this.cacheDefinitions = cacheDefinitions;
   }
 
@@ -59,19 +61,19 @@ public class PutOperation<K, V> implements Operation {
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
     final long next = this.sequenceGenerator.next();
-    for (final CacheDefinition cacheDefinition : cacheDefinitions) {
-      Ehcache cache = cacheDefinition.getCache();
-      Object k = keyGenerator.generate(next);
-      Object v = valueGenerator.generate(next);
+    Set<K> set = Collections.newSetFromMap(new WeakHashMap<K, Boolean>());
+    for (int i = 0; i < bulkBatchSize; i++) {
+      set.add(keyGenerator.generate(next));
+    }
 
-      Element element = new Element(k, v);
+    for (final CacheDefinition<K, V> cacheDefinition : cacheDefinitions) {
+      Cache<K, V> cache = cacheDefinition.getCache();
       long start = statisticsHolder.getTimeInNs();
       try {
-        cache.put(element);
+        cache.removeAll(set);
         long end = statisticsHolder.getTimeInNs();
-        statisticsHolder.record(cacheDefinition.getName(), (end - start), PUT);
+        statisticsHolder.record(cacheDefinition.getName(), (end - start), REMOVEALL);
       } catch (Exception e) {
-        e.printStackTrace();
         long end = statisticsHolder.getTimeInNs();
         statisticsHolder.record(cacheDefinition.getName(), (end - start), EXCEPTION);
       }
@@ -81,8 +83,9 @@ public class PutOperation<K, V> implements Operation {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add("put(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
+    desc.add("removeAll(Set<? extends " + keyGenerator.getDescription() + "> keys)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }
+
 }

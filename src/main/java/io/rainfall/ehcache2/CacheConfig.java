@@ -29,6 +29,7 @@ import java.util.Map;
  * @author Aurelien Broszniowski
  */
 
+@Deprecated
 public class CacheConfig<K, V> extends Configuration {
 
   private List<Ehcache> caches = new ArrayList<Ehcache>();

@@ -18,9 +18,11 @@ package io.rainfall.ehcache2.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
-import io.rainfall.EhcacheOperation;
+import io.rainfall.ObjectGenerator;
+import io.rainfall.Operation;
+import io.rainfall.SequenceGenerator;
 import io.rainfall.TestException;
-import io.rainfall.ehcache2.CacheConfig;
+import io.rainfall.ehcache2.CacheDefinition;
 import io.rainfall.statistics.StatisticsHolder;
 import net.sf.ehcache.Ehcache;
 
@@ -37,16 +39,25 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVE;
  *
  * @author Aurelien Broszniowski
  */
-public class RemoveOperation<K, V> extends EhcacheOperation<K, V> {
+public class RemoveOperation<K, V> implements Operation {
+
+  private final ObjectGenerator<K> keyGenerator;
+  private final SequenceGenerator sequenceGenerator;
+  private final Iterable<CacheDefinition> cacheDefinitions;
+
+  public RemoveOperation(final ObjectGenerator<K> keyGenerator, final SequenceGenerator sequenceGenerator, final Iterable<CacheDefinition> cacheDefinitions) {
+    this.keyGenerator = keyGenerator;
+    this.sequenceGenerator = sequenceGenerator;
+    this.cacheDefinitions = cacheDefinitions;
+  }
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
-    CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
     final long next = this.sequenceGenerator.next();
-    List<Ehcache> caches = cacheConfig.getCaches();
-    for (final Ehcache cache : caches) {
+    for (final CacheDefinition cacheDefinition : cacheDefinitions) {
+      Ehcache cache = cacheDefinition.getCache();
       boolean removed;
       Object k = keyGenerator.generate(next);
 
@@ -55,13 +66,13 @@ public class RemoveOperation<K, V> extends EhcacheOperation<K, V> {
         removed = cache.remove(k);
         long end = statisticsHolder.getTimeInNs();
         if (removed) {
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVE);
+          statisticsHolder.record(cacheDefinition.getName(), (end - start), REMOVE);
         } else {
-          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), MISS);
+          statisticsHolder.record(cacheDefinition.getName(), (end - start), MISS);
         }
       } catch (Exception e) {
         long end = statisticsHolder.getTimeInNs();
-        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
+        statisticsHolder.record(cacheDefinition.getName(), (end - start), EXCEPTION);
       }
     }
   }

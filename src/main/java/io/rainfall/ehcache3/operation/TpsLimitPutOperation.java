@@ -21,9 +21,7 @@ import io.rainfall.Configuration;
 import io.rainfall.ObjectGenerator;
 import io.rainfall.SequenceGenerator;
 import io.rainfall.TestException;
-import io.rainfall.ehcache3.operation.PutOperation;
 import io.rainfall.ehcache.statistics.EhcacheResult;
-import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.ehcache3.CacheDefinition;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
@@ -55,7 +53,7 @@ public class TpsLimitPutOperation<K, V> extends PutOperation<K, V> {
     final long next = this.sequenceGenerator.next();
     long currentTps = statisticsHolder.getCurrentTps(EhcacheResult.PUT);
     if (currentTps < this.tpsLimit) {
-      for (final CacheDefinition<K, V> cacheDefinition : caches) {
+      for (final CacheDefinition<K, V> cacheDefinition : cacheDefinitions) {
         Cache<K, V> cache = cacheDefinition.getCache();
         K k = keyGenerator.generate(next);
         V v = valueGenerator.generate(next);

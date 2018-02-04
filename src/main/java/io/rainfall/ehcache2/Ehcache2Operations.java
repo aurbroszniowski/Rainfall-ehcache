@@ -17,11 +17,12 @@
 package io.rainfall.ehcache2;
 
 import io.rainfall.ObjectGenerator;
+import io.rainfall.Operation;
 import io.rainfall.SequenceGenerator;
-import io.rainfall.ehcache2.operation.GetOperation;
-import io.rainfall.ehcache2.operation.PutIfAbsentOperation;
-import io.rainfall.ehcache2.operation.PutOperation;
-import io.rainfall.ehcache2.operation.RemoveOperation;
+import io.rainfall.deprecated.ehcache2.operation.GetOperation;
+import io.rainfall.deprecated.ehcache2.operation.PutIfAbsentOperation;
+import io.rainfall.deprecated.ehcache2.operation.PutOperation;
+import io.rainfall.deprecated.ehcache2.operation.RemoveOperation;
 
 /**
  * Contains the helper methods to instantiate the Ehcache {@link io.rainfall.Operation} objects.
@@ -30,26 +31,44 @@ import io.rainfall.ehcache2.operation.RemoveOperation;
  */
 public class Ehcache2Operations {
 
-  public static <K, V> PutOperation<K, V> put(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
-                                              final SequenceGenerator sequenceGenerator, final CacheDefinition cacheDefinition) {
-    return new PutOperation<K, V>(keyGenerator, valueGenerator, sequenceGenerator, cacheDefinition);
+  @Deprecated
+  public static <K, V> PutOperation<K, V> put(Class<K> keyClass, Class<V> valueClass) {
+    return new io.rainfall.deprecated.ehcache2.operation.PutOperation<K, V>();
   }
 
-  public static <K, V> PutOperation<K, V> put(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
-                                              final SequenceGenerator sequenceGenerator, final CacheDefinition... cacheDefinitions) {
-    return new PutOperation<K, V>(keyGenerator, valueGenerator, sequenceGenerator, cacheDefinitions);
+  public static <K, V> Operation put(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
+                                     final SequenceGenerator sequenceGenerator, final Iterable<CacheDefinition> cacheDefinitions) {
+    return new io.rainfall.ehcache2.operation.PutOperation<K, V>(keyGenerator, valueGenerator, sequenceGenerator, cacheDefinitions);
   }
 
+  @Deprecated
   public static <K, V> GetOperation<K, V> get(Class<K> keyClass, Class<V> valueClass) {
-    return new GetOperation<K, V>();
+    return new io.rainfall.deprecated.ehcache2.operation.GetOperation<K, V>();
   }
 
+  public static <K, V> Operation get(final ObjectGenerator<K> keyGenerator,
+                                              final SequenceGenerator sequenceGenerator, final Iterable<CacheDefinition> cacheDefinitions) {
+    return new io.rainfall.ehcache2.operation.GetOperation<K, V>(keyGenerator, sequenceGenerator, cacheDefinitions);
+  }
+
+  @Deprecated
   public static <K, V> RemoveOperation<K, V> remove(Class<K> keyClass, Class<V> valueClass) {
-    return new RemoveOperation<K, V>();
+    return new io.rainfall.deprecated.ehcache2.operation.RemoveOperation<K, V>();
   }
 
+  public static <K, V> Operation remove(final ObjectGenerator<K> keyGenerator,
+                                     final SequenceGenerator sequenceGenerator, final Iterable<CacheDefinition> cacheDefinitions) {
+    return new io.rainfall.ehcache2.operation.RemoveOperation<K, V>(keyGenerator, sequenceGenerator, cacheDefinitions);
+  }
+
+  @Deprecated
   public static <K, V> PutIfAbsentOperation<K, V> putIfAbsent(Class<K> keyClass, Class<V> valueClass) {
-    return new PutIfAbsentOperation<K, V>();
+    return new io.rainfall.deprecated.ehcache2.operation.PutIfAbsentOperation<K, V>();
+  }
+
+  public static <K, V> Operation putIfAbsent(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
+                                     final SequenceGenerator sequenceGenerator, final Iterable<CacheDefinition> cacheDefinitions) {
+    return new io.rainfall.ehcache2.operation.PutIfAbsentOperation<K, V>(keyGenerator, valueGenerator, sequenceGenerator, cacheDefinitions);
   }
 
 

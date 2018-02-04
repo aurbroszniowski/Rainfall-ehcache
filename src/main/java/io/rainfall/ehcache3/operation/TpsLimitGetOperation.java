@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package io.rainfall.ehcache2.operation;
+package io.rainfall.ehcache3.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
-import io.rainfall.EhcacheOperation;
 import io.rainfall.ObjectGenerator;
-import io.rainfall.Operation;
 import io.rainfall.SequenceGenerator;
 import io.rainfall.TestException;
-import io.rainfall.ehcache2.CacheConfig;
-import io.rainfall.ehcache2.CacheDefinition;
+import io.rainfall.ehcache.statistics.EhcacheResult;
+import io.rainfall.ehcache3.CacheDefinition;
 import io.rainfall.statistics.StatisticsHolder;
-import net.sf.ehcache.Ehcache;
-import net.sf.ehcache.Element;
+import org.ehcache.Cache;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,21 +35,16 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.GET;
 import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
 
 /**
- * Execute and measure a Ehcache get operation
- *
  * @author Aurelien Broszniowski
  */
-public class GetOperation<K, V>  implements Operation {
+public class TpsLimitGetOperation<K, V> extends GetOperation<K, V> {
 
-  private final ObjectGenerator<K> keyGenerator;
-  private final SequenceGenerator sequenceGenerator;
-  private final Iterable<CacheDefinition> cacheDefinitions;
+  private final long tpsLimit;
 
-  public GetOperation(final ObjectGenerator<K> keyGenerator, final SequenceGenerator sequenceGenerator,
-                      final Iterable<CacheDefinition> cacheDefinitions) {
-    this.keyGenerator = keyGenerator;
-    this.sequenceGenerator = sequenceGenerator;
-    this.cacheDefinitions = cacheDefinitions;
+  public TpsLimitGetOperation(final ObjectGenerator<K> keyGenerator, final SequenceGenerator sequenceGenerator,
+                              final Iterable<CacheDefinition<K, V>> cacheDefinitions, final long tpsLimit) {
+    super(keyGenerator, sequenceGenerator, cacheDefinitions);
+    this.tpsLimit = tpsLimit;
   }
 
   @Override
@@ -60,23 +52,26 @@ public class GetOperation<K, V>  implements Operation {
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
     final long next = this.sequenceGenerator.next();
-    for (final CacheDefinition cacheDefinition : cacheDefinitions) {
-      Ehcache cache = cacheDefinition.getCache();
-      Element value;
-      Object k = keyGenerator.generate(next);
+    long currentTps = statisticsHolder.getCurrentTps(EhcacheResult.GET);
+    if (currentTps < this.tpsLimit) {
+      for (final CacheDefinition<K, V> cacheDefinition : cacheDefinitions) {
+        Cache<K, V> cache = cacheDefinition.getCache();
+        K k = keyGenerator.generate(next);
+        V value;
 
-      long start = statisticsHolder.getTimeInNs();
-      try {
-        value = cache.get(k);
-        long end = statisticsHolder.getTimeInNs();
-        if (value == null) {
-          statisticsHolder.record(cacheDefinition.getName(), (end - start), MISS);
-        } else {
-          statisticsHolder.record(cacheDefinition.getName(), (end - start), GET);
+        long start = statisticsHolder.getTimeInNs();
+        try {
+          value = cache.get(k);
+          long end = statisticsHolder.getTimeInNs();
+          if (value == null) {
+            statisticsHolder.record(cacheDefinition.getName(), (end - start), MISS);
+          } else {
+            statisticsHolder.record(cacheDefinition.getName(), (end - start), GET);
+          }
+        } catch (Exception e) {
+          long end = statisticsHolder.getTimeInNs();
+          statisticsHolder.record(cacheDefinition.getName(), (end - start), EXCEPTION);
         }
-      } catch (Exception e) {
-        long end = statisticsHolder.getTimeInNs();
-        statisticsHolder.record(cacheDefinition.getName(), (end - start), EXCEPTION);
       }
     }
   }
@@ -84,10 +79,8 @@ public class GetOperation<K, V>  implements Operation {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add("get(" + keyGenerator.getDescription() + " key)");
+    desc.add("THROTTLED get(" + keyGenerator.getDescription() + " key)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }
-
-
 }

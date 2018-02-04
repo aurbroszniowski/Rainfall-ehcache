@@ -25,7 +25,7 @@ import io.rainfall.utils.NullSequenceGenerator;
 /**
  * @author Aurelien Broszniowski
  */
-
+@Deprecated
 public abstract class EhcacheOperation<K, V> implements Operation {
 
   protected ObjectGenerator<K> keyGenerator = NullObjectGenerator.instance();

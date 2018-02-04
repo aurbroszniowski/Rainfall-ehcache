@@ -14,66 +14,55 @@
  * limitations under the License.
  */
 
-package io.rainfall.ehcache2.operation;
+package io.rainfall.deprecated.ehcache2.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
-import io.rainfall.ObjectGenerator;
-import io.rainfall.Operation;
-import io.rainfall.SequenceGenerator;
+import io.rainfall.EhcacheOperation;
 import io.rainfall.TestException;
-import io.rainfall.ehcache2.CacheDefinition;
+import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.statistics.StatisticsHolder;
 import net.sf.ehcache.Ehcache;
-import net.sf.ehcache.Element;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static io.rainfall.ehcache.statistics.EhcacheResult.EXCEPTION;
-import static io.rainfall.ehcache.statistics.EhcacheResult.PUT;
+import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
+import static io.rainfall.ehcache.statistics.EhcacheResult.REMOVE;
 
 /**
- * Execute and measure a Ehcache put operation
+ * Execute and measure a Ehcache remove operation
  *
  * @author Aurelien Broszniowski
  */
-public class PutOperation<K, V> implements Operation {
-
-  protected final ObjectGenerator<K> keyGenerator;
-  protected final ObjectGenerator<V> valueGenerator;
-  protected final SequenceGenerator sequenceGenerator;
-  private final Iterable<CacheDefinition> cacheDefinitions;
-
-  public PutOperation(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
-                      final SequenceGenerator sequenceGenerator, final Iterable<CacheDefinition> cacheDefinitions) {
-    this.keyGenerator = keyGenerator;
-    this.valueGenerator = valueGenerator;
-    this.sequenceGenerator = sequenceGenerator;
-    this.cacheDefinitions = cacheDefinitions;
-  }
+@Deprecated
+public class RemoveOperation<K, V> extends EhcacheOperation<K, V> {
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>,
       Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
+    CacheConfig<K, V> cacheConfig = (CacheConfig<K, V>)configurations.get(CacheConfig.class);
     final long next = this.sequenceGenerator.next();
-    for (final CacheDefinition cacheDefinition : cacheDefinitions) {
-      Ehcache cache = cacheDefinition.getCache();
+    List<Ehcache> caches = cacheConfig.getCaches();
+    for (final Ehcache cache : caches) {
+      boolean removed;
       Object k = keyGenerator.generate(next);
-      Object v = valueGenerator.generate(next);
 
-      Element element = new Element(k, v);
       long start = statisticsHolder.getTimeInNs();
       try {
-        cache.put(element);
+        removed = cache.remove(k);
         long end = statisticsHolder.getTimeInNs();
-        statisticsHolder.record(cacheDefinition.getName(), (end - start), PUT);
+        if (removed) {
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), REMOVE);
+        } else {
+          statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), MISS);
+        }
       } catch (Exception e) {
-        e.printStackTrace();
         long end = statisticsHolder.getTimeInNs();
-        statisticsHolder.record(cacheDefinition.getName(), (end - start), EXCEPTION);
+        statisticsHolder.record(cacheConfig.getCacheName(cache), (end - start), EXCEPTION);
       }
     }
   }
@@ -81,7 +70,7 @@ public class PutOperation<K, V> implements Operation {
   @Override
   public List<String> getDescription() {
     List<String> desc = new ArrayList<String>();
-    desc.add("put(" + keyGenerator.getDescription() + " key, " + valueGenerator.getDescription() + " value)");
+    desc.add("remove(" + keyGenerator.getDescription() + " key)");
     desc.add(sequenceGenerator.getDescription());
     return desc;
   }

@@ -20,6 +20,7 @@ import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
 import io.rainfall.EhcacheOperation;
 import io.rainfall.ObjectGenerator;
+import io.rainfall.Operation;
 import io.rainfall.SequenceGenerator;
 import io.rainfall.TestException;
 import io.rainfall.ehcache3.CacheConfig;
@@ -38,11 +39,11 @@ import static io.rainfall.ehcache.statistics.EhcacheResult.MISS;
 /**
  * @author Aurelien Broszniowski
  */
-public class GetOperation<K, V> extends EhcacheOperation<K, V> {
+public class GetOperation<K, V> implements Operation {
 
-  private final ObjectGenerator<K> keyGenerator;
-  private final SequenceGenerator sequenceGenerator;
-  private final Iterable<CacheDefinition<K, V>> cacheDefinitions;
+  protected final ObjectGenerator<K> keyGenerator;
+  protected final SequenceGenerator sequenceGenerator;
+  protected final Iterable<CacheDefinition<K, V>> cacheDefinitions;
 
   public GetOperation(final ObjectGenerator<K> keyGenerator,
                       final SequenceGenerator sequenceGenerator, final Iterable<CacheDefinition<K, V>> cacheDefinitions) {

@@ -28,6 +28,8 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 import static io.rainfall.Scenario.weighted;
@@ -44,6 +46,8 @@ import static io.rainfall.generator.SequencesGenerator.atRandom;
 import static io.rainfall.generator.SequencesGenerator.sequentially;
 import static io.rainfall.unit.TimeDivision.minutes;
 import static io.rainfall.unit.TimeDivision.seconds;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 /**
@@ -78,7 +82,7 @@ public class PerfTest2 {
 
       Runner.setUp(
           Scenario.scenario("warmup phase").exec(
-              put(keyGenerator, valueGenerator, new DistributedLongSequenceGenerator(distributedConfig), cache("one", one))
+              put(keyGenerator, valueGenerator, new DistributedLongSequenceGenerator(distributedConfig), singletonList(cache("one", one)))
           ))
           .executed(times(nbElements))
           .config(distributedConfig)
@@ -86,13 +90,13 @@ public class PerfTest2 {
               html("rainfall-distributed-" + UUID.randomUUID().toString())))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
 //          .start()
-          ;
+      ;
 
       StatisticsPeekHolder finalStats = Runner.setUp(
           Scenario.scenario("Test phase").exec(
               weighted(0.20,
                   put(keyGenerator, valueGenerator,
-                      atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000), cache("one", one)))
+                      atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000), singletonList(cache("one", one))))
               ,
               weighted(0.80, get(String.class, byte[].class)
                   .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
@@ -149,8 +153,8 @@ public class PerfTest2 {
       Runner.setUp(
           Scenario.scenario("Warm up phase")
               .exec(
-                  put(keyGenerator, valueGenerator, sequentially(), cache("one", one), cache("two", two)),
-                  put(keyGenerator, valueGenerator, sequentially(), cache("three", three), cache("four", four))
+                  put(keyGenerator, valueGenerator, sequentially(), asList(cache("one", one), cache("two", two))),
+                  put(keyGenerator, valueGenerator, sequentially(), asList(cache("three", three), cache("four", four)))
               ))
           .executed(new UntilCacheFull())
           .config(concurrency, ReportingConfig.report(EhcacheResult.class, new EhcacheResult[] { EhcacheResult.PUT })
@@ -177,7 +181,7 @@ public class PerfTest2 {
           Scenario.scenario("Test phase").exec(
               weighted(0.90, put(keyGenerator, valueGenerator,
                   atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000),
-                  cache("three", three), cache("four", four))),
+                  asList(cache("three", three), cache("four", four)))),
               weighted(0.10, get(String.class, byte[].class)
                   .atRandom(Distribution.GAUSSIAN, 0, nbElements, 10000)
                   .using(keyGenerator, valueGenerator))

@@ -26,20 +26,20 @@ public class PutOperation<K, V> implements Operation {
   protected final ObjectGenerator<K> keyGenerator;
   protected final ObjectGenerator<V> valueGenerator;
   protected final SequenceGenerator sequenceGenerator;
-  protected final Iterable<CacheDefinition<K, V>> caches;
+  protected final Iterable<CacheDefinition<K, V>> cacheDefinitions;
 
   public PutOperation(final ObjectGenerator<K> keyGenerator, final ObjectGenerator<V> valueGenerator,
                       final SequenceGenerator sequenceGenerator, final Iterable<CacheDefinition<K, V>> caches) {
     this.keyGenerator = keyGenerator;
     this.valueGenerator = valueGenerator;
     this.sequenceGenerator = sequenceGenerator;
-    this.caches = caches;
+    this.cacheDefinitions = caches;
   }
 
   @Override
   public void exec(final StatisticsHolder statisticsHolder, final Map<Class<? extends Configuration>, Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
     final long next = this.sequenceGenerator.next();
-    for (final CacheDefinition<K, V> cacheDefinition : caches) {
+    for (final CacheDefinition<K, V> cacheDefinition : cacheDefinitions) {
       Cache<K, V> cache = cacheDefinition.getCache();
 
       K k = keyGenerator.generate(next);
