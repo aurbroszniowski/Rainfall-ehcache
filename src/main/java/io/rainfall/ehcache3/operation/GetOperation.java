@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Aurélien Broszniowski
+ * Copyright (c) 2014-2018 Aurélien Broszniowski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,10 @@ package io.rainfall.ehcache3.operation;
 
 import io.rainfall.AssertionEvaluator;
 import io.rainfall.Configuration;
-import io.rainfall.EhcacheOperation;
 import io.rainfall.ObjectGenerator;
 import io.rainfall.Operation;
 import io.rainfall.SequenceGenerator;
 import io.rainfall.TestException;
-import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.ehcache3.CacheDefinition;
 import io.rainfall.statistics.StatisticsHolder;
 import org.ehcache.Cache;
