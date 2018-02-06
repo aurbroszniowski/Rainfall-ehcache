@@ -1,5 +1,5 @@
-Rainfall
-========
+Rainfall-ehcache
+================
 
 Rainfall is an extensible java framework to implement custom DSL based stress and performance tests in your application.
 
@@ -13,18 +13,6 @@ Rainfall is open to extensions, three of which are currently in progress,
 
 [![Build Status](https://rainfall.ci.cloudbees.com/buildStatus/icon?job=Rainfall ehcache)](https://rainfall.ci.cloudbees.com/job/Rainfall%20ehcache/)
 
-Components
-----------
-[Rainfall-core](https://github.com/aurbroszniowski/Rainfall-core) is the core library containing the key elements of the framework.
- When writing your framework implementation, you must include this library as a dependency.
-
-[Rainfall-web](https://github.com/aurbroszniowski/Rainfall-web) is the Web Application performance testing implementation.
-
-[Rainfall-jcache](https://github.com/aurbroszniowski/Rainfall-jcache) is the JSR107 caches performance testing implementation.
-
-[Rainfall-ehcache](https://github.com/aurbroszniowski/Rainfall-ehcache) is the Ehcache 2.x/3.x performance testing implementation.
-
-
 Quick start
 -----------
 
@@ -36,18 +24,17 @@ ObjectGenerator<byte[]> valueGenerator = ByteArrayGenerator.fixedLength(1000); /
 
 StatisticsPeekHolder finalStats = Runner.setUp( // (3) 
     Scenario.scenario("Test phase").exec(   // (4)
-        put(Long.class, byte[].class)     // (5)   
-           .using(keyGenerator, valueGenerator) // (6)
-           .atRandom(GAUSSIAN, 0, 100000, 5000), // (7)
-        get(Long.class, byte[].class).withWeight(0.80) //(8)
-            .using(keyGenerator, valueGenerator)
-            .atRandom(GAUSSIAN, 0, 100000, 5000)
+        weighted(0.10, put(keyGenerator, valueGenerator, // (5)
+                atRandom(GAUSSIAN, 0, 100000, 5000), // (6)
+                Coolections.singletonList(cache("cacheOne", cacheOne)))), // (7)
+        weighted(0.90, get(keyGenerator, valueGenerator, // (8)
+                atRandom(GAUSSIAN, 0, 100000, 5000),
+                Arrays.asList(cache("cacheOne", cacheOne), cache("cacheTwo", cacheTwo)))) // (9)
     ))
+    .warmup(during(30, seconds)) // (10)
     .executed(during(1, minutes))
     .config(concurrency, 
-          ReportingConfig.report(EhcacheResult.class).log(text(), html()).summary(text()))
-    .config(cacheConfig(Long.class, byte[].class)
-        .caches(one, two, three, four).bulkBatchSize(10))
+          ReportingConfig.report(EhcacheResult.class).log(text(), ReportingConfig.hlog()).summary(text())) //(11)
     .start();
 ```
  
@@ -55,12 +42,15 @@ StatisticsPeekHolder finalStats = Runner.setUp( // (3)
   (1) A class to generate Long values
   (2) A class to generate byte arrays of 1000 bytes
   (3) Test runner, returns a StatisticsPeekHolder that holds the final stats summary
-  (4) a Scenario is a list of operations that will be executed
-  (5) an operation (put) that will put Long objects as keys and byte[] objects as values.
-  (6) use a Long generator as a key generator and a byte array generator for values
-  (7) The distribution of keys will be gaussian, to simulate a real-life scenario where 
+  (4) A Scenario is a list of operations that will be executed
+  (5) A weighted operation (put), which occurs 10% of the times, using a Long generator as a key generator and a byte array generator for values
+  (6) The distribution of keys will be gaussian, to simulate a real-life scenario where 
           only a limited set of keys are more often accessed
-  (8) Another operation : get()        
+  (7) The operation will be executed on the single cache given as parameter 
+  (8) Another operation : get(), executed 90% of the times        
+  (9) Here, a list of two caches is used
+  (10) The Scenario will be have a warmup time of 30 seconds and the be executed during 1 minute
+  (11) The report will be both text and HdrHistogram-based
 ```
 
 See the [Wiki](https://github.com/aurbroszniowski/Rainfall-ehcache/wiki) to list all operations and parameters.
@@ -79,7 +69,7 @@ Use it in your project
     <dependency>
       <groupId>io.rainfall</groupId>
       <artifactId>rainfall-ehcache</artifactId>
-      <version>1.2.1</version>
+      <version>LATEST</version>
     </dependency>
   </dependencies>
 ```

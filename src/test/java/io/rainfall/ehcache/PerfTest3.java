@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Aurélien Broszniowski
+ * Copyright (c) 2014-2018 Aurélien Broszniowski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import io.rainfall.ehcache3.CacheDefinition;
 import io.rainfall.generator.LongGenerator;
 import io.rainfall.generator.VerifiedValueGenerator;
 import io.rainfall.generator.VerifiedValueGenerator.VerifiedValue;
+import io.rainfall.reporting.Reporter;
 import io.rainfall.statistics.StatisticsPeekHolder;
 import io.rainfall.utils.SystemTest;
 import org.ehcache.Cache;
@@ -601,7 +602,7 @@ public class PerfTest3 {
           .executed(during(2, minutes))
           .config(concurrency)
           .config(report(EhcacheResult.class, new EhcacheResult[] { PUT, GET, MISS })
-              .collect(gcStatistics()).log(text(), html("test-basic")))
+              .collect(gcStatistics()).log(text(), html("test-basic") ))
           .config(cacheConfig(String.class, byte[].class)
               .cache("one", one)
           )
