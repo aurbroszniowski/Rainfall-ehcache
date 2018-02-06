@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2014-2018 Aurélien Broszniowski
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.rainfall.ehcache;
 
 import io.rainfall.ObjectGenerator;
@@ -36,6 +52,7 @@ import static io.rainfall.Scenario.weighted;
 import static io.rainfall.configuration.DistributedConfig.address;
 import static io.rainfall.configuration.ReportingConfig.hlog;
 import static io.rainfall.configuration.ReportingConfig.html;
+import static io.rainfall.configuration.ReportingConfig.report;
 import static io.rainfall.configuration.ReportingConfig.text;
 import static io.rainfall.ehcache2.CacheDefinition.cache;
 import static io.rainfall.ehcache2.Ehcache2Operations.get;
@@ -63,7 +80,7 @@ public class PerfTest2 {
     RainfallMaster rainfallMaster = null;
     CacheManager cacheManager = null;
     try {
-      rainfallMaster = RainfallMaster.master(distributedConfig, new File("rainfall-dist")).start();
+      rainfallMaster = RainfallMaster.master(distributedConfig, report(EhcacheResult.class), new File("rainfall-dist")).start();
 
       Configuration configuration = new Configuration().name("EhcacheTest")
           .defaultCache(new CacheConfiguration("default", 0).eternal(true))
@@ -86,7 +103,7 @@ public class PerfTest2 {
           ))
           .executed(times(nbElements))
           .config(distributedConfig)
-          .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(),
+          .config(concurrency, report(EhcacheResult.class).log(text(),
               html("rainfall-distributed-" + UUID.randomUUID().toString())))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
 //          .start()
@@ -103,7 +120,7 @@ public class PerfTest2 {
                   .using(keyGenerator, valueGenerator))
           ))
           .executed(during(20, seconds))
-          .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(),
+          .config(concurrency, report(EhcacheResult.class).log(text(),
               hlog("rainfall-distributed-" + UUID.randomUUID().toString(), true)))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
           .config(distributedConfig)
@@ -157,7 +174,7 @@ public class PerfTest2 {
                   put(keyGenerator, valueGenerator, sequentially(), asList(cache("three", three), cache("four", four)))
               ))
           .executed(new UntilCacheFull())
-          .config(concurrency, ReportingConfig.report(EhcacheResult.class, new EhcacheResult[] { EhcacheResult.PUT })
+          .config(concurrency, report(EhcacheResult.class, new EhcacheResult[] { EhcacheResult.PUT })
               .log(text()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
               .caches(one, two, three, four)
@@ -187,7 +204,7 @@ public class PerfTest2 {
                   .using(keyGenerator, valueGenerator))
           ))
           .executed(during(5, minutes))
-          .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), html()))
+          .config(concurrency, report(EhcacheResult.class).log(text(), html()))
           .config(CacheConfig.<String, byte[]>cacheConfig()
               .caches(one, two, three, four)
           )
