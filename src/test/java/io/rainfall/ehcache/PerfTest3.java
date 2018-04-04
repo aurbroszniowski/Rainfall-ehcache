@@ -26,10 +26,10 @@ import io.rainfall.configuration.ReportingConfig;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache3.CacheConfig;
 import io.rainfall.ehcache3.CacheDefinition;
+import io.rainfall.generator.IterationSequenceGenerator;
 import io.rainfall.generator.LongGenerator;
 import io.rainfall.generator.VerifiedValueGenerator;
 import io.rainfall.generator.VerifiedValueGenerator.VerifiedValue;
-import io.rainfall.reporting.Reporter;
 import io.rainfall.statistics.StatisticsPeekHolder;
 import io.rainfall.utils.SystemTest;
 import org.ehcache.Cache;
@@ -602,7 +602,7 @@ public class PerfTest3 {
           .executed(during(2, minutes))
           .config(concurrency)
           .config(report(EhcacheResult.class, new EhcacheResult[] { PUT, GET, MISS })
-              .collect(gcStatistics()).log(text(), html("test-basic") ))
+              .collect(gcStatistics()).log(text(), html("test-basic")))
           .config(cacheConfig(String.class, byte[].class)
               .cache("one", one)
           )
@@ -848,23 +848,19 @@ public class PerfTest3 {
     Cache<String, byte[]> one = cacheManager.getCache("one", String.class, byte[].class);
     try {
       System.out.println("----------> Test phase");
-      StatisticsPeekHolder finalStats = Runner.setUp(
-          scenario("Test phase")
+
+      Runner.setUp(
+          Scenario.scenario("Cache warm up phase")
               .exec(
-                  weighted(0.50, get(String.class, byte[].class).using(keyGenerator, valueGenerator)
-                      .atRandom(GAUSSIAN, 0, nbElements, nbElements / 10)),
-                  weighted(0.50, put(keyGenerator, valueGenerator, atRandom(GAUSSIAN, 0, nbElements, nbElements / 10),
-                      singletonList(new CacheDefinition<String, byte[]>("one", one))))
+                  put(keyGenerator, valueGenerator, new IterationSequenceGenerator(), singletonList(cache("one", one)))
               ))
           .warmup(during(30, seconds))
           .executed(during(1, minutes))
           .config(concurrency)
-          .config(report(EhcacheResult.class, new EhcacheResult[] { PUT, GET, MISS })
-              .log(text(), hlog("test-basic-hlog", true)))
-          .config(cacheConfig(String.class, byte[].class)
-              .cache("one", one)
-          )
+          .config(report(EhcacheResult.class).log(text(), html("report-html"),
+              hlog("report-log")))
           .start();
+
       System.out.println("----------> Done");
     } catch (SyntaxException e) {
       e.printStackTrace();
