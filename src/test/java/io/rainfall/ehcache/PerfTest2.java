@@ -24,7 +24,6 @@ import io.rainfall.SyntaxException;
 import io.rainfall.TestException;
 import io.rainfall.configuration.ConcurrencyConfig;
 import io.rainfall.configuration.DistributedConfig;
-import io.rainfall.configuration.ReportingConfig;
 import io.rainfall.ehcache.statistics.EhcacheResult;
 import io.rainfall.ehcache2.CacheConfig;
 import io.rainfall.ehcache2.execution.UntilCacheFull;
@@ -44,8 +43,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.UUID;
 
 import static io.rainfall.Scenario.weighted;
@@ -76,7 +73,7 @@ public class PerfTest2 {
   @Test
   @Ignore
   public void testDistributedLoad() throws SyntaxException, TestException {
-    DistributedConfig distributedConfig = DistributedConfig.distributedConfig(address("localhost", 9911), 2);
+    DistributedConfig distributedConfig = DistributedConfig.distributedConfig(address("localhost", 9911), 4);
     RainfallMaster rainfallMaster = null;
     CacheManager cacheManager = null;
     try {
