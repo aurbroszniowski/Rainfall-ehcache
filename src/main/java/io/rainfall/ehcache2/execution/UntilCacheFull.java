@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Aurélien Broszniowski
+ * Copyright (c) 2014-2018 Aurélien Broszniowski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,8 @@ public class UntilCacheFull extends Execution {
   public <E extends Enum<E>> void execute(final StatisticsHolder<E> statisticsHolder, final Scenario scenario, final Map<Class<? extends Configuration>, Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
     ConcurrencyConfig concurrencyConfig = (ConcurrencyConfig)configurations.get(ConcurrencyConfig.class);
-    int nbThreads = concurrencyConfig.getThreadsCount();
-    ExecutorService executor = Executors.newFixedThreadPool(nbThreads);
+    final int threadCount = concurrencyConfig.getThreadCount();
+    ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
     CacheConfig cachesConfig = (CacheConfig)configurations.get(CacheConfig.class);
     final List<Ehcache> caches = cachesConfig.getCaches();
@@ -55,7 +55,7 @@ public class UntilCacheFull extends Execution {
       sizes.put(cache.getName(), Integer.MIN_VALUE);
     }
 
-    for (int threadNb = 0; threadNb < nbThreads; threadNb++) {
+    for (int threadNb = 0; threadNb < threadCount; threadNb++) {
       executor.submit(new Callable() {
 
         @Override

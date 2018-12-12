@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Aurélien Broszniowski
+ * Copyright (c) 2014-2018 Aurélien Broszniowski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ public class TpsLimitGetOperation<K, V> extends GetOperation<K, V> {
 
   private final long tpsLimit;
 
-  public TpsLimitGetOperation(final ObjectGenerator<K> keyGenerator, final SequenceGenerator sequenceGenerator,
-                              final Iterable<CacheDefinition<K, V>> cacheDefinitions, final long tpsLimit) {
+  public TpsLimitGetOperation( ObjectGenerator<K> keyGenerator,  SequenceGenerator sequenceGenerator,
+                               Iterable<CacheDefinition<K, V>> cacheDefinitions,  long tpsLimit) {
     super(keyGenerator, sequenceGenerator, cacheDefinitions);
     this.tpsLimit = tpsLimit;
   }
