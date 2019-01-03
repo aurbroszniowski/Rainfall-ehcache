@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018 Aurélien Broszniowski
+ * Copyright (c) 2014-2019 Aurélien Broszniowski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import io.rainfall.generator.IterationSequenceGenerator;
 import io.rainfall.generator.LongGenerator;
 import io.rainfall.generator.VerifiedValueGenerator;
 import io.rainfall.generator.VerifiedValueGenerator.VerifiedValue;
+import io.rainfall.generator.sequence.Distribution;
 import io.rainfall.statistics.StatisticsPeekHolder;
 import io.rainfall.utils.SystemTest;
 import org.ehcache.Cache;
@@ -45,6 +46,7 @@ import org.junit.experimental.categories.Category;
 import org.openjdk.jol.info.GraphLayout;
 
 import java.io.File;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 
@@ -68,15 +70,20 @@ import static io.rainfall.ehcache3.Ehcache3Operations.remove;
 import static io.rainfall.ehcache3.Ehcache3Operations.removeForKeyAndValue;
 import static io.rainfall.execution.Executions.during;
 import static io.rainfall.execution.Executions.once;
+import static io.rainfall.execution.Executions.ramp;
 import static io.rainfall.execution.Executions.times;
 import static io.rainfall.generator.ByteArrayGenerator.fixedLengthByteArray;
 import static io.rainfall.generator.SequencesGenerator.atRandom;
 import static io.rainfall.generator.SequencesGenerator.sequentially;
 import static io.rainfall.generator.StringGenerator.fixedLengthString;
+import static io.rainfall.generator.sequence.Distribution.FLAT;
 import static io.rainfall.generator.sequence.Distribution.GAUSSIAN;
+import static io.rainfall.unit.From.from;
 import static io.rainfall.unit.Instance.instances;
+import static io.rainfall.unit.Over.over;
 import static io.rainfall.unit.TimeDivision.minutes;
 import static io.rainfall.unit.TimeDivision.seconds;
+import static io.rainfall.unit.To.to;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -343,7 +350,7 @@ public class PerfTest3 {
   @Test
   @Ignore
   public void testLoad() throws SyntaxException {
-    int nbCaches = 10;
+    int nbCaches = 1;
     int nbElements = 500000;
     CacheConfigurationBuilder<Long, byte[]> configurationBuilder = CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, byte[].class,
         newResourcePoolsBuilder().heap(nbElements, EntryUnit.ENTRIES).build());
@@ -355,35 +362,32 @@ public class PerfTest3 {
     CacheManager cacheManager = cacheManagerBuilder.build(true);
 
     CacheDefinition<Long, byte[]>[] cacheDefinitions = new CacheDefinition[nbCaches];
-    CacheConfig<Long, byte[]> cacheConfig = cacheConfig(Long.class, byte[].class);
     for (int i = 0; i < nbCaches; i++) {
       String alias = "cache" + i;
       cacheDefinitions[i] = new CacheDefinition<Long, byte[]>(alias, cacheManager.getCache(alias, Long.class, byte[].class));
-      cacheConfig.cache(alias, cacheManager.getCache(alias, Long.class, byte[].class));
     }
 
     ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
-        .threads(4).timeout(50, MINUTES);
+        .threads(40).timeout(50, MINUTES);
 
     ObjectGenerator<Long> keyGenerator = new LongGenerator();
-    ObjectGenerator<byte[]> valueGenerator = fixedLengthByteArray(1000);
+    ObjectGenerator<byte[]> valueGenerator = fixedLengthByteArray(10);
 
-    System.out.println("----------> Warm up phase");
+    System.out.println("----------> Load phase " + new Date());
     ScenarioRun run = Runner.setUp(
-        scenario("Warm up phase").exec(
-            put(keyGenerator, valueGenerator, sequentially(), asList(cacheDefinitions)),
-            get(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially(),
-            remove(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially(),
-            putIfAbsent(Long.class, byte[].class).using(keyGenerator, valueGenerator).sequentially()
+        scenario("load phase").exec(
+            put(keyGenerator, valueGenerator, atRandom(FLAT, 0, nbElements, nbElements / 10), asList(cacheDefinitions)),
+            get(keyGenerator, atRandom(FLAT, 0, nbElements, nbElements / 10), asList(cacheDefinitions)),
+            remove(keyGenerator, atRandom(FLAT, 0, nbElements, nbElements / 10), asList(cacheDefinitions)),
+            putIfAbsent(keyGenerator, valueGenerator, atRandom(FLAT, 0, nbElements, nbElements / 10), asList(cacheDefinitions))
         ))
-        .executed(times(nbElements))
-        .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text()))
-        .config(cacheConfig);
+        .executed(ramp(from(1, instances), to(40, instances), over(5, minutes)))
+        .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(hlog("loadtest")));
     run.start();
 
     GraphLayout graphLayout = GraphLayout.parseInstance(run);
     System.out.println(graphLayout.totalSize());
-    System.out.println("----------> Done");
+    System.out.println("----------> Done " + new Date());
 
     cacheManager.close();
   }
@@ -422,7 +426,7 @@ public class PerfTest3 {
         scenario("Test phase").exec(
             removeForKeyAndValue(Long.class, Long.class).using(keyGenerator, valueGenerator).sequentially()
         ))
-        .executed(during(1, minutes))
+        .executed(during(3, minutes))
         .config(concurrency, reportingConfig)
         .config(cacheConfig)
         .start()
