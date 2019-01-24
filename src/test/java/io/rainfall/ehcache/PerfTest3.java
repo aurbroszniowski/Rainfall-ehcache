@@ -30,7 +30,6 @@ import io.rainfall.generator.IterationSequenceGenerator;
 import io.rainfall.generator.LongGenerator;
 import io.rainfall.generator.VerifiedValueGenerator;
 import io.rainfall.generator.VerifiedValueGenerator.VerifiedValue;
-import io.rainfall.generator.sequence.Distribution;
 import io.rainfall.statistics.StatisticsPeekHolder;
 import io.rainfall.utils.SystemTest;
 import org.ehcache.Cache;

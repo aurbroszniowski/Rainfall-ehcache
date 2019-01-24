@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018 Aurélien Broszniowski
+ * Copyright (c) 2014-2019 Aurélien Broszniowski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class PerfTest2 {
   @Test
   @Ignore
   public void testDistributedLoad() throws SyntaxException, TestException {
-    DistributedConfig distributedConfig = DistributedConfig.distributedConfig(address("localhost", 9911), 4);
+    DistributedConfig distributedConfig = DistributedConfig.distributedConfig(address("localhost", 9911), 2);
     RainfallMaster rainfallMaster = null;
     CacheManager cacheManager = null;
     try {
@@ -100,10 +100,12 @@ public class PerfTest2 {
           ))
           .executed(times(nbElements))
           .config(distributedConfig)
-          .config(concurrency, report(EhcacheResult.class).log(text(),
-              html("rainfall-distributed-" + UUID.randomUUID().toString())))
+          .config(concurrency, report(EhcacheResult.class).log(
+              text()
+//              html("rainfall-distributed-" + UUID.randomUUID().toString())
+          ))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
-//          .start()
+          .start()
       ;
 
       StatisticsPeekHolder finalStats = Runner.setUp(
@@ -117,7 +119,8 @@ public class PerfTest2 {
                   .using(keyGenerator, valueGenerator))
           ))
           .executed(during(20, seconds))
-          .config(concurrency, report(EhcacheResult.class).log(text(),
+          .config(concurrency, report(EhcacheResult.class).log(
+//              text(),
               hlog("rainfall-distributed-" + UUID.randomUUID().toString(), true)))
           .config(CacheConfig.<String, byte[]>cacheConfig().caches(one))
           .config(distributedConfig)
