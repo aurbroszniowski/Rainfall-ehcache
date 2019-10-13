@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018 Aurélien Broszniowski
+ * Copyright (c) 2014-2019 Aurélien Broszniowski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -45,40 +44,56 @@ public class UntilCacheFull extends Execution {
   public <E extends Enum<E>> void execute(final StatisticsHolder<E> statisticsHolder, final Scenario scenario, final Map<Class<? extends Configuration>, Configuration> configurations, final List<AssertionEvaluator> assertions) throws TestException {
 
     ConcurrencyConfig concurrencyConfig = (ConcurrencyConfig)configurations.get(ConcurrencyConfig.class);
-    final int threadCount = concurrencyConfig.getThreadCount();
-    ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
-    CacheConfig cachesConfig = (CacheConfig)configurations.get(CacheConfig.class);
-    final List<Ehcache> caches = cachesConfig.getCaches();
-    final Map<String, Integer> sizes = new HashMap<String, Integer>();
-    for (Ehcache cache : caches) {
-      sizes.put(cache.getName(), Integer.MIN_VALUE);
-    }
+    markExecutionState(scenario, ExecutionState.BEGINNING);
 
-    for (int threadNb = 0; threadNb < threadCount; threadNb++) {
-      executor.submit(new Callable() {
+    final Map<String, ExecutorService> executors = concurrencyConfig.createFixedExecutorService();
+    for (final String threadpoolName : executors.keySet()) {
+      final int threadCount = concurrencyConfig.getThreadCount(threadpoolName);
+      final ExecutorService executor = executors.get(threadpoolName);
 
-        @Override
-        public Object call() throws Exception {
-          List<RangeMap<WeightedOperation>> operations = scenario.getOperations();
-          while (!cachesAreFull(sizes, caches)) {
-            for (RangeMap<WeightedOperation> operation : operations) {
-              operation.get(weightRnd.nextFloat(operation.getHigherBound()))
+      CacheConfig cachesConfig = (CacheConfig)configurations.get(CacheConfig.class);
+      final List<Ehcache> caches = cachesConfig.getCaches();
+      final Map<String, Integer> sizes = new HashMap<String, Integer>();
+      for (Ehcache cache : caches) {
+        sizes.put(cache.getName(), Integer.MIN_VALUE);
+      }
+
+      for (int threadNb = 0; threadNb < threadCount; threadNb++) {
+        executor.submit(new Callable() {
+
+          @Override
+          public Object call() throws Exception {
+            Thread.currentThread().setName("Rainfall-core Operations Thread");
+            RangeMap<WeightedOperation> operations = scenario.getOperations().get(threadpoolName);
+
+            while (!cachesAreFull(sizes, caches)) {
+              operations.getNextRandom(weightRnd)
                   .getOperation().exec(statisticsHolder, configurations, assertions);
             }
+            return null;
           }
-          return null;
-        }
-      });
+        });
+      }
     }
     //TODO : it is submitted enough but not everything has finished to run when threads are done -> how to solve Coordinated Omission ?
 
-    executor.shutdown();
+    markExecutionState(scenario, ExecutionState.ENDING);
+    for (ExecutorService executor : executors.values()) {
+      executor.shutdown();
+    }
     try {
-      long timeoutInSeconds = ((ConcurrencyConfig)configurations.get(ConcurrencyConfig.class)).getTimeoutInSeconds();
-      boolean success = executor.awaitTermination(timeoutInSeconds, SECONDS);
+      boolean success = true;
+      for (ExecutorService executor : executors.values()) {
+        boolean executorSuccess = executor.awaitTermination(60, SECONDS);
+        if (!executorSuccess) {
+          executor.shutdownNow();
+          success &= executor.awaitTermination(60, SECONDS);
+        }
+      }
+
       if (!success) {
-        throw new TestException("Execution of Scenario timed out after " + timeoutInSeconds + " seconds.");
+        throw new TestException("Execution of Scenario timed out.");
       }
     } catch (InterruptedException e) {
       throw new TestException("Execution of Scenario didn't stop correctly.", e);

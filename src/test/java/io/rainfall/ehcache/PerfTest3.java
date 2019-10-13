@@ -49,7 +49,6 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 
-import static io.rainfall.Scenario.fixed;
 import static io.rainfall.Scenario.scenario;
 import static io.rainfall.Scenario.weighted;
 import static io.rainfall.configuration.ReportingConfig.gcStatistics;
@@ -726,9 +725,6 @@ public class PerfTest3 {
             .offheap(offheap, MemoryUnit.GB)
             .build());
 
-    ConcurrencyConfig concurrency = ConcurrencyConfig.concurrencyConfig()
-        .threads(4).timeout(30, MINUTES);
-
     CacheManager cacheManager = newCacheManagerBuilder()
         .with(new CacheManagerPersistenceConfiguration(new File("/data/PerfTest3")))
         .withCache("one", cacheBuilder.build())
@@ -741,7 +737,7 @@ public class PerfTest3 {
       System.out.println("----------> Test phase");
       StatisticsPeekHolder finalStats = Runner.setUp(
           scenario("Test phase")
-              .exec(
+              .exec("POOL1",
                   weighted(0.1,
                       put(fixedLengthString(10), fixedLengthByteArray(1024), atRandom(GAUSSIAN, 0, nbElements, nbElements / 10),
                           singletonList(cache("ee", one)))
@@ -749,14 +745,15 @@ public class PerfTest3 {
                   weighted(0.9,
                       get(String.class, byte[].class).using(fixedLengthString(10), fixedLengthByteArray(1024))
                           .atRandom(GAUSSIAN, 0, nbElements, nbElements / 10)
-                  ),
-                  fixed(
-                      remove(String.class, byte[].class).using(fixedLengthString(10), fixedLengthByteArray(1024)).
-                          atRandom(GAUSSIAN, 0, nbElements, nbElements / 10)
                   )
-              ))
+              ).exec("POOL2",
+              remove(String.class, byte[].class).using(fixedLengthString(10), fixedLengthByteArray(1024)).
+                  atRandom(GAUSSIAN, 0, nbElements, nbElements / 10)
+          )
+      )
           .executed(during(2, minutes))
-          .config(concurrency)
+          .config(ConcurrencyConfig.concurrencyConfig()
+              .threads("POOL1", 4).threads("POOL2", 4).timeout(30, MINUTES))
           .config(report(EhcacheResult.class, EnumSet.of(PUT, GET, MISS))
               .log(text(), html("test-basic")))
           .config(cacheConfig(String.class, byte[].class)
