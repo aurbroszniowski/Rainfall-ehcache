@@ -379,7 +379,7 @@ public class PerfTest3 {
             remove(keyGenerator, atRandom(FLAT, 0, nbElements, nbElements / 10), asList(cacheDefinitions)),
             putIfAbsent(keyGenerator, valueGenerator, atRandom(FLAT, 0, nbElements, nbElements / 10), asList(cacheDefinitions))
         ))
-        .executed(ramp(from(1, instances), to(40, instances), over(5, minutes)))
+        .executed(ramp(from(1, instances), to(40, instances), over(1, minutes)))
         .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(hlog("loadtest")));
     run.start();
 
