@@ -23,11 +23,11 @@
   <groupId>io.rainfall</groupId>
   <artifactId>rainfall-ehcache</artifactId>
   <name>Rainfall-ehcache</name>
-  <version>1.5.1</version>
+  <version>1.5.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <properties>
-    <rainfall.core.version>1.5.1</rainfall.core.version>
+    <rainfall.core.version>1.5.2-SNAPSHOT</rainfall.core.version>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
