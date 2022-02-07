@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019 Aurélien Broszniowski
+ * Copyright (c) 2014-2022 Aurélien Broszniowski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -373,14 +373,14 @@ public class PerfTest3 {
 
     System.out.println("----------> Load phase " + new Date());
     ScenarioRun run = Runner.setUp(
-        scenario("load phase").exec(
-            put(keyGenerator, valueGenerator, atRandom(FLAT, 0, nbElements, nbElements / 10), asList(cacheDefinitions)),
-            get(keyGenerator, atRandom(FLAT, 0, nbElements, nbElements / 10), asList(cacheDefinitions)),
-            remove(keyGenerator, atRandom(FLAT, 0, nbElements, nbElements / 10), asList(cacheDefinitions)),
-            putIfAbsent(keyGenerator, valueGenerator, atRandom(FLAT, 0, nbElements, nbElements / 10), asList(cacheDefinitions))
-        ))
+            scenario("load phase").exec(
+                put(keyGenerator, valueGenerator, atRandom(FLAT, 0, nbElements, nbElements / 10), asList(cacheDefinitions)),
+                get(keyGenerator, atRandom(FLAT, 0, nbElements, nbElements / 10), asList(cacheDefinitions)),
+                remove(keyGenerator, atRandom(FLAT, 0, nbElements, nbElements / 10), asList(cacheDefinitions)),
+                putIfAbsent(keyGenerator, valueGenerator, atRandom(FLAT, 0, nbElements, nbElements / 10), asList(cacheDefinitions))
+            ))
         .executed(ramp(from(1, instances), to(40, instances), over(1, minutes)))
-        .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(hlog("loadtest")));
+        .config(concurrency, ReportingConfig.report(EhcacheResult.class).log(text(), hlog("loadtest")));
     run.start();
 
     GraphLayout graphLayout = GraphLayout.parseInstance(run);

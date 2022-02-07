@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019 Aurélien Broszniowski
+ * Copyright (c) 2014-2022 Aurélien Broszniowski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,19 +60,15 @@ public class UntilCacheFull extends Execution {
       }
 
       for (int threadNb = 0; threadNb < threadCount; threadNb++) {
-        executor.submit(new Callable() {
+        executor.submit((Callable)() -> {
+          Thread.currentThread().setName("Rainfall-core Operations Thread");
+          RangeMap<WeightedOperation> operations = scenario.getOperations().get(threadpoolName);
 
-          @Override
-          public Object call() throws Exception {
-            Thread.currentThread().setName("Rainfall-core Operations Thread");
-            RangeMap<WeightedOperation> operations = scenario.getOperations().get(threadpoolName);
-
-            while (!cachesAreFull(sizes, caches)) {
-              operations.getNextRandom(weightRnd)
-                  .getOperation().exec(statisticsHolder, configurations, assertions);
-            }
-            return null;
+          while (!cachesAreFull(sizes, caches)) {
+            operations.getNextRandom(weightRnd)
+                .getOperation().exec(statisticsHolder, configurations, assertions);
           }
+          return null;
         });
       }
     }
@@ -101,10 +97,9 @@ public class UntilCacheFull extends Execution {
   }
 
   @Override
-  public String getDescription() {
+  public String toString() {
     return "Execution : until caches are full";
   }
-
 
   private boolean cachesAreFull(final Map<String, Integer> sizes, final List<Ehcache> caches) {
     boolean allCachesAreFull = true;
