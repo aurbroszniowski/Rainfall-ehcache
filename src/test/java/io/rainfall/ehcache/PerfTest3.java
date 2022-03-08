@@ -70,6 +70,7 @@ import static io.rainfall.execution.Executions.during;
 import static io.rainfall.execution.Executions.once;
 import static io.rainfall.execution.Executions.ramp;
 import static io.rainfall.execution.Executions.times;
+import static io.rainfall.execution.Executions.warmup;
 import static io.rainfall.generator.ByteArrayGenerator.fixedLengthByteArray;
 import static io.rainfall.generator.SequencesGenerator.atRandom;
 import static io.rainfall.generator.SequencesGenerator.sequentially;
@@ -281,11 +282,11 @@ public class PerfTest3 {
 
     System.out.println("----------> Test phase");
     StatisticsPeekHolder finalStats = Runner.setUp(
-        scenario)
-        .warmup(during(25, seconds))
-        .executed(during(30, seconds))
+            scenario)
+//        .warmup(during(25, seconds))
+        .executed(warmup(during(25, seconds)), during(30, seconds))
         .config(concurrency,
-            ReportingConfig.report(EhcacheResult.class, resultsReported).log(text(), html()))
+            ReportingConfig.report(EhcacheResult.class, resultsReported).log(text(), hlog("rep3")))
         .config(cacheConfig(Long.class, byte[].class).cache("one", one)
         )
         .start();
