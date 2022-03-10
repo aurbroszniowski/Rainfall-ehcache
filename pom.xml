@@ -23,11 +23,11 @@
   <groupId>io.rainfall</groupId>
   <artifactId>rainfall-ehcache</artifactId>
   <name>Rainfall-ehcache</name>
-  <version>1.5.4-SNAPSHOT</version>
+  <version>1.6.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <properties>
-    <rainfall.core.version>1.5.4-SNAPSHOT</rainfall.core.version>
+    <rainfall.core.version>1.6.1-SNAPSHOT</rainfall.core.version>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -318,8 +318,8 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>[1.2.0,)</version>
-      <scope>provided</scope>
+      <version>1.2.10</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -331,7 +331,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
 
