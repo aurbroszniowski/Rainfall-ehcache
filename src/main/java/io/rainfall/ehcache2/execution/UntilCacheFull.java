@@ -60,8 +60,9 @@ public class UntilCacheFull extends Execution {
       }
 
       for (int threadNb = 0; threadNb < threadCount; threadNb++) {
+        final int finalThreadNb = threadNb;
         executor.submit((Callable)() -> {
-          Thread.currentThread().setName("Rainfall-core Operations Thread");
+          Thread.currentThread().setName("Rainfall-core Operations Thread - " + finalThreadNb);
           RangeMap<WeightedOperation> operations = scenario.getOperations().get(threadpoolName);
 
           while (!cachesAreFull(sizes, caches)) {
