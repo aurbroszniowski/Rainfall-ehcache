@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2014-2022 Aurélien Broszniowski
+  ~ Copyright (c) 2014-2023 Aurélien Broszniowski
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@
   <groupId>io.rainfall</groupId>
   <artifactId>rainfall-ehcache</artifactId>
   <name>Rainfall-ehcache</name>
-  <version>1.6.4-SNAPSHOT</version>
+  <version>1.6.4</version>
   <packaging>jar</packaging>
 
   <properties>
-    <rainfall.core.version>1.6.4-SNAPSHOT</rainfall.core.version>
+    <rainfall.core.version>1.6.4</rainfall.core.version>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -241,7 +241,7 @@
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.4-SNAPSHOT</version>
+            <version>1.6.4</version>
             <extensions>true</extensions>
             <configuration>
               <serverId>ossrh</serverId>
